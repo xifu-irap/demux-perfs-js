@@ -1,0 +1,54 @@
+include("F:/Shared/04_GSE_XIFU-STUDIO/00_SCRIPTS/DRE_Tools_REFERENCE.dscript")
+include("F:/Shared/04_GSE_XIFU-STUDIO/00_SCRIPTS/FPA_Tools.dscript")
+
+///////////////////////////////// FPAsim configuration ///////////////////////////////////////
+// FPAsim detection & power on if detected
+const FREQtab = [1.0e6,1.1e6,1.2e6,1.3e6,1.4e6,1.5e6,1.6e6,1.7e6,1.8e6,1.9e6,
+				2.0e6,2.1e6,2.2e6,2.3e6,2.4e6,2.5e6,2.6e6,2.7e6,2.8e6,2.9e6,
+				3.0e6,3.1e6,3.2e6,3.3e6,3.4e6,3.5e6,3.6e6,3.7e6,3.8e6,3.9e6,
+				4.0e6,4.1e6,4.2e6,4.3e6,4.4e6,4.5e6,4.6e6,4.7e6,4.8e6,4.9e6]
+
+waitMs(200)				
+getLatestValue("DISP_SubsystemConnectionState")
+FPA_State = DISP_SubsystemConnectionState[3]
+if(FPA_State == 1){
+	print("\nFPAsim detected")
+	print("FPAsim Power ON...")
+	FPA_Power_ON(FREQtab)
+}
+else print("\nFPAsim not detected")
+
+///////////////////////////////// DRE Restart ///////////////////////////////////////
+
+// sendResetDRE()// deplacement du reset en fin de sequence le 04/07/2018 WM
+//waitMs(10)
+//print("DRE RESET !\n")
+sendOKReset()
+waitMs(10)
+print("Opal Kelly RESET !\n")
+sendOKResetDaqFifo()
+print("DAQ FIFO RESET !\n")
+waitMs(10)
+sendResetDRE()
+print("DRE RESET !\n")
+waitMs(10)
+
+
+DRE_Startup()
+print("\nProcessing ScanFeedback...\n")
+
+
+/////////////////// SCAN-FEEDBACK  /////////////////////////
+sendStartScanFB(800e3,9900e3,20e3,1,0)
+waitingForEndOfScanFB()
+print("ScanFeedback done \n")
+waitMs(250)
+print("DRE Ready !\n")
+
+
+
+////////////////// SCAN-FPA //////////////////////
+
+////////////////// SCAN IV ///////////////////////
+
+// and so on...
