@@ -1,0 +1,362 @@
+include("./Tools.dscript")
+
+////////////////////////////////////////////////////////////////////////////////
+// Test sequence
+////////////////////////////////////////////////////////////////////////////////
+function test_sequence(
+	Session_name,
+	Session_comment,
+	Operator_name,
+	Channel_ID,
+	Default_amp,
+	test_pix_index,
+	amp_pixel_test,
+	SQUID_interne,
+	Gain,
+	BIAS_trunc,
+	FBCK_trunc,
+	FBCK_gain,
+	Fgrid,
+	dacMode,
+	Spread,
+	Npix,
+	FS,
+	DoGBW,
+	DoScienceSpectra,
+	nbr_spectra,
+	spectra_duration_ms,
+	DoEnergyResol,
+	ER_nbr_pulses_meas,
+	Threshold,
+	ModulationRatio,
+	saveIQ,
+	Test_pix_only
+	)
+// This function makes one test sequence for a set of parameters
+{
+	// Opening the session
+	sendStartSession(Session_name, Session_comment)
+	copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
+	copyFileToBackupDir(".\\Launcher.dscript","\\SCRIPTS_GSE\\Launcher.dscript") // sauvegarde du script included
+	copyFileToBackupDir(".\\Tools.dscript","\\SCRIPTS_GSE\\Tools.dscript") // sauvegarde du script included
+	copyFileToBackupDir(".\\Startup.dscript","\\SCRIPTS_GSE\\Startup.dscript") // sauvegarde du script de demarrage included
+	copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\"+__FILE__.split("/").pop()) // sauvegarde du script courant
+	copyDirToBackupDir(getEGSEDirectory()+"\\EP",".\\EP_PARAMETERS")	
+	// Saving test parameters in a file
+	setAndMemorize( "Session_name"			, Session_name)
+	setAndMemorize( "Session_comment"		, Session_comment)
+	setAndMemorize( "Operator_name"			, Operator_name)
+	setAndMemorize( "Channel_ID"			, Channel_ID)
+	setAndMemorize( "Default_amp"			, Default_amp)
+	setAndMemorize( "test_pix_index"		, test_pix_index)
+	setAndMemorize( "amp_pixel_test"		, amp_pixel_test)
+	setAndMemorize( "SQUID_interne"		, SQUID_interne)
+	setAndMemorize( "Gain"					, Gain)
+	setAndMemorize( "BIAS_trunc"			, BIAS_trunc)
+	setAndMemorize( "FBCK_trunc"			, FBCK_trunc)
+	setAndMemorize( "FBCK_gain"			, FBCK_gain)
+	setAndMemorize( "Fgrid"					, Fgrid)
+	setAndMemorize( "dacMode"				, dacMode)
+	setAndMemorize( "Spread"				, Spread )
+	setAndMemorize( "Npix"					, Npix )	// Defined in the script DRE_Tools_REFERENCE
+	setAndMemorize( "FS"					, FS)		// Defined in the script DRE_Tools_REFERENCE
+	setAndMemorize( "DoGBW"					, DoGBW)
+	setAndMemorize( "DoScienceSpectra"		, DoScienceSpectra)
+	setAndMemorize( "nbr_spectra"			, nbr_spectra)
+	setAndMemorize( "spectra_duration_ms"	, spectra_duration_ms)
+	setAndMemorize( "ER_nbr_pulses_meas"	, ER_nbr_pulses_meas)
+	setAndMemorize( "Threshold"	, Threshold)
+	setAndMemorize( "ModulationRatio"	, ModulationRatio)
+	setAndMemorize( "saveIQ"	, saveIQ)
+	setAndMemorize( "Test_pix_only"	, Test_pix_only)
+
+	saveMemorizedParametersToBackupDir("SCRIPTS_GSE\\"+__FILE__.split("/").pop().split(".")[0]+"_PARAMETERS.txt")
+	
+	// Computing the carrier frequencies
+	FREQtab = carrier_freq(Spread, Fgrid)
+
+	// Resetting the DEMUX firmware
+	DRE_resetAll()
+
+	// Measurement of housekeepings
+	Start_HK_collection()
+
+	// Configuration of the DEMUX firmware (channels)
+	configure_DEMUX_channel(Channel_ID, SQUID_interne, BIAS_trunc, FBCK_gain, FBCK_trunc)
+
+	// Measurement of gain bandwidth product
+	if (DoGBW) {
+		ScanGBW(Channel_ID, Default_amp, Gain, FREQtab[test_pix_index])}
+	
+	// Configuration of the DEMUX firmware (pixels)
+	configure_DEMUX_pixels(Channel_ID, Default_amp, Gain, FREQtab, test_pix_index, amp_pixel_test, Test_pix_only)
+
+	//  Start DEMUX
+	sendStartDREChannels(3)
+	waitMs(1000)            // Wait for the ramp
+
+	// Measurement of the data dumps
+	mk_dumps(Channel_ID, 1000)
+
+	// Measurement of IQ files for spectra characterisation
+	if (DoScienceSpectra) {
+	mk_science_data_files(Channel_ID, nbr_spectra, spectra_duration_ms)}
+	
+	if (DoEnergyResol){
+	// Measurement of energy resolution
+	mk_energy_resol_tst(Channel_ID, ER_nbr_pulses_meas, ModulationRatio, Threshold, saveIQ)}
+
+	Stop_HK_collection()
+	saveLogToBackupDir("scriptlog.txt")
+	sendStopSession()
+
+	onAbortScript()
+
+	print("Processing data ...")
+	output = copyDirToBackupDirAndExecuteBat("..\\SCRIPTS_PY\\demux-perfs-py",".\\SCRIPTS_PYTHON\\demux-perfs-py","python-perfs.bat")
+	addToFile(output)
+
+	print("Compressing data ...")
+	zipData()
+
+	print("End of session " + Session_name)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Functions definitions
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+function carrier_freq(Spread, Fgrid)
+// This function computes the set of carrier frequencies
+	{
+	switch (Spread) {
+		case "No":
+			// Definition of LC resonance frequencies: 100.0 kHz step and  0.0 kHz dispersion @ 1 sigma
+			FREQtab = [
+				1000000.00, 1100000.00, 1200000.00, 1300000.00, 1400000.00, 1500000.00, 1600000.00, 1700000.00,
+				1800000.00, 1900000.00, 2000000.00, 2100000.00, 2200000.00, 2300000.00, 2400000.00, 2500000.00,
+				2600000.00, 2700000.00, 2800000.00, 2900000.00, 3000000.00, 3100000.00, 3200000.00, 3300000.00,
+				3400000.00, 3500000.00, 3600000.00, 3700000.00, 3800000.00, 3900000.00, 4000000.00, 4100000.00,
+				4200000.00, 4300000.00, 4400000.00, 4500000.00, 4600000.00, 4700000.00, 4800000.00, 4900000.00,
+				]
+		case "Normal":
+			// Definition of LC resonance frequencies: 100.0 kHz step and  2.0 kHz dispersion @ 1 sigma
+			FREQtab = [
+				996704.86, 1097653.73, 1197333.15, 1301868.92, 1400987.31, 1500698.06, 1596579.61, 1697836.03,
+				1794853.56, 1901259.85, 1999130.86, 2101956.92, 2200656.92, 2299750.19, 2400616.07, 2499278.93,
+				2598731.30, 2701501.05, 2798540.48, 2903169.11, 2998998.49, 3099093.41, 3198765.55, 3297652.76,
+				3398986.46, 3501151.12, 3602702.04, 3702049.53, 3797144.36, 3899066.58, 4001907.83, 4099602.47,
+				4200198.73, 4301944.65, 4398899.80, 4501899.92, 4602836.70, 4699252.43, 4797968.19, 4900545.02,
+				]
+		case "Huge":
+			// Definition of LC resonance frequencies: 100.0 kHz step and  5.0 kHz dispersion @ 1 sigma
+			FREQtab = [
+				1002656.49, 1102642.86, 1199864.85, 1304155.35, 1408462.12, 1496696.95, 1597934.81, 1703763.20,
+				1799162.90, 1892685.25, 2006563.03, 2097925.96, 2206107.51, 2299695.00, 2395534.38, 2512506.79,
+				2596784.44, 2696679.10, 2794153.82, 2900068.66, 2992240.22, 3089285.15, 3205906.49, 3304381.29,
+				3399724.42, 3501857.99, 3600557.53, 3702984.09, 3803244.73, 3899462.84, 4007617.30, 4104209.38,
+				4197136.25, 4299587.03, 4409470.87, 4500047.15, 4601632.49, 4698735.13, 4802668.38, 4906147.21,
+				]
+		}
+
+	for(i=0;i<Npix;i++){            // This loop aligns the firmware frequencies on a frequency grid
+		FREQtab[i] = Fgrid*(Math.ceil(FREQtab[i]/Fgrid))
+		}
+	return(FREQtab)
+	}
+
+////////////////////////////////////////////////////////////////////////////////
+function configure_DEMUX_channel(Channel_ID, SQUID_interne, BIAS_trunc, FBCK_gain, FBCK_trunc)
+// This function configures the channels parameters of the DEMUX firmware
+{
+	//// Channel settings
+	Channel_CMD(
+		Channel_ID,			// Channel_id
+		0,					// Loop_Control
+		0,					// StartStop (don't touch, always STOP)
+		1,					// ADC_ON
+		1,					// DACB_ON
+		1,					// DACF_ON
+		SQUID_interne,		// Select_Input
+		1,					// Bias_Enabled
+		1,					// Feedback_Enabled
+		2,					// Bias_Slope_Speed
+		BIAS_trunc,			// Bias_Truncation
+		FBCK_trunc,			// Feedback_Truncation
+		FBCK_gain,				// Compensation_Gain (32767 => unitary gain)
+		0					// Feedback_Reverse
+		)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, amp_pixel_test, Test_pix_only)
+// This function configures the pixels' parameters of the DEMUX firmware for the test
+// In this configuration 39 standard pixels and the test pixel are used.
+// Input parameters:
+//		Amp: (number)
+//			the amplitude of the pixels
+//		FREQtab: (array)
+//			the values of the carriers
+//		test_pix_index: (number)
+//			the index of the standard pixel to be replaced by the test pixel
+{
+	if (! Test_pix_only)
+	{
+		print("41 pixels used")
+		for(var Pixel_ID=0;Pixel_ID<Npix;Pixel_ID++)
+		{
+			var PhiIdeg = (Math.PI*Pixel_ID*Pixel_ID/Npix)*180/Math.PI            // apply the Schroeder's minus relation defined in eq (6.10) in page 163 of the Bible
+			if(PhiIdeg >= 360) PhiIdeg = PhiIdeg-(360*parseInt(PhiIdeg/360))    // wrap PhiI in the range [0-360]
+			Set_Pixel_Config(
+				Pixel_ID,		// Pixel_ID
+				-1,				// PHI_Delay (degree) (Phi_C)
+				0,				// Test_PHI_Rotate (degree)
+				Gain,			// Gain_BBFB
+				Amp,			// Bias_Amplitude
+				FREQtab[Pixel_ID],		// Frequency
+				PhiIdeg			// Test_PHI_Initial (degree)
+				)
+		}
+		
+		// Switch off the pixel where we will place the test pixel 
+		Set_Pixel_Off(test_pix_index)
+		
+		// Apply the configuration of the standard pixels
+		Update_All_Configs(0)
+		Apply_All_Configs(0)
+	}
+
+	////// Test pixel's settings
+	// Frequency
+	Freq_Test = FREQtab[test_pix_index]
+	// Initial Phase
+	PhiIdeg = (Math.PI*test_pix_index*test_pix_index/Npix)*180/Math.PI	// apply the Schroeder's minus relation defined in eq (6.10) in page 163 of the Bible
+	if(PhiIdeg >= 360) PhiIdeg = PhiIdeg-(360*parseInt(PhiIdeg/360))	// wrap PhiI in the range [0-360]
+	// Correction Phase
+	PhiC_Testdeg = Get_PhiC(Freq_Test)
+	Test_Pixel_CMD(
+		Channel_ID,
+		Math.round(PhiC_Testdeg*Math.pow(2,8)/360),		// Test_PHI_Delay (degree)
+		Math.round(0*Math.pow(2,8)/360),				// Test_PHI_Rotate (degree)
+		Math.round(PhiIdeg*Math.pow(2,12)/360),			// Test_PHI_Initial (degree)
+		Gain,											// Test_Gain_BBFB
+		amp_pixel_test,									// Test_Bias_Amplitude
+		Math.round(Freq_Test*Math.pow(2,20)/FS),		// Increment
+		0,												// Test_Bias_Modulation_Frequency (Hz)
+		0,												// Test_Bias_Modulation_Amplitude (necessarily lower than "Test_Bias_Amplitude")
+		0,												// SW2
+		0,									// SW1
+		0,									// Pulse_timescale
+		0,									// Pulse_Amplitude
+		0									// Send_Pulse
+		)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function Start_HK_collection()
+{
+	sendStartDREHkAcquisition(1)	// periodic HK from ADC (to be stopped at the end of the sequence)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function Stop_HK_collection()
+{
+	sendStopDREHkAcquisition()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function mk_dumps(Channel_ID, duration_ms)
+// This function makes BIAS, INPUT and FEEDBACK dumps
+// Input parameters:
+//		duration_ms: number
+//			duration of each dump
+{
+	print(">>---------------------------------------------------------")
+	print(">>- Measuring ADC and DACs data dumps")
+
+	START_DUMP("IN-BIA" ,0,Channel_ID,"")
+	waitMs(duration_ms)
+	STOP_DUMP()
+	
+	START_DUMP("IN-FBK",0,Channel_ID,"")
+	waitMs(duration_ms)
+	STOP_DUMP()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function mk_science_data_files(Channel_ID, nbr_files, duration_ms)
+// This function makes a series of science data files in order to measure the science data spectra
+// Input parameters:
+//		duration_ms: (number)
+//			duration of each dump
+//		nbr_spectra: (number)
+//			the number of files to measure
+{
+	print(">>---------------------------------------------------------")
+	print(">>- Measurement of IQ data files for spectra measurement:")
+	for(i=0;i<nbr_files;i++){
+		//Dump IQ-ALL (all pixels filtered and data @ 156ksps)
+		START_DUMP("IQ-ALL",i,Channel_ID,"_Science-Data")        // ( dump_type, i, channelID, filename_comment )
+		waitMs(duration_ms)
+		STOP_DUMP()
+	}
+		
+	for(i=0;i<nbr_files;i++){
+		//Dump IQ-TST (test pixel - data @ 20Msps)
+		START_DUMP("IQ-TST",i,Channel_ID,"_Science-Data")        // ( dump_type, i, channelID, filename_comment )
+		waitMs(duration_ms)
+		STOP_DUMP()
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function mk_energy_resol_tst(Channel_id,  Npulses_meas, ModulationRatio, Threshold, saveIQ)
+// This function makes the measurements necessary to estimate the energy resolution
+{
+	print(">>---------------------------------------------------------")
+	print(">>- Measuring ADC dumps with pulses")
+	START_DUMP("IN-BIA" ,0,Channel_id,"_PULSE")
+	sendPulsesAndWaitingForInjectionDone(Channel_id,20,50,ModulationRatio)
+	STOP_DUMP()
+	
+	print(">>---------------------------------------------------------")
+	print("  - Measuring energy resolution")
+	print("  - PULSE Measurements: ")
+	sendConfigureEventProcessor(1,Threshold) // => Switch EP on
+	sendStartDREDaqAcquisition(8) // IQ-ALL
+	if (saveIQ)
+		{
+		print("Saving IQ data")
+		sendStartDumpedDataBackup(0)
+		}
+
+	sendStartSpectrumAcquisition()
+	sendPulsesAndWaitingForInjectionDone(Channel_id,Npulses_meas,70,ModulationRatio)
+	sendSaveSpectrums()
+
+	sendConfigureEventProcessor(0,Threshold) // => Switch EP off	
+	sendStopDumpedDataBackup()
+	sendStopDREDaqAcquisition()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function clean_stop()
+{
+	sendConfigureEventProcessor(0,65535)
+	sendStopDREHkAcquisition()
+	sendStopDREChannels(3)
+	sendStopDumpedDataBackup()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function onAbortScript()
+// This function is called when clicking on the "Abort" button
+// It is used to abort the setup in a proper way
+{
+	clean_stop()
+	
+	sendStopSession()
+}
+
+////////////////////////////////////////////////////////////////////////////////
