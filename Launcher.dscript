@@ -53,7 +53,7 @@ Test_pix_only = false
 
 for (iteration = 0; iteration < 1;iteration+=1)
 	{
-	Session_name = "Check_JavaScript"
+	Session_name = "Valid_GSE"
 	Session_comment = ""
 	print("Starting test sequence "+Session_name)
 	//linearity_test_sequence(

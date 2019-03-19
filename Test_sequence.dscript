@@ -36,12 +36,6 @@ function test_sequence(
 {
 	// Opening the session
 	sendStartSession(Session_name, Session_comment)
-	copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
-	copyFileToBackupDir(".\\Launcher.dscript","\\SCRIPTS_GSE\\Launcher.dscript") // sauvegarde du script included
-	copyFileToBackupDir(".\\Tools.dscript","\\SCRIPTS_GSE\\Tools.dscript") // sauvegarde du script included
-	copyFileToBackupDir(".\\Startup.dscript","\\SCRIPTS_GSE\\Startup.dscript") // sauvegarde du script de demarrage included
-	copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\"+__FILE__.split("/").pop()) // sauvegarde du script courant
-	copyDirToBackupDir(getEGSEDirectory()+"\\EP",".\\EP_PARAMETERS")	
 	// Saving test parameters in a file
 	setAndMemorize( "Session_name"			, Session_name)
 	setAndMemorize( "Session_comment"		, Session_comment)
@@ -70,7 +64,17 @@ function test_sequence(
 	setAndMemorize( "saveIQ"	, saveIQ)
 	setAndMemorize( "Test_pix_only"	, Test_pix_only)
 
-	saveMemorizedParametersToBackupDir("SCRIPTS_GSE\\"+__FILE__.split("/").pop().split(".")[0]+"_PARAMETERS.txt")
+	copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
+	
+	getLatestValue("DISP_BackupsCurrentDirectory")
+	mkpath(DISP_BackupsCurrentDirectory+"\\SCRIPTS_GSE\\demux-perfs-js")
+	copyFileToBackupDir(".\\Launcher.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Launcher.dscript") // sauvegarde du script included
+	copyFileToBackupDir(".\\Tools.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Tools.dscript") // sauvegarde du script included
+	copyFileToBackupDir(".\\Startup.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Startup.dscript") // sauvegarde du script de demarrage included
+	copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/").pop()) // sauvegarde du script courant
+	copyDirToBackupDir(getEGSEDirectory()+"\\EP",".\\EP_PARAMETERS")	
+
+	saveMemorizedParametersToBackupDir("SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/").pop().split(".")[0]+"_PARAMETERS.txt")
 	
 	// Computing the carrier frequencies
 	FREQtab = carrier_freq(Spread, Fgrid)
@@ -101,7 +105,7 @@ function test_sequence(
 	// Measurement of IQ files for spectra characterisation
 	if (DoScienceSpectra) {
 	mk_science_data_files(Channel_ID, nbr_spectra, spectra_duration_ms)}
-	
+
 	if (DoEnergyResol){
 	// Measurement of energy resolution
 	mk_energy_resol_tst(Channel_ID, ER_nbr_pulses_meas, ModulationRatio, Threshold, saveIQ)}
@@ -113,7 +117,7 @@ function test_sequence(
 	onAbortScript()
 
 	print("Processing data ...")
-	output = copyDirToBackupDirAndExecuteBat("..\\SCRIPTS_PY\\demux-perfs-py",".\\SCRIPTS_PYTHON\\demux-perfs-py","python-perfs.bat")
+	output = copyDirToBackupDirAndExecuteBat("..\\..\\SCRIPTS_PYTHON\\demux-perfs-py",".\\SCRIPTS_PYTHON\\demux-perfs-py","python-perfs.bat")
 	addToFile(output)
 
 	print("Compressing data ...")
@@ -314,11 +318,11 @@ function mk_science_data_files(Channel_ID, nbr_files, duration_ms)
 function mk_energy_resol_tst(Channel_id,  Npulses_meas, ModulationRatio, Threshold, saveIQ)
 // This function makes the measurements necessary to estimate the energy resolution
 {
-	print(">>---------------------------------------------------------")
+	print(">>---------------------------------------------------------")
 	print(">>- Measuring ADC dumps with pulses")
-	START_DUMP("IN-BIA" ,0,Channel_id,"_PULSE")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,20,50,ModulationRatio)
-	STOP_DUMP()
+	START_DUMP("IN-BIA" ,0,Channel_id,"_PULSE")
+	sendPulsesAndWaitingForInjectionDone(Channel_id,20,50,ModulationRatio)
+	STOP_DUMP()
 	
 	print(">>---------------------------------------------------------")
 	print("  - Measuring energy resolution")
