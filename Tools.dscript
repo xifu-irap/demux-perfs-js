@@ -293,7 +293,7 @@ function get_operator_name()
 //----------------------------------------------------------------------------------------------------------------------------
 function get_session_name()
 {
-	session_name = getText("Please, type the session name:", "Default session name")
+	session_name = getText("Please, type the session name:", "Default_session_name")
 	return(session_name)
 }
 
