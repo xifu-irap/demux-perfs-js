@@ -4,9 +4,9 @@ include("./Tools.dscript")
 // Test sequence
 ////////////////////////////////////////////////////////////////////////////////
 function test_sequence(
-	Session_name,
-	Session_comment,
-	Operator_name,
+	session_name,
+	session_comment,
+	operator_name,
 	Channel_ID,
 	Default_amp,
 	test_pix_index,
@@ -35,11 +35,11 @@ function test_sequence(
 // This function makes one test sequence for a set of parameters
 {
 	// Opening the session
-	sendStartSession(Session_name, Session_comment)
+	sendStartSession(session_name, session_comment)
 	// Saving test parameters in a file
-	setAndMemorize( "Session_name"			, Session_name)
-	setAndMemorize( "Session_comment"		, Session_comment)
-	setAndMemorize( "Operator_name"			, Operator_name)
+	setAndMemorize( "session_name"			, session_name)
+	setAndMemorize( "session_comment"		, session_comment)
+	setAndMemorize( "operator_name"			, operator_name)
 	setAndMemorize( "Channel_ID"			, Channel_ID)
 	setAndMemorize( "Default_amp"			, Default_amp)
 	setAndMemorize( "test_pix_index"		, test_pix_index)
@@ -105,7 +105,8 @@ function test_sequence(
 	// Measurement of IQ files for spectra characterisation
 	if (DoScienceSpectra) {
 	mk_science_data_files(Channel_ID, nbr_spectra, spectra_duration_ms)}
-
+
+
 	if (DoEnergyResol){
 	// Measurement of energy resolution
 	mk_energy_resol_tst(Channel_ID, ER_nbr_pulses_meas, ModulationRatio, Threshold, saveIQ)}
@@ -123,7 +124,7 @@ function test_sequence(
 	print("Compressing data ...")
 	zipData()
 
-	print("End of session " + Session_name)
+	print("End of session " + session_name)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

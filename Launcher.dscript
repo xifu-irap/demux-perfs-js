@@ -1,11 +1,11 @@
 include("./Test_sequence.dscript")
-//include("./Test_sequence_pix29_31_Off.dscript")
-//include("./Linearity_Test_sequence.dscript")
 
 // Stopping every previouly unstopped readout...
 clean_stop()
 
-Operator_name=Get_Operator()
+operator_name=get_operator_name()
+
+session_name=get_session_name()
 
 //DoEnergyResol = question("Do you want to measure the energy resolution?")
 DoEnergyResol=true
@@ -49,18 +49,16 @@ Test_pix_only = false
 
 //for (fgridIndex = 0; fgridIndex < Fgrids.length;++fgridIndex) {
 //	Fgrid = Fgrids[fgridIndex]
-//Session_name = "Linearity_check"
 
 for (iteration = 0; iteration < 1;iteration+=1)
 	{
-	Session_name = "Valid_GSE"
-	Session_comment = ""
-	print("Starting test sequence "+Session_name)
+	session_comment = ""
+	print("Starting test sequence "+session_name)
 	//linearity_test_sequence(
 	test_sequence(
-		Session_name,
-		Session_comment,
-		Operator_name,
+		session_name,
+		session_comment,
+		operator_name,
 		Channel_ID,
 		Default_amp,
 		test_pix_index,

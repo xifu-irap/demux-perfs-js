@@ -278,7 +278,7 @@ function Get_PhiI_from_freq(Freq, Freq_max)
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
-function Get_Operator()
+function get_operator_name()
 {
 	OperatorTab = ["", "Laurent", "Odile", "David", "Paul", "Bernard", "Wilfried", "Christophe"]
 	OperatorId = getItem("Please, select the operator name:", OperatorTab)
@@ -288,6 +288,13 @@ function Get_Operator()
 		Operator_name = OperatorTab[OperatorId]
 		}
 	return(Operator_name)
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
+function get_session_name()
+{
+	session_name = getText("Please, type the session name:", "Default session name")
+	return(session_name)
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
