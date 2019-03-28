@@ -639,8 +639,8 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, central_freq){			// Scan GBW u
 	print(">>- GBW characterization")
 	// Definition of frequencies to be used to characterize the BW before the decimation filter
 	const MOD_FREQ1 		=
-	[      10,        40,      100,       400,       1000,      4000,
-		   10000,     40000,   100000,    400000,    1000000
+	[      10,        32,      100,       316,       1000,      3162,
+		   10000,     31623,   100000,    316227,    1000000
 	]
 
 	// Definition of frequencies to be used to characterize the BW after the decimation filter
@@ -648,8 +648,7 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, central_freq){			// Scan GBW u
 	[      10,        30,        50,        70,        100,       147,
 	190,       245,       316,       408,       527,       681,       880,
 	1136,      1468,      1896,      2448,      3162,      4084,      5275,
-	6813,      7743,      8799,     10000,     11365,     12915,     14678,
-	16681,     18957,     21544,     24484,     27826,     31623,     35938,
+	6813,      8799,      11365,     14678,    18957,     24484,     31623,
 	40842,     52750,     68129,     87992,    113646,    146780,    189574,
 	244844,    316228,    408424,    527500,    681292,    879923
 	]
