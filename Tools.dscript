@@ -637,8 +637,15 @@ function waitingForEndOfScanFB(){
 function ScanGBW(Channel_id, bias_Amp, BBFB_gain, central_freq){			// Scan GBW using the Test_pixel BIAS modulation in the channel configuration defined externally of this function
 	print(">>---------------------------------------------------------")
 	print(">>- GBW characterization")
-	const MOD_FREQ 		=
-	[      10,        30,        50,        70,        90,       114,       147,
+	// Definition of frequencies to be used to characterize the BW before the decimation filter
+	const MOD_FREQ1 		=
+	[      10,        40,      100,       400,       1000,      4000,
+		   10000,     40000,   100000,    400000,    1000000
+	]
+
+	// Definition of frequencies to be used to characterize the BW after the decimation filter
+	const MOD_FREQ2 		=
+	[      10,        30,        50,        70,        100,       147,
 	190,       245,       316,       408,       527,       681,       880,
 	1136,      1468,      1896,      2448,      3162,      4084,      5275,
 	6813,      7743,      8799,     10000,     11365,     12915,     14678,
@@ -646,6 +653,7 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, central_freq){			// Scan GBW u
 	40842,     52750,     68129,     87992,    113646,    146780,    189574,
 	244844,    316228,    408424,    527500,    681292,    879923
 	]
+
 	N_PERIOD		= 20
 	
 	// Sets the amplitude of all the pixels (but the test pixel) to 0
@@ -677,10 +685,10 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, central_freq){			// Scan GBW u
 	sendStartDREChannels(3)
 	waitMs(1000)		// wait to let the BBFB lock
 	
-	// sweep with different modulation frequencies
-	for(i=0;i<MOD_FREQ.length;i++)
+	// sweep with different modulation frequencies and measures data before the LPF
+	for(i=0;i<MOD_FREQ1.length;i++)
 	{
-		MOD_FREQ_REEL = Math.round(MOD_FREQ[i]*Math.pow(2,24)/FS)
+		MOD_FREQ_REEL = Math.round(MOD_FREQ1[i]*Math.pow(2,24)/FS)
 		Test_Pixel_CMD(
 		Channel_id,									// Channel_id
 		Math.round(PhiC_Testdeg*Math.pow(2,8)/360),	// Test_PHI_Delay (degree)
@@ -698,9 +706,42 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, central_freq){			// Scan GBW u
 		0									// Send_Pulse
 		)
 		
-		file_size = Math.round(((FS/MOD_FREQ[i])*32/8)*N_PERIOD/1024)	// File size as a function of the modulation frequency and the number of period to be aquired
+		file_size = Math.round(((FS/MOD_FREQ1[i])*32/8)*N_PERIOD/1024)	// File size as a function of the modulation frequency and the number of period to be aquired
 		duration = (file_size*1e3*1.1/80e3)/1000
-		print(MOD_FREQ[i]+"Hz --> "+ duration.toFixed(3) +" s   /  "+file_size+" ko")
+		print(MOD_FREQ1[i]+"Hz --> "+ duration.toFixed(3) +" s   /  "+file_size+" ko")
+		
+		comment = "_GBW_" + (("0000000"+(Math.round(MOD_FREQ_REEL*FS/Math.pow(2,24))).toString()).slice(-7))+ "Hz_Gain" + Gain.toString()		
+		dump_type = "IQ-TST"
+		START_DUMP(dump_type,i,0,comment)        // ( dump_type, i, channelID, filename_comment )   with dump_type = [ADC, BIAS, FEEDBACK, IQ_ALL, IQ_TST, COUNTER]
+		waitMs(file_size*1e3*1.1/80e3)
+		STOP_DUMP()
+		waitMs(100)
+	}
+
+	// sweep with different modulation frequencies and measures data after the LPF
+	for(i=0;i<MOD_FREQ2.length;i++)
+	{
+		MOD_FREQ_REEL = Math.round(MOD_FREQ2[i]*Math.pow(2,24)/FS)
+		Test_Pixel_CMD(
+		Channel_id,									// Channel_id
+		Math.round(PhiC_Testdeg*Math.pow(2,8)/360),	// Test_PHI_Delay (degree)
+		Math.round(0*Math.pow(2,8)/360),			// Test_PHI_Rotate (degree)
+		Math.round(0*Math.pow(2,12)/360),			// Test_PHI_Initial (degree)
+		BBFB_gain,									// Test_Gain_BBFB
+		bias_Amp,									// Test_Bias_Amplitude
+		Math.round(Freq_Test*Math.pow(2,20)/FS),	// Test_Frequency (not Hz)
+		MOD_FREQ_REEL,	// Test_Bias_Modulation_Frequency (not Hz)
+		255,										// Test_Bias_Modulation_Amplitude (necessarily lower than "Test_Bias_Amplitude")
+		0,											// SW2
+		0,									// SW1
+		0,									// Pulse_timescale
+		0,									// Pulse_Amplitude
+		0									// Send_Pulse
+		)
+		
+		file_size = Math.round(((FS/MOD_FREQ2[i])*32/8)*N_PERIOD/1024)	// File size as a function of the modulation frequency and the number of period to be aquired
+		duration = (file_size*1e3*1.1/80e3)/1000
+		print(MOD_FREQ2[i]+"Hz --> "+ duration.toFixed(3) +" s   /  "+file_size+" ko")
 		
 		comment = "_GBW_" + (("0000000"+(Math.round(MOD_FREQ_REEL*FS/Math.pow(2,24))).toString()).slice(-7))+ "Hz_Gain" + Gain.toString()
 		dump_type = "IQ-ALL"
@@ -708,14 +749,8 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, central_freq){			// Scan GBW u
 		waitMs(file_size*1e3*1.1/80e3)
 		STOP_DUMP()
 		waitMs(100)
-		
-		dump_type = "IQ-TST"
-		START_DUMP(dump_type,i,0,comment)        // ( dump_type, i, channelID, filename_comment )   with dump_type = [ADC, BIAS, FEEDBACK, IQ_ALL, IQ_TST, COUNTER]
-		waitMs(file_size*1e3*1.1/80e3)
-		STOP_DUMP()
-		waitMs(100)
 	}
-		
+	
 	// switch test pixel off
 	Test_Pixel_CMD(
 	Channel_id,								// Channel_id
