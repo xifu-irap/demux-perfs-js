@@ -135,9 +135,12 @@ function test_sequence(
 function carrier_freq(Spread, Fgrid)
 // This function computes the set of carrier frequencies
 	{
+
 	switch (Spread) {
 		case "No":
 			// Definition of LC resonance frequencies: 100.0 kHz step and  0.0 kHz dispersion @ 1 sigma
+
+			print("No spread around ideal 100kHz grid")
 			FREQtab = [
 				1000000.00, 1100000.00, 1200000.00, 1300000.00, 1400000.00, 1500000.00, 1600000.00, 1700000.00,
 				1800000.00, 1900000.00, 2000000.00, 2100000.00, 2200000.00, 2300000.00, 2400000.00, 2500000.00,
@@ -145,8 +148,11 @@ function carrier_freq(Spread, Fgrid)
 				3400000.00, 3500000.00, 3600000.00, 3700000.00, 3800000.00, 3900000.00, 4000000.00, 4100000.00,
 				4200000.00, 4300000.00, 4400000.00, 4500000.00, 4600000.00, 4700000.00, 4800000.00, 4900000.00,
 				]
+			break
 		case "Normal":
 			// Definition of LC resonance frequencies: 100.0 kHz step and  2.0 kHz dispersion @ 1 sigma
+
+			print("Normal spread around ideal 100kHz grid")
 			FREQtab = [
 				996704.86, 1097653.73, 1197333.15, 1301868.92, 1400987.31, 1500698.06, 1596579.61, 1697836.03,
 				1794853.56, 1901259.85, 1999130.86, 2101956.92, 2200656.92, 2299750.19, 2400616.07, 2499278.93,
@@ -154,8 +160,11 @@ function carrier_freq(Spread, Fgrid)
 				3398986.46, 3501151.12, 3602702.04, 3702049.53, 3797144.36, 3899066.58, 4001907.83, 4099602.47,
 				4200198.73, 4301944.65, 4398899.80, 4501899.92, 4602836.70, 4699252.43, 4797968.19, 4900545.02,
 				]
+			break
 		case "Huge":
 			// Definition of LC resonance frequencies: 100.0 kHz step and  5.0 kHz dispersion @ 1 sigma
+
+			print("Huge spread around ideal 100kHz grid")
 			FREQtab = [
 				1002656.49, 1102642.86, 1199864.85, 1304155.35, 1408462.12, 1496696.95, 1597934.81, 1703763.20,
 				1799162.90, 1892685.25, 2006563.03, 2097925.96, 2206107.51, 2299695.00, 2395534.38, 2512506.79,
@@ -163,11 +172,29 @@ function carrier_freq(Spread, Fgrid)
 				3399724.42, 3501857.99, 3600557.53, 3702984.09, 3803244.73, 3899462.84, 4007617.30, 4104209.38,
 				4197136.25, 4299587.03, 4409470.87, 4500047.15, 4601632.49, 4698735.13, 4802668.38, 4906147.21,
 				]
+			break
 		}
 
 	for(i=0;i<Npix;i++){            // This loop aligns the firmware frequencies on a frequency grid
 		FREQtab[i] = Fgrid*(Math.ceil(FREQtab[i]/Fgrid))
 		}
+
+	print("The values of the carrier frequencies set in the firmware are:")
+	Ncol=8
+	Nlines=5
+	for(line=0;line<Nlines;line++)
+	{
+		for(linestring='', col=0;col<Ncol;col++)
+
+		{
+			freq=("0000000"+parseInt(FREQtab[line*Ncol+col]).toString()).slice(-7)+"Hz    "
+			linestring=linestring+freq
+		}
+		print(linestring)
+	}
+
+			
+
 	return(FREQtab)
 	}
 
@@ -235,6 +262,7 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, 
 	////// Test pixel's settings
 	// Frequency
 	Freq_Test = FREQtab[test_pix_index]
+	//Freq_Test = FS/4+FS/Math.pow(2,20)
 	// Initial Phase
 	PhiIdeg = (Math.PI*test_pix_index*test_pix_index/Npix)*180/Math.PI	// apply the Schroeder's minus relation defined in eq (6.10) in page 163 of the Bible
 	if(PhiIdeg >= 360) PhiIdeg = PhiIdeg-(360*parseInt(PhiIdeg/360))	// wrap PhiI in the range [0-360]
@@ -242,6 +270,7 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, 
 	PhiC_Testdeg = Get_PhiC(Freq_Test)
 	Test_Pixel_CMD(
 		Channel_ID,
+		//Math.round((PhiC_Testdeg+70)*Math.pow(2,8)/360),		// Test_PHI_Delay (degree) to test a non optimal value
 		Math.round(PhiC_Testdeg*Math.pow(2,8)/360),		// Test_PHI_Delay (degree)
 		Math.round(0*Math.pow(2,8)/360),				// Test_PHI_Rotate (degree)
 		Math.round(PhiIdeg*Math.pow(2,12)/360),			// Test_PHI_Initial (degree)
@@ -328,7 +357,8 @@ function mk_energy_resol_tst(Channel_id,  Npulses_meas, ModulationRatio, Thresho
 	print(">>---------------------------------------------------------")
 	print("  - Measuring energy resolution")
 	print("  - PULSE Measurements: ")
-	sendConfigureEventProcessor(1,Threshold) // => Switch EP on
+//	sendConfigureEventProcessor(1,Threshold) // => Switch EP on
+	sendStartEventProcessor(1000,"check_resol",Threshold)
 	sendStartDREDaqAcquisition(8) // IQ-ALL
 	if (saveIQ)
 		{
@@ -336,11 +366,12 @@ function mk_energy_resol_tst(Channel_id,  Npulses_meas, ModulationRatio, Thresho
 		sendStartDumpedDataBackup(0)
 		}
 
-	sendStartSpectrumAcquisition()
+//	sendStartSpectrumAcquisition()
 	sendPulsesAndWaitingForInjectionDone(Channel_id,Npulses_meas,70,ModulationRatio)
-	sendSaveSpectrums()
+//	sendSaveSpectrums()
 
-	sendConfigureEventProcessor(0,Threshold) // => Switch EP off	
+sendStopEventProcessor()
+//	sendConfigureEventProcessor(0,Threshold) // => Switch EP off	
 	sendStopDumpedDataBackup()
 	sendStopDREDaqAcquisition()
 }
@@ -348,7 +379,8 @@ function mk_energy_resol_tst(Channel_id,  Npulses_meas, ModulationRatio, Thresho
 ////////////////////////////////////////////////////////////////////////////////
 function clean_stop()
 {
-	sendConfigureEventProcessor(0,65535)
+	sendStopEventProcessor()
+	//sendConfigureEventProcessor(0,65535)
 	sendStopDREHkAcquisition()
 	sendStopDREChannels(3)
 	sendStopDumpedDataBackup()
