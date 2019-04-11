@@ -135,11 +135,9 @@ function test_sequence(
 function carrier_freq(Spread, Fgrid)
 // This function computes the set of carrier frequencies
 	{
-
 	switch (Spread) {
 		case "No":
 			// Definition of LC resonance frequencies: 100.0 kHz step and  0.0 kHz dispersion @ 1 sigma
-
 			print("No spread around ideal 100kHz grid")
 			FREQtab = [
 				1000000.00, 1100000.00, 1200000.00, 1300000.00, 1400000.00, 1500000.00, 1600000.00, 1700000.00,
@@ -151,7 +149,6 @@ function carrier_freq(Spread, Fgrid)
 			break
 		case "Normal":
 			// Definition of LC resonance frequencies: 100.0 kHz step and  2.0 kHz dispersion @ 1 sigma
-
 			print("Normal spread around ideal 100kHz grid")
 			FREQtab = [
 				996704.86, 1097653.73, 1197333.15, 1301868.92, 1400987.31, 1500698.06, 1596579.61, 1697836.03,
@@ -163,7 +160,6 @@ function carrier_freq(Spread, Fgrid)
 			break
 		case "Huge":
 			// Definition of LC resonance frequencies: 100.0 kHz step and  5.0 kHz dispersion @ 1 sigma
-
 			print("Huge spread around ideal 100kHz grid")
 			FREQtab = [
 				1002656.49, 1102642.86, 1199864.85, 1304155.35, 1408462.12, 1496696.95, 1597934.81, 1703763.20,
@@ -183,18 +179,14 @@ function carrier_freq(Spread, Fgrid)
 	Ncol=8
 	Nlines=5
 	for(line=0;line<Nlines;line++)
-	{
-		for(linestring='', col=0;col<Ncol;col++)
-
 		{
+		for(linestring='', col=0;col<Ncol;col++)
+			{
 			freq=("0000000"+parseInt(FREQtab[line*Ncol+col]).toString()).slice(-7)+"Hz    "
 			linestring=linestring+freq
-		}
+			}
 		print(linestring)
-	}
-
-			
-
+		}
 	return(FREQtab)
 	}
 
@@ -232,6 +224,7 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, 
 //			the values of the carriers
 //		test_pix_index: (number)
 //			the index of the standard pixel to be replaced by the test pixel
+//			if -1 the test pixel is switched off
 {
 	if (! Test_pix_only)
 	{
@@ -262,12 +255,18 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, 
 	////// Test pixel's settings
 	// Frequency
 	Freq_Test = FREQtab[test_pix_index]
-	//Freq_Test = FS/4+FS/Math.pow(2,20)
 	// Initial Phase
 	PhiIdeg = (Math.PI*test_pix_index*test_pix_index/Npix)*180/Math.PI	// apply the Schroeder's minus relation defined in eq (6.10) in page 163 of the Bible
 	if(PhiIdeg >= 360) PhiIdeg = PhiIdeg-(360*parseInt(PhiIdeg/360))	// wrap PhiI in the range [0-360]
 	// Correction Phase
 	PhiC_Testdeg = Get_PhiC(Freq_Test)
+	if (test_pix_index==-1) // switching test pixel off
+	{
+		amp_pixel_test = 0
+		Gain = 0
+		Freq_Test = 0
+	}
+
 	Test_Pixel_CMD(
 		Channel_ID,
 		//Math.round((PhiC_Testdeg+70)*Math.pow(2,8)/360),		// Test_PHI_Delay (degree) to test a non optimal value
