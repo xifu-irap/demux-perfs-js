@@ -331,7 +331,11 @@ function mk_dumps_DDSout(duration_ms)
 	print(">>- Measuring DDS output dump")
 
 	Channel_ID = 1
-	START_DUMP("IN-BIA", 0, Channel_ID, "DDSout")
+	START_DUMP("IN-BIA", 0, Channel_ID, "DDSout1")
+	waitMs(duration_ms)
+	STOP_DUMP()
+
+	START_DUMP("IN-FBK", 0, Channel_ID, "DDSout2")
 	waitMs(duration_ms)
 	STOP_DUMP()
 }
