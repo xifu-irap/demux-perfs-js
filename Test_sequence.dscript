@@ -102,8 +102,8 @@ function test_sequence(
 	// Measurement of the data dumps
 	mk_dumps(Channel_ID, 1000)
 
-	// Measurement of one DDS output dump (for test only)
-	mk_dumps_DDSout(1000)
+	// Measurement of one DDS output dump (for test only)
+	mk_dumps_DDSout(1000)
 
 	// Measurement of IQ files for spectra characterisation
 	if (DoScienceSpectra) {
@@ -247,9 +247,6 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, 
 				)
 		}
 		
-		// Switch off the pixel where we will place the test pixel 
-		Set_Pixel_Off(test_pix_index)
-		
 		// Apply the configuration of the standard pixels
 		Update_All_Configs(0)
 		Apply_All_Configs(0)
@@ -265,9 +262,15 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, 
 	PhiC_Testdeg = Get_PhiC(Freq_Test)
 	if (test_pix_index==-1) // switching test pixel off
 	{
+		print("switching test pixel off")
 		amp_pixel_test = 0
 		Gain = 0
 		Freq_Test = 0
+	}
+	else
+	{
+		// Switch off the pixel where we will place the test pixel 
+		Set_Pixel_Off(test_pix_index)
 	}
 
 	Test_Pixel_CMD(
@@ -337,6 +340,11 @@ function mk_dumps_DDSout(duration_ms)
 
 	START_DUMP("IN-FBK", 0, Channel_ID, "DDSout2")
 	waitMs(duration_ms)
+	STOP_DUMP()
+	START_DUMP("BI-FBK", 0, Channel_ID, "DDSout3")
+	waitMs(duration_ms)
+	STOP_DUMP()
+	START_DUMP("IQ-TST", 0, Channel_ID, "DDSout4")	waitMs(duration_ms)
 	STOP_DUMP()
 }
 
