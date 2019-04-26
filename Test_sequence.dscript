@@ -103,7 +103,9 @@ function test_sequence(
 	mk_dumps(Channel_ID, 1000)
 
 	// Measurement of one DDS output dump (for test only)
+
 	mk_dumps_DDSout(1000)
+
 
 	// Measurement of IQ files for spectra characterisation
 	if (DoScienceSpectra) {
@@ -350,9 +352,11 @@ function mk_dumps_DDSout(duration_ms)
 	START_DUMP("IN-FBK", 0, Channel_ID, "DDSout2")
 	waitMs(duration_ms)
 	STOP_DUMP()
+
 	START_DUMP("BI-FBK", 0, Channel_ID, "DDSout3")
 	waitMs(duration_ms)
 	STOP_DUMP()
+
 	START_DUMP("IQ-TST", 0, Channel_ID, "DDSout4")
 	waitMs(duration_ms)
 	STOP_DUMP()
