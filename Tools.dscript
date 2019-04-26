@@ -201,7 +201,6 @@ function Test_Pixel_CMD(Channel_id,Test_PHI_Delay,Test_PHI_Rotate,Test_PHI_Initi
 	+ (Test_Bias_Amplitude & Test_Bias_Amplitude_mask) * Test_Bias_Amplitude_l;
 	sendConfigureDREOneRegister(address_1, value_1)
 	
-	
 	Test_Increment_l					= Math.pow(2,12);
 	Test_Increment_mask					= 0xFFFFF;
 	Test_PHI_Initial_l					= Math.pow(2,0);

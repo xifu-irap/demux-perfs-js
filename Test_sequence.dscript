@@ -229,13 +229,15 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, 
 //			the index of the standard pixel to be replaced by the test pixel
 //			if -1 the test pixel is switched off
 {
-	if (! Test_pix_only)
-	{
-		print("41 pixels used")
+	if (Test_pix_only){
+		print("Standard pixels switched off")
+		Reset_All_Configs()
+	} else {
+		print("Standard pixels switched on")
 		for(var Pixel_ID=0;Pixel_ID<Npix;Pixel_ID++)
 		{
 			var PhiIdeg = (Math.PI*Pixel_ID*Pixel_ID/Npix)*180/Math.PI            // apply the Schroeder's minus relation defined in eq (6.10) in page 163 of the Bible
-			if(PhiIdeg >= 360) PhiIdeg = PhiIdeg-(360*parseInt(PhiIdeg/360))    // wrap PhiI in the range [0-360]
+			PhiIdeg = PhiIdeg-(360*parseInt(PhiIdeg/360))    // wrap PhiI in the range [0-360]
 			Set_Pixel_Config(
 				Pixel_ID,		// Pixel_ID
 				-1,				// PHI_Delay (degree) (Phi_C)
@@ -246,13 +248,6 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, 
 				PhiIdeg			// Test_PHI_Initial (degree)
 				)
 		}
-		
-		// Switch off the pixel where we will place the test pixel 
-		Set_Pixel_Off(test_pix_index)
-		
-		// Apply the configuration of the standard pixels
-		Update_All_Configs(0)
-		Apply_All_Configs(0)
 	}
 
 	////// Test pixel's settings
@@ -260,15 +255,25 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, 
 	Freq_Test = FREQtab[test_pix_index]
 	// Initial Phase
 	PhiIdeg = (Math.PI*test_pix_index*test_pix_index/Npix)*180/Math.PI	// apply the Schroeder's minus relation defined in eq (6.10) in page 163 of the Bible
-	if(PhiIdeg >= 360) PhiIdeg = PhiIdeg-(360*parseInt(PhiIdeg/360))	// wrap PhiI in the range [0-360]
+	PhiIdeg = PhiIdeg-(360*parseInt(PhiIdeg/360))	// wrap PhiI in the range [0-360]
 	// Correction Phase
 	PhiC_Testdeg = Get_PhiC(Freq_Test)
 	if (test_pix_index==-1) // switching test pixel off
 	{
+		print("switching test pixel off")
 		amp_pixel_test = 0
 		Gain = 0
 		Freq_Test = 0
 	}
+	else
+	{
+		// Switch off the pixel where we will place the test pixel 
+		Set_Pixel_Off(test_pix_index)
+	}
+
+	// Apply the configuration of the standard pixels
+	Update_All_Configs(0)
+	Apply_All_Configs(0)
 
 	Test_Pixel_CMD(
 		Channel_ID,
@@ -336,6 +341,12 @@ function mk_dumps_DDSout(duration_ms)
 	STOP_DUMP()
 
 	START_DUMP("IN-FBK", 0, Channel_ID, "DDSout2")
+	waitMs(duration_ms)
+	STOP_DUMP()
+	START_DUMP("BI-FBK", 0, Channel_ID, "DDSout3")
+	waitMs(duration_ms)
+	STOP_DUMP()
+	START_DUMP("IQ-TST", 0, Channel_ID, "DDSout4")
 	waitMs(duration_ms)
 	STOP_DUMP()
 }

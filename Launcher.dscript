@@ -1,14 +1,17 @@
 include("./Test_sequence.dscript")
+include("./Configs.dscript")
 
 // Stopping every previouly unstopped readout...
 clean_stop()
 
 operator_name=get_operator_name()
-
 session_name=get_session_name()
 
-//DoEnergyResol = question("Do you want to measure the energy resolution?")
-DoEnergyResol=true
+// Definition of tests to be done
+DoEnergyResol = true
+DoGBW = true
+DoScienceSpectra	= true
+Test_pix_only = false
 
 // Definition of parameters ///////////////////////////////////////////////////////////////////
 // Definition of the firmware frequency grid
@@ -17,26 +20,27 @@ Fgrids = new Array(FS/Math.pow(2,18),FS/Math.pow(2,15),FS/Math.pow(2,13))
 // liste des modes du DAC AD9726:
 dacModes = new Array("Factory", "Self-calibrated", "Uncalibrated")
 
-Channel_ID		= 0
-Default_amp		= 45 // 45
-test_pix_index	= 30
+getLatestValue("DRE_FirmwareId")
+print(DRE_FirmwareId)
+config = best_config(DRE_FirmwareId)
+Default_amp = config.Default_amp
 amp_pixel_test	= Default_amp
+Gain = config.Gain
+BIAS_trunc = config.BIAS_trunc
+FBCK_trunc = config.FBCK_trunc
+FBCK_gain = config.FBCK_gain
+
+Channel_ID		= 0
+test_pix_index	= 30
 SQUID_interne	= 0
-Gain			= 10 // 20
-BIAS_trunc		= 3
-FBCK_trunc		= 3
-FBCK_gain		= 24000 // max 32767
 Fgrid			= Fgrids[2]
 dacMode 		= dacModes[0]
-
-DoGBW			= true
 
 //Spread = "No"
 Spread = "Normal"  // Default setting
 //Spread = "Huge"
 
 // Nbr and duration of measurements for spectra characterization 
-DoScienceSpectra	= true
 nbr_spectra         = 40
 spectra_duration_ms	= 1000
 
@@ -45,7 +49,6 @@ ModulationRatio = 64.5 // 64.5% modulation corresponds to 7keV with LPA 75um pix
 Threshold  = 150  // TRIGGER threshold
 saveIQ = false  // If true the IQ files are saved during the energy resolution measurement (huge files)
 
-Test_pix_only = false
 
 //for (fgridIndex = 0; fgridIndex < Fgrids.length;++fgridIndex) {
 //	Fgrid = Fgrids[fgridIndex]
