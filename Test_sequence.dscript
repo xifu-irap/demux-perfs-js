@@ -175,7 +175,7 @@ function carrier_freq(Spread, Fgrid)
 		}
 
 	for(i=0;i<Npix;i++){            // This loop aligns the firmware frequencies on a frequency grid
-		FREQtab[i] = Fgrid*(Math.ceil(FREQtab[i]/Fgrid))
+		FREQtab[i] = Fgrid*(Math.round(FREQtab[i]/Fgrid))
 		}
 
 	print("The values of the carrier frequencies set in the firmware are:")
@@ -229,9 +229,12 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, 
 //			the index of the standard pixel to be replaced by the test pixel
 //			if -1 the test pixel is switched off
 {
-	if (Test_pix_only){
-		print("Standard pixels switched off")
-		Reset_All_Configs()
+	if (Test_pix_only){
+
+		print("Standard pixels switched off")
+
+		Reset_All_Configs()
+
 	} else {
 		print("Standard pixels switched on")
 		for(var Pixel_ID=0;Pixel_ID<Npix;Pixel_ID++)
@@ -270,10 +273,14 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, test_pix_index, 
 		// Switch off the pixel where we will place the test pixel 
 		Set_Pixel_Off(test_pix_index)
 	}
-
-	// Apply the configuration of the standard pixels
-	Update_All_Configs(0)
-	Apply_All_Configs(0)
+
+
+	// Apply the configuration of the standard pixels
+
+	Update_All_Configs(0)
+
+	Apply_All_Configs(0)
+
 
 	Test_Pixel_CMD(
 		Channel_ID,

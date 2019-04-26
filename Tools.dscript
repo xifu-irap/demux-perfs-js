@@ -1124,8 +1124,8 @@ function sendPulsesAndWaitingForTimeout(Channel_id,pulsesFreq,durationMs, pulses
 	sendStopDREPulses()
 	print("  - injection done")
 }
-//---------------------------------------------------------------------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------------------------------------------------------------------
 function waitingForDDR3Empty()
 {
 	var req = getNextValue("OK_DDR3Occupation","toutes les 10 ms");
@@ -1137,4 +1137,3 @@ function waitingForDDR3Empty()
 	}while(OK_DDR3Occupation > 0)
 		abortOneRequest(req)
 }
-//---------------------------------------------------------------------------------------------------------------------------------------
