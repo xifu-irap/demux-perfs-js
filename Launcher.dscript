@@ -15,7 +15,7 @@ Test_pix_only = false
 
 // Definition of parameters ///////////////////////////////////////////////////////////////////
 // Definition of the firmware frequency grid
-Fgrids = new Array(FS/Math.pow(2,21),FS/Math.pow(2,19),FS/Math.pow(2,17),FS/Math.pow(2,15),FS/Math.pow(2,13))
+Fgridratios = new Array(Math.pow(2,21),Math.pow(2,19),Math.pow(2,17),Math.pow(2,15),Math.pow(2,13))
 
 // liste des modes du DAC AD9726:
 dacModes = new Array("Factory", "Self-calibrated", "Uncalibrated")
@@ -33,7 +33,7 @@ FBCK_gain = config.FBCK_gain
 Channel_ID		= 0
 test_pix_index	= 30
 SQUID_interne	= 0
-Fgrid			= Fgrids[4]
+Fgridratio		= Fgridratios[4]
 dacMode 		= dacModes[0]
 
 //Spread = "No"
@@ -71,7 +71,7 @@ for (iteration = 0; iteration < 1;iteration+=1)
 		BIAS_trunc,
 		FBCK_trunc,
 		FBCK_gain,
-		Fgrid,
+		Fgridratio,
 		dacMode,
 		Spread,
 		Npix,
