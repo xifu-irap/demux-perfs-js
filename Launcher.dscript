@@ -1,4 +1,5 @@
-include("./Test_sequence.dscript")
+include("./Test_sequence.dscript")
+//include("./Test_sequence_unlock.dscript")
 include("./Configs.dscript")
 
 // Stopping every previouly unstopped readout...
@@ -9,13 +10,13 @@ session_name=get_session_name()
 
 // Definition of tests to be done
 DoEnergyResol = true
-DoGBW = true
-DoScienceSpectra	= true
+DoGBW = false
+DoScienceSpectra	= false
 Test_pix_only = false
 
 // Definition of parameters ///////////////////////////////////////////////////////////////////
 // Definition of the firmware frequency grid
-Fgridratios = new Array(Math.pow(2,21),Math.pow(2,19),Math.pow(2,17),Math.pow(2,15),Math.pow(2,13))
+Fgridratios = new Array(Math.pow(2,20),Math.pow(2,19),Math.pow(2,18),Math.pow(2,17),Math.pow(2,16),Math.pow(2,15),Math.pow(2,14),Math.pow(2,13))
 
 // liste des modes du DAC AD9726:
 dacModes = new Array("Factory", "Self-calibrated", "Uncalibrated")

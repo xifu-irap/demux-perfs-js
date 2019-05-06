@@ -94,13 +94,15 @@ function DRE_General_CMD(Start_Sending_TM,Select_TM,Start_Sending_HK,Select_HK)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-function Channel_CMD(Channel_id,Loop_Control,StartStop,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse)
+function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
 // 14 inputs
 {
 	Loop_Control_l			= Math.pow(2,28);
 	Loop_Control_mask		= 0xF;
 	StartStop_l				= Math.pow(2,16);
 	StartStop_mask			= 0x1;
+	Delock_ON_l				= Math.pow(2,13);
+	Delock_ON_mask			= 0x1;
 	ADC_ON_l				= Math.pow(2,12);
 	ADC_ON_mask				= 0x1;
 	DACB_ON_l				= Math.pow(2,11);
@@ -123,6 +125,7 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,ADC_ON,DACB_ON,DACF_ON,Se
 	address_1 		= 1 + Channel_id*(2+2*Npix+4);
 	value_1 	= (Loop_Control & Loop_Control_mask) * Loop_Control_l
 	+ (StartStop & StartStop_mask) * StartStop_l
+	+ (Delock_ON & Delock_ON_mask) * Delock_ON_l
 	+ (ADC_ON & ADC_ON_mask) * ADC_ON_l
 	+ (DACB_ON & DACB_ON_mask) * DACB_ON_l
 	+ (DACF_ON & DACF_ON_mask) * DACF_ON_l
@@ -139,11 +142,17 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,ADC_ON,DACB_ON,DACF_ON,Se
 	Compensation_Gain_mask	= 0xFFFF;
 	Feedback_Reverse_l		= Math.pow(2,15);
 	Feedback_Reverse_mask	= 0x1;
+	Wait_for_relock_l		= Math.pow(2,12);
+	Wait_for_relock_mask	= 0x7;
+	Delock_level_l		= Math.pow(2,0);
+	Delock_level_mask	= 0xFFF;
 	
 	address_2 	= address_1 + 1;
 	value_2 	= (Compensation_Gain & Compensation_Gain_mask) * Compensation_Gain_l
-	+ (Feedback_Reverse & Feedback_Reverse_mask) * Feedback_Reverse_l;
-	sendConfigureDREOneRegister(address_2,value_2)
+	+ (Feedback_Reverse & Feedback_Reverse_mask) * Feedback_Reverse_l
+	+ (Wait_for_relock & Wait_for_relock_mask) * Wait_for_relock_l
+	+ (Delock_level & Delock_level_mask) * Delock_level_l;
+sendConfigureDREOneRegister(address_2,value_2)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
@@ -818,7 +827,7 @@ function Update_All_Configs(channelId){
 //----------------------------------------------------------------------------------------------------------------------------
 function Set_Pixel_Config(Pixel_ID,PHI_Delay,PHI_Rotate,Gain_BBFB,Bias_Amplitude,Frequency,PHI_Initial){
 	t_Freq[Pixel_ID] = Frequency;
-	t_Amp[Pixel_ID]	 = Bias_Amplitude;
+	t_Amp[Pixel_ID] = Bias_Amplitude;
 	t_Gain[Pixel_ID] = Gain_BBFB;
 	t_PhiC[Pixel_ID] = PHI_Delay;
 	t_PhiI[Pixel_ID] = PHI_Initial;

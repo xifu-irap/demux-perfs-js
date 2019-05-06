@@ -203,7 +203,7 @@ function carrier_freq(Spread, Fgrid)
 function carrier_freq2(Fgridratio)
 // This function computes the set of carrier frequencies
 	{
-	switch (Fgrid) {
+	switch (Fgridratio) {
 		case Math.pow(2,13):
 			// Sampling frequency:          19530000 Hz
 			// Mean frequency spacing:        100000 Hz
@@ -345,6 +345,7 @@ function configure_DEMUX_channel(Channel_ID, SQUID_interne, BIAS_trunc, FBCK_gai
 		Channel_ID,			// Channel_id
 		0,					// Loop_Control
 		0,					// StartStop (don't touch, always STOP)
+		0,					// Delock_ON (0 not active)
 		1,					// ADC_ON
 		1,					// DACB_ON
 		1,					// DACF_ON
@@ -355,7 +356,9 @@ function configure_DEMUX_channel(Channel_ID, SQUID_interne, BIAS_trunc, FBCK_gai
 		BIAS_trunc,			// Bias_Truncation
 		FBCK_trunc,			// Feedback_Truncation
 		FBCK_gain,				// Compensation_Gain (32767 => unitary gain)
-		0					// Feedback_Reverse
+		0,					// Feedback_Reverse
+		7,				// Wait for relock (0..7)
+		0x7FF			// Delock_level (maximum positive value)
 		)
 }
 
