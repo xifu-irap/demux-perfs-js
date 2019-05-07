@@ -107,9 +107,7 @@ function test_sequence(
 	mk_dumps(Channel_ID, 1000)
 
 	// Measurement of one DDS output dump (for test only)
-
-	mk_dumps_DDSout(1000)
-
+	//mk_dumps_DDSout(1000)
 
 	// Measurement of IQ files for spectra characterisation
 	if (DoScienceSpectra) {
@@ -204,7 +202,7 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, PHIItab, test_pi
 	PhiIdeg = PHIItab[test_pix_index]
 	// Correction Phase
 	PhiC_Testdeg = Get_PhiC(Freq_Test)
-	if (test_pix_index==-1) // switching test pixel off
+	if (test_pix_index==-1) // switching test pixel off
 	{
 		print("switching test pixel off")
 		amp_pixel_test = 0
@@ -213,14 +211,15 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, PHIItab, test_pi
 	}
 	else
 	{
-		// Switch off the pixel where we will place the test pixel 
+		// Switch off the pixel where we will place the test pixel 
+		print("switching standard pixel ", test_pix_index, " off")
 		Set_Pixel_Off(test_pix_index)
 	}
 
 	// Apply the configuration of the standard pixels
 	Update_All_Configs(0)
 	Apply_All_Configs(0)
-
+
 	Test_Pixel_CMD(
 		Channel_ID,
 		//Math.round((PhiC_Testdeg+70)*Math.pow(2,8)/360),		// Test_PHI_Delay (degree) to test a non optimal value
@@ -347,12 +346,9 @@ function mk_energy_resol_tst(Channel_id,  Npulses_meas, ModulationRatio, Thresho
 		sendStartDumpedDataBackup(0)
 		}
 
-//	sendStartSpectrumAcquisition()
 	sendPulsesAndWaitingForInjectionDone(Channel_id,Npulses_meas,70,ModulationRatio)
-//	sendSaveSpectrums()
 
-sendStopEventProcessor()
-//	sendConfigureEventProcessor(0,Threshold) // => Switch EP off	
+	sendStopEventProcessor()
 	sendStopDumpedDataBackup()
 	sendStopDREDaqAcquisition()
 }
@@ -373,7 +369,6 @@ function onAbortScript()
 // It is used to abort the setup in a proper way
 {
 	clean_stop()
-	
 	sendStopSession()
 }
 

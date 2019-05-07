@@ -203,8 +203,8 @@ function carrier_freq2(fgridratio, nbcarriers)
 			break;
 		}
 
-	print_freq_tab(FREQtab.slice(0, nbcarriers));
-	print_phi_tab(PHIItab.slice(0, nbcarriers));
+	print_freq_tab(freqtab.slice(0, nbcarriers));
+	print_phi_tab(phitab.slice(0, nbcarriers));
 		
 	return {
 		FREQtab: freqtab.slice(0, nbcarriers),
@@ -281,7 +281,7 @@ function print_freq_tab(FREQtab)
 			{
 			if (line*Ncol+col < FREQtab.length)
 				{
-				freq=("0000000"+parseInt(FREQtab[line*Ncol+col]).toString()).slice(-7)+"Hz    "
+				freq=("       "+parseInt(FREQtab[line*Ncol+col]).toString()).slice(-7)+"Hz    "
 				linestring=linestring+freq
 				}
 			}
@@ -303,7 +303,7 @@ function print_phi_tab(PHIItab)
 			{
 			if (line*Ncol+col < PHIItab.length)
 				{
-				phi=("000"+parseInt(PHIItab[line*Ncol+col]).toString()).slice(-3)+"deg    "
+				phi=("   "+parseInt(PHIItab[line*Ncol+col]).toString()).slice(-3)+"deg    "
 				linestring=linestring+phi
 				}
 			}

@@ -97,33 +97,33 @@ function DRE_General_CMD(Start_Sending_TM,Select_TM,Start_Sending_HK,Select_HK)
 function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
 // 14 inputs
 {
-	Loop_Control_l			= Math.pow(2,28);
-	Loop_Control_mask		= 0xF;
-	StartStop_l				= Math.pow(2,16);
-	StartStop_mask			= 0x1;
-	Delock_ON_l				= Math.pow(2,13);
-	Delock_ON_mask			= 0x1;
-	ADC_ON_l				= Math.pow(2,12);
-	ADC_ON_mask				= 0x1;
-	DACB_ON_l				= Math.pow(2,11);
-	DACB_ON_mask			= 0x1;
-	DACF_ON_l				= Math.pow(2,10);
-	DACF_ON_mask			= 0x1;
-	Select_Input_l			= Math.pow(2,8);
-	Select_Input_mask		= 0x3;
-	Bias_Enabled_l			= Math.pow(2,7);
-	Bias_Enabled_mask		= 0x1;
-	Feedback_Enabled_l		= Math.pow(2,6);
-	Feedback_Enabled_mask	= 0x1;
-	Bias_Slope_Speed_l		= Math.pow(2,4);
+	Loop_Control_l = Math.pow(2,28);
+	Loop_Control_mask = 0xF;
+	StartStop_l = Math.pow(2,16);
+	StartStop_mask = 0x1;
+	Delock_ON_l = Math.pow(2,13);
+	Delock_ON_mask = 0x1;
+	ADC_ON_l = Math.pow(2,12);
+	ADC_ON_mask = 0x1;
+	DACB_ON_l = Math.pow(2,11);
+	DACB_ON_mask = 0x1;
+	DACF_ON_l = Math.pow(2,10);
+	DACF_ON_mask = 0x1;
+	Select_Input_l = Math.pow(2,8);
+	Select_Input_mask = 0x3;
+	Bias_Enabled_l = Math.pow(2,7);
+	Bias_Enabled_mask = 0x1;
+	Feedback_Enabled_l = Math.pow(2,6);
+	Feedback_Enabled_mask = 0x1;
+	Bias_Slope_Speed_l = Math.pow(2,4);
 	Bias_Slope_Speed_mask	= 0x3;
-	Bias_Truncation_l		= Math.pow(2,2);
-	Bias_Truncation_mask	= 0x3;
-	Feedback_Truncation_l	= Math.pow(2,0);
-	Feedback_Truncation_mask= 0x3;
+	Bias_Truncation_l = Math.pow(2,2);
+	Bias_Truncation_mask = 0x3;
+	Feedback_Truncation_l = Math.pow(2,0);
+	Feedback_Truncation_mask = 0x3;
 	
-	address_1 		= 1 + Channel_id*(2+2*Npix+4);
-	value_1 	= (Loop_Control & Loop_Control_mask) * Loop_Control_l
+	address_1 = 1 + Channel_id*(2+2*Npix+4);
+	value_1 = (Loop_Control & Loop_Control_mask) * Loop_Control_l
 	+ (StartStop & StartStop_mask) * StartStop_l
 	+ (Delock_ON & Delock_ON_mask) * Delock_ON_l
 	+ (ADC_ON & ADC_ON_mask) * ADC_ON_l
@@ -135,24 +135,24 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,ADC_ON,DACB_ON,
 	+ (Bias_Slope_Speed & Bias_Slope_Speed_mask) * Bias_Slope_Speed_l
 	+ (Bias_Truncation & Bias_Truncation_mask) * Bias_Truncation_l
 	+ (Feedback_Truncation & Feedback_Truncation_mask) * Feedback_Truncation_l;
-	sendConfigureDREOneRegister(address_1,value_1)
+	sendConfigureDREOneRegister(address_1, value_1);
 	
 	
-	Compensation_Gain_l		= Math.pow(2,16);
-	Compensation_Gain_mask	= 0xFFFF;
-	Feedback_Reverse_l		= Math.pow(2,15);
+	Compensation_Gain_l = Math.pow(2,16);
+	Compensation_Gain_mask = 0xFFFF;
+	Feedback_Reverse_l = Math.pow(2,15);
 	Feedback_Reverse_mask	= 0x1;
-	Wait_for_relock_l		= Math.pow(2,12);
-	Wait_for_relock_mask	= 0x7;
-	Delock_level_l		= Math.pow(2,0);
-	Delock_level_mask	= 0xFFF;
+	Wait_for_relock_l = Math.pow(2,12);
+	Wait_for_relock_mask = 0x7;
+	Delock_level_l = Math.pow(2,0);
+	Delock_level_mask = 0xFFF;
 	
-	address_2 	= address_1 + 1;
-	value_2 	= (Compensation_Gain & Compensation_Gain_mask) * Compensation_Gain_l
+	address_2 = address_1 + 1;
+	value_2 = (Compensation_Gain & Compensation_Gain_mask) * Compensation_Gain_l
 	+ (Feedback_Reverse & Feedback_Reverse_mask) * Feedback_Reverse_l
 	+ (Wait_for_relock & Wait_for_relock_mask) * Wait_for_relock_l
 	+ (Delock_level & Delock_level_mask) * Delock_level_l;
-sendConfigureDREOneRegister(address_2,value_2)
+	sendConfigureDREOneRegister(address_2, value_2);
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
@@ -161,95 +161,95 @@ function Pixel_CMD(Channel_id, Pixel_ID,PHI_Delay,PHI_Rotate,Gain_BBFB,Bias_Ampl
 // This functions sends the pixel configuration to the DRE-DEMUX firmware.
 // ==> Use Set_Pixel_Config(), Update_All_Configs() and Apply_All_Configs() instead
 {
-	PHI_Delay_l			= Math.pow(2,24);
-	PHI_Delay_mask		= 0xFF;
-	PHI_Rotate_l		= Math.pow(2,16);
-	PHI_Rotate_mask		= 0xFF;
-	Gain_BBFB_l			= Math.pow(2,8);
-	Gain_BBFB_mask		= 0xFF;
-	Bias_Amplitude_l	= Math.pow(2,0);
-	Bias_Amplitude_mask	= 0xFF;
+	PHI_Delay_l = Math.pow(2,24);
+	PHI_Delay_mask = 0xFF;
+	PHI_Rotate_l = Math.pow(2,16);
+	PHI_Rotate_mask = 0xFF;
+	Gain_BBFB_l = Math.pow(2,8);
+	Gain_BBFB_mask = 0xFF;
+	Bias_Amplitude_l = Math.pow(2,0);
+	Bias_Amplitude_mask = 0xFF;
 	
-	address_1 		= 1 + Channel_id*(2+2*Npix+4) + 2 + 2*Npix;
-	value_1 		= (PHI_Delay & PHI_Delay_mask) * PHI_Delay_l
+	address_1 = 1 + Channel_id*(2+2*Npix+4) + 2 + 2*Npix;
+	value_1 = (PHI_Delay & PHI_Delay_mask) * PHI_Delay_l
 	+ (PHI_Rotate & PHI_Rotate_mask) * PHI_Rotate_l
 	+ (Gain_BBFB & Gain_BBFB_mask) * Gain_BBFB_l
 	+ (Bias_Amplitude & Bias_Amplitude_mask) * Bias_Amplitude_l;
-	sendConfigureDREOneRegister(address_1,value_1)
+	sendConfigureDREOneRegister(address_1, value_1);
 	
 	
-	Increment_l			= Math.pow(2,12);
-	Increment_mask		= 0xFFFF;
-	PHI_Initial_l		= Math.pow(2,0);
-	PHI_Initial_mask	= 0xFFF;
+	Increment_l = Math.pow(2,12);
+	Increment_mask = 0xFFFF;
+	PHI_Initial_l = Math.pow(2,0);
+	PHI_Initial_mask = 0xFFF;
 	
-	address_2 		= address_1 + 1;
-	value_2 		= (Increment & Increment_mask) * Increment_l
+	address_2 = address_1 + 1;
+	value_2 = (Increment & Increment_mask) * Increment_l
 	+ (PHI_Initial & PHI_Initial_mask) * PHI_Initial_l;
-	sendConfigureDREOneRegister(address_2,value_2)
+	sendConfigureDREOneRegister(address_2, value_2);
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 function Test_Pixel_CMD(Channel_id,Test_PHI_Delay,Test_PHI_Rotate,Test_PHI_Initial,Test_Gain_BBFB,Test_Bias_Amplitude,Test_Increment,Test_Bias_Modulation_Increment,Test_Bias_Modulation_Amplitude,SW2,SW1,Pulse_timescale,Pulse_Amplitude,Send_Pulse)
 //14 inputs
 {
-	Test_PHI_Delay_l					= Math.pow(2,24);
-	Test_PHI_Delay_mask					= 0xFF;
-	Test_PHI_Rotate_l					= Math.pow(2,16);
-	Test_PHI_Rotate_mask				= 0xFF;
-	Test_Gain_BBFB_l					= Math.pow(2,8);
-	Test_Gain_BBFB_mask					= 0xFF;
-	Test_Bias_Amplitude_l				= Math.pow(2,0);
-	Test_Bias_Amplitude_mask			= 0xFF;
+	Test_PHI_Delay_l = Math.pow(2,24);
+	Test_PHI_Delay_mask = 0xFF;
+	Test_PHI_Rotate_l = Math.pow(2,16);
+	Test_PHI_Rotate_mask = 0xFF;
+	Test_Gain_BBFB_l = Math.pow(2,8);
+	Test_Gain_BBFB_mask = 0xFF;
+	Test_Bias_Amplitude_l = Math.pow(2,0);
+	Test_Bias_Amplitude_mask = 0xFF;
 	
-	
-	address_1		= 1 + Channel_id*(2+2*Npix+4) + 2+2*Npix;
-	value_1 		= (Test_PHI_Delay & Test_PHI_Delay_mask) * Test_PHI_Delay_l
+	address_1 = 1 + Channel_id*(2+2*Npix+4) + 2+2*Npix;
+	value_1 = (Test_PHI_Delay & Test_PHI_Delay_mask) * Test_PHI_Delay_l
 	+ (Test_PHI_Rotate & Test_PHI_Rotate_mask) * Test_PHI_Rotate_l
 	+ (Test_Gain_BBFB & Test_Gain_BBFB_mask) * Test_Gain_BBFB_l
 	+ (Test_Bias_Amplitude & Test_Bias_Amplitude_mask) * Test_Bias_Amplitude_l;
-	sendConfigureDREOneRegister(address_1, value_1)
+	sendConfigureDREOneRegister(address_1, value_1);
+
 	
-	Test_Increment_l					= Math.pow(2,12);
-	Test_Increment_mask					= 0xFFFFF;
-	Test_PHI_Initial_l					= Math.pow(2,0);
-	Test_PHI_Initial_mask				= 0xFFF;
+	Test_Increment_l = Math.pow(2,12);
+	Test_Increment_mask = 0xFFFFF;
+	Test_PHI_Initial_l = Math.pow(2,0);
+	Test_PHI_Initial_mask = 0xFFF;
 	
-	address_2 	= address_1 + 1;
-	value_2 	= (Test_Increment & Test_Increment_mask) * Test_Increment_l
+	address_2 = address_1 + 1;
+	value_2 = (Test_Increment & Test_Increment_mask) * Test_Increment_l
 	+ (Test_PHI_Initial & Test_PHI_Initial_mask) * Test_PHI_Initial_l;
-	sendConfigureDREOneRegister(address_2, value_2)
+	sendConfigureDREOneRegister(address_2, value_2);
 	
 	
-	Test_Bias_Modulation_Increment_l	= Math.pow(2,0);
-	Test_Bias_Modulation_Increment_mask	= 0xFFFFFF;
+	Test_Bias_Modulation_Increment_l = Math.pow(2,0);
+	Test_Bias_Modulation_Increment_mask = 0xFFFFFF;
 	
-	address_3 	= address_1 + 2;
-	value_3 	= (Test_Bias_Modulation_Increment & Test_Bias_Modulation_Increment_mask) * Test_Bias_Modulation_Increment_l;
-	sendConfigureDREOneRegister(address_3, value_3)
+	address_3 = address_1 + 2;
+	value_3 = (Test_Bias_Modulation_Increment & Test_Bias_Modulation_Increment_mask) * Test_Bias_Modulation_Increment_l;
+	sendConfigureDREOneRegister(address_3, value_3);
 	
 	
-	Pulse_timescale_l					= Math.pow(2,20);
-	Pulse_timescale_mask				= 0xFFF;
-	Pulse_Amplitude_l					= Math.pow(2,12);
-	Pulse_Amplitude_mask				= 0xFF;
-	Send_Pulse_l						= Math.pow(2,11);
-	Send_Pulse_mask						= 0x1;
-	SW2_l								= Math.pow(2,9);
-	SW2_mask							= 0x3;
-	SW1_l								= Math.pow(2,8);
-	SW1_mask							= 0x1;
-	Test_Bias_Modulation_Amplitude_l	= Math.pow(2,0);
-	Test_Bias_Modulation_Amplitude_mask	= 0xFF;
+	Pulse_timescale_l = Math.pow(2,20);
+	Pulse_timescale_mask = 0xFFF;
+	Pulse_Amplitude_l = Math.pow(2,12);
+	Pulse_Amplitude_mask = 0xFF;
+	Send_Pulse_l = Math.pow(2,11);
+	Send_Pulse_mask = 0x1;
+	SW2_l = Math.pow(2,9);
+	SW2_mask = 0x3;
+	SW1_l = Math.pow(2,8);
+	SW1_mask = 0x1;
+	Test_Bias_Modulation_Amplitude_l = Math.pow(2,0);
+	Test_Bias_Modulation_Amplitude_mask = 0xFF;
 	
-	address_4 	= address_1 + 3;
-	value_4 	= (Pulse_timescale & Pulse_timescale_mask) * Pulse_timescale_l
+	address_4 = address_1 + 3;
+	value_4 = (Pulse_timescale & Pulse_timescale_mask) * Pulse_timescale_l
 	+ (Pulse_Amplitude & Pulse_Amplitude_mask) * Pulse_Amplitude_l
 	+ (Send_Pulse & Send_Pulse_mask) * Send_Pulse_l
 	+ (SW2 & SW2_mask) * SW2_l
 	+ (SW1 & SW1_mask) * SW1_l
 	+ (Test_Bias_Modulation_Amplitude & Test_Bias_Modulation_Amplitude_mask) * Test_Bias_Modulation_Amplitude_l;
-	sendConfigureDREOneRegister(address_4,value_4)
+	sendConfigureDREOneRegister(address_4, value_4);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
