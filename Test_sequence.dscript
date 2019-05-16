@@ -202,7 +202,8 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, PHIItab, test_pi
 	PhiIdeg = PHIItab[test_pix_index]
 	// Correction Phase
 	PhiC_Testdeg = Get_PhiC(Freq_Test)
-	if (test_pix_index==-1) // switching test pixel off
+	if (test_pix_index==-1) // switching test pixel off
+
 	{
 		print("switching test pixel off")
 		amp_pixel_test = 0
@@ -211,32 +212,38 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, PHIItab, test_pi
 	}
 	else
 	{
-		// Switch off the pixel where we will place the test pixel 
+		// Switch off the pixel where we will place the test pixel 
+
 		print("switching standard pixel ", test_pix_index, " off")
 		Set_Pixel_Off(test_pix_index)
 	}
 
+	
+
+
+Set_Pixel_Config(
+
+				40,		// Pixel_ID
+
+				PhiC_Testdeg,				// PHI_Delay (degree) (Phi_C)
+
+				0,				// Test_PHI_Rotate (degree)
+
+				Gain,			// Gain_BBFB
+
+				amp_pixel_test,			// Bias_Amplitude
+
+				Freq_Test,	// Frequency
+
+				PhiIdeg	// Test_PHI_Initial (degree)
+
+				)
+
+				
+
 	// Apply the configuration of the standard pixels
 	Update_All_Configs(0)
-	Apply_All_Configs(0)
-
-	Test_Pixel_CMD(
-		Channel_ID,
-		//Math.round((PhiC_Testdeg+70)*Math.pow(2,8)/360),		// Test_PHI_Delay (degree) to test a non optimal value
-		Math.round(PhiC_Testdeg*Math.pow(2,8)/360),		// Test_PHI_Delay (degree)
-		Math.round(0*Math.pow(2,8)/360),				// Test_PHI_Rotate (degree)
-		Math.round(PhiIdeg*Math.pow(2,12)/360),			// Test_PHI_Initial (degree)
-		Gain,											// Test_Gain_BBFB
-		amp_pixel_test,									// Test_Bias_Amplitude
-		Math.round(Freq_Test*Math.pow(2,20)/FS),		// Increment
-		0,												// Test_Bias_Modulation_Frequency (Hz)
-		0,												// Test_Bias_Modulation_Amplitude (necessarily lower than "Test_Bias_Amplitude")
-		0,												// SW2
-		0,									// SW1
-		0,									// Pulse_timescale
-		0,									// Pulse_Amplitude
-		0									// Send_Pulse
-		)
+	Apply_All_Configs(0)		
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -315,12 +322,16 @@ function mk_science_data_files(Channel_ID, nbr_files, duration_ms)
 		waitMs(duration_ms)
 		STOP_DUMP()
 	}
-		
-	for(i=0;i<nbr_files;i++){
-		//Dump IQ-TST (test pixel - data @ 20Msps)
-		START_DUMP("IQ-TST",i,Channel_ID,"_Science-Data")        // ( dump_type, i, channelID, filename_comment )
-		waitMs(duration_ms)
-		STOP_DUMP()
+
+
+	if (false){
+		for(i=0;i<nbr_files;i++){
+			//Dump IQ-TST (test pixel - data @ 20Msps)
+			START_DUMP("IQ-TST",i,Channel_ID,"_Science-Data")        // ( dump_type, i, channelID, filename_comment )
+			waitMs(duration_ms)
+			STOP_DUMP()
+		}
+
 	}
 }
 

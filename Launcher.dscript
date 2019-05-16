@@ -9,9 +9,9 @@ operator_name=get_operator_name()
 session_name=get_session_name()
 
 // Definition of tests to be done
-DoEnergyResol = false
-DoGBW = false
-DoScienceSpectra	= false
+DoEnergyResol = true
+DoGBW = true
+DoScienceSpectra = true
 Test_pix_only = false
 
 // Definition of parameters ///////////////////////////////////////////////////////////////////
@@ -31,22 +31,22 @@ BIAS_trunc = config.BIAS_trunc
 FBCK_trunc = config.FBCK_trunc
 FBCK_gain = config.FBCK_gain
 
-Channel_ID = 0
-test_pix_index = 30
-SQUID_interne = 0
+Channel_ID		= 0
+test_pix_index	= 30
+SQUID_interne	= 0
 index=7
-Fgridratio = Fgridratios[index]
-dacMode = dacModes[0]
+Fgridratio		= Fgridratios[index]
+dacMode 		= dacModes[0]
 
 //Spread = "No"
 Spread = "Normal"  // Default setting
 //Spread = "Huge"
 
 // Nbr and duration of measurements for spectra characterization 
-nbr_spectra = 40
-spectra_duration_ms = 1000
+nbr_spectra         = 40
+spectra_duration_ms	= 1000
 
-ER_nbr_pulses_meas = 2019
+ER_nbr_pulses_meas	= 2019
 ModulationRatio = 64.5 // 64.5% modulation corresponds to 7keV with LPA 75um pixels
 Threshold  = 150  // TRIGGER threshold
 saveIQ = false  // If true the IQ files are saved during the energy resolution measurement (huge files)
@@ -55,10 +55,10 @@ saveIQ = false  // If true the IQ files are saved during the energy resolution m
 //for (fgridIndex = 0; fgridIndex < Fgrids.length;++fgridIndex) {
 //	Fgrid = Fgrids[fgridIndex]
 
-for (iteration = 0; iteration < 1; iteration+=1)
+for (iteration = 0; iteration < 1;iteration+=1)
 	{
-	//session_name = "chk_fgrid_2pow"+parseInt(20-index).toString().slice(-2)
 	session_comment = ""
+	//session_name="chk_fgrid_2pow"+parseInt(20-index).toString().slice(-2)
 	print("Starting test sequence "+session_name)
 	//linearity_test_sequence(
 	test_sequence(

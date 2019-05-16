@@ -192,6 +192,8 @@ function Pixel_CMD(Channel_id, Pixel_ID,PHI_Delay,PHI_Rotate,Gain_BBFB,Bias_Ampl
 //---------------------------------------------------------------------------------------------------------------------------------------
 function Test_Pixel_CMD(Channel_id,Test_PHI_Delay,Test_PHI_Rotate,Test_PHI_Initial,Test_Gain_BBFB,Test_Bias_Amplitude,Test_Increment,Test_Bias_Modulation_Increment,Test_Bias_Modulation_Amplitude,SW2,SW1,Pulse_timescale,Pulse_Amplitude,Send_Pulse)
 //14 inputs
+
+// OBSOLETE
 {
 	Test_PHI_Delay_l = Math.pow(2,24);
 	Test_PHI_Delay_mask = 0xFF;
@@ -208,7 +210,7 @@ function Test_Pixel_CMD(Channel_id,Test_PHI_Delay,Test_PHI_Rotate,Test_PHI_Initi
 	+ (Test_Gain_BBFB & Test_Gain_BBFB_mask) * Test_Gain_BBFB_l
 	+ (Test_Bias_Amplitude & Test_Bias_Amplitude_mask) * Test_Bias_Amplitude_l;
 	sendConfigureDREOneRegister(address_1, value_1);
-
+
 	
 	Test_Increment_l = Math.pow(2,12);
 	Test_Increment_mask = 0xFFFFF;
@@ -551,6 +553,8 @@ function DRE_Stop()
 //---------------------------------------------------------------------------------------------------------------------------------------
 function ScanFeedback(Channel_id, start,stop,step,Select_Input)
 // execute a scan-feedback of the DRE-DEMUX
+
+//OBSOLETE
 {
 	sendStopDREChannels(3)
 	
@@ -784,13 +788,15 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, central_freq){			// Scan GBW u
 //-------------------------------------------------------------------------------------------------------------------------------------//
 
 ///////////////// Pixels Configuration tables initialization //////////////////////////////
-var t_Freq 	= new Array(Npix);
-var t_Amp	= new Array(Npix);
-var t_Gain	= new Array(Npix);
-var t_PhiC	= new Array(Npix);
-var t_PhiI	= new Array(Npix);
-var t_PhiR	= new Array(Npix);
-for(i=0;i<Npix;i++){
+var t_Freq 	= new Array(Npix + 1);
+var t_Amp	= new Array(Npix+ 1);
+var t_Gain	= new Array(Npix+ 1);
+var t_PhiC	= new Array(Npix+ 1);
+var t_PhiI	= new Array(Npix+ 1);
+var t_PhiR	= new Array(Npix+ 1);
+var t_command3 = -1;
+var t_command4 = -1;
+for(i=0;i<Npix+1;i++){
 	t_Freq[i] = -1;
 	t_Amp[i]  = -1;
 	t_Gain[i] = -1;
@@ -801,7 +807,7 @@ for(i=0;i<Npix;i++){
 
 //----------------------------------------------------------------------------------------------------------------------------
 function Reset_All_Configs(){
-	for(i=0;i<Npix;i++){
+	for(i=0;i<Npix+1;i++){
 		t_Freq[i] = 0;
 		t_Amp[i]  = 0;
 		t_Gain[i] = 0;
@@ -809,7 +815,9 @@ function Reset_All_Configs(){
 		t_PhiI[i] = 0;
 		t_PhiR[i] = 0;
 	}
-	sendConfigureDREPixelsBuffer(0,t_Freq,t_Amp,t_Gain,t_PhiC,t_PhiI,t_PhiR)
+	t_command3 = 0
+	t_command4 = 0
+	sendConfigureDREPixelsBuffer(0,t_Freq,t_Amp,t_Gain,t_PhiC,t_PhiI,t_PhiR,t_command3,t_command4)
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -820,7 +828,7 @@ function Apply_All_Configs(channelId){
 
 //----------------------------------------------------------------------------------------------------------------------------
 function Update_All_Configs(channelId){
-	sendConfigureDREPixelsBuffer(channelId,t_Freq,t_Amp,t_Gain,t_PhiC,t_PhiI,t_PhiR)
+	sendConfigureDREPixelsBuffer(channelId,t_Freq,t_Amp,t_Gain,t_PhiC,t_PhiI,t_PhiR,t_command3,t_command4)
 	sendCalculatePhiCPixelsBuffer(channelId)
 }
 
@@ -832,6 +840,11 @@ function Set_Pixel_Config(Pixel_ID,PHI_Delay,PHI_Rotate,Gain_BBFB,Bias_Amplitude
 	t_PhiC[Pixel_ID] = PHI_Delay;
 	t_PhiI[Pixel_ID] = PHI_Initial;
 	t_PhiR[Pixel_ID] = PHI_Rotate;
+}
+//----------------------------------------------------------------------------------------------------------------------------
+function Set_TestPixel_ExtraCommands(command3, command4){
+	t_command3 = command3
+	t_command4 = command4
 }
 
 //----------------------------------------------------------------------------------------------------------------------------

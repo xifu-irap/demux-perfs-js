@@ -1,0 +1,7 @@
+getLatestValue("DRECONFBUFFER_Phi_R_0,DRECONFBUFFER_Phi_I_0,DRECONFBUFFER_Phi_C_0,DRECONFBUFFER_Frequency_0,DRECONFBUFFER_SENT_Phi_R_0,DRECONFBUFFER_SENT_Phi_I_0,DRECONFBUFFER_SENT_Phi_C_0,DRECONFBUFFER_SENT_Frequency_0")
+print("phi_i_sent;phi_i _conf;delta_phi_i;phi_C_sent;phi_C _conf;delta_phi_C;freq_sent;freq _conf;delta_freq;")
+for (i=0; i < 41;++i)
+print(DRECONFBUFFER_SENT_Phi_I_0[i],";", DRECONFBUFFER_Phi_I_0[i],";", DRECONFBUFFER_SENT_Phi_I_0[i] - DRECONFBUFFER_Phi_I_0[i]
+,";", DRECONFBUFFER_SENT_Phi_C_0[i] ,";",DRECONFBUFFER_Phi_C_0[i],";", DRECONFBUFFER_SENT_Phi_C_0[i] - DRECONFBUFFER_Phi_C_0[i]
+,";", DRECONFBUFFER_SENT_Frequency_0[i] ,";",DRECONFBUFFER_Frequency_0[i],";", DRECONFBUFFER_SENT_Frequency_0[i] - DRECONFBUFFER_Frequency_0[i])
+//sendConfigureDREPixelsBuffer(0,DRECONFBUFFER_SENT_Frequency_0,DRECONFBUFFER_Amplitude_0,DRECONFBUFFER_Gain_0,DRECONFBUFFER_SENT_Phi_C_0,DRECONFBUFFER_SENT_Phi_I_0,DRECONFBUFFER_Phi_R_0,0,0)
