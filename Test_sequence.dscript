@@ -203,7 +203,6 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, PHIItab, test_pi
 	// Correction Phase
 	PhiC_Testdeg = Get_PhiC(Freq_Test)
 	if (test_pix_index==-1) // switching test pixel off
-
 	{
 		print("switching test pixel off")
 		amp_pixel_test = 0
@@ -213,37 +212,24 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, PHIItab, test_pi
 	else
 	{
 		// Switch off the pixel where we will place the test pixel 
-
 		print("switching standard pixel ", test_pix_index, " off")
 		Set_Pixel_Off(test_pix_index)
 	}
 
-	
-
-
-Set_Pixel_Config(
-
+	// Setting the test pixel's configuration
+	Set_Pixel_Config(
 				40,		// Pixel_ID
-
 				PhiC_Testdeg,				// PHI_Delay (degree) (Phi_C)
-
 				0,				// Test_PHI_Rotate (degree)
-
 				Gain,			// Gain_BBFB
-
 				amp_pixel_test,			// Bias_Amplitude
-
 				Freq_Test,	// Frequency
-
 				PhiIdeg	// Test_PHI_Initial (degree)
-
 				)
 
-				
-
-	// Apply the configuration of the standard pixels
-	Update_All_Configs(0)
-	Apply_All_Configs(0)		
+	// Apply the pixels' configurations
+	Update_All_Configs(Channel_ID)
+	Apply_All_Configs(Channel_ID)		
 }
 
 ////////////////////////////////////////////////////////////////////////////////
