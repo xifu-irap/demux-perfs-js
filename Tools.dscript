@@ -261,12 +261,10 @@ function Get_PhiC(Freq)
 	getLatestValue("SCANFB_outputCoeffs")                // Request the ScanFB coef to the GSE
 	for (var i=0, PhiC=0; i<SCANFB_outputCoeffs.length; i++)
 	{
-		PhiC+=SCANFB_outputCoeffs[i]*Math.pow(Freq_Test,i)
+		PhiC+=SCANFB_outputCoeffs[i]*Math.pow(Freq,i)
 	}
 	PhiC = -PhiC + 180										// apply the Antoine's relation defined in eq. (6.8) in page 158 of the Bible
-	if(PhiC >= 360) PhiC = PhiC-(360*parseInt(Math.abs(PhiC)/360))	// wrap PhiC in the range [0-360]
-	if(PhiC <= 0) PhiC = PhiC+(360*parseInt(1+Math.abs(PhiC)/360))	// wrap PhiC in the range [0-360]
-    return(PhiC)
+    return(PhiC%360)
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -328,10 +326,10 @@ function DRE_resetAll()
 	DRE_General_CMD(0,0,0,0)
 	Channel_CMD(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 	Channel_CMD(1,0,0,0,0,0,0,0,0,0,0,0,0,0)
-	Reset_All_Configs(0)
-	Apply_All_Configs(0)
-	//Reset_All_Configs(1)
-	//Apply_All_Configs(1)
+	Reset_All_Configs(0)
+	Apply_All_Configs(0)
+	//Reset_All_Configs(1)
+	//Apply_All_Configs(1)
 	waitMs(10)
 }
 
@@ -589,21 +587,21 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 	///////////////////////// Test Pixel ////////////////////////////////
 	PhiC_Testdeg = Get_PhiC(Freq_Test)
 	
-	// Setting the test pixel's configuration
-	Set_Pixel_Config(
-		40,		// Pixel_ID
-		PhiC_Testdeg,				// PHI_Delay (degree) (Phi_C)
-		0,				// Test_PHI_Rotate (degree)
-		BBFB_gain,			// Gain_BBFB
-		bias_Amp,			// Bias_Amplitude
-		Freq_Test,	// Frequency
-		0	// Test_PHI_Initial (degree)
-		)
-
-	// Apply the pixels' configurations
-	Update_All_Configs(Channel_id)
-	Apply_All_Configs(Channel_id)		
-
+	// Setting the test pixel's configuration
+	Set_Pixel_Config(
+		40,		// Pixel_ID
+		PhiC_Testdeg,				// PHI_Delay (degree) (Phi_C)
+		0,				// Test_PHI_Rotate (degree)
+		BBFB_gain,			// Gain_BBFB
+		bias_Amp,			// Bias_Amplitude
+		Freq_Test,	// Frequency
+		0	// Test_PHI_Initial (degree)
+		)
+
+	// Apply the pixels' configurations
+	Update_All_Configs(Channel_id)
+	Apply_All_Configs(Channel_id)		
+
 	sendStartDREChannels(3)
 	waitMs(1000)		// wait to let the BBFB lock
 	
@@ -611,18 +609,18 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 	for(i=0;i<MOD_FREQ1.length;i++)
 	{
 		MOD_FREQ_REEL = Math.round(MOD_FREQ1[i]*Math.pow(2,24)/FS)
-		Set_TestPixel_ExtraCommands(
-			MOD_FREQ_REEL, // modulation_freq, 
-			0, // pulse_timescale, 
-			0, // pulse_amplitude, 
-			0, // pulse_start, 
-			0, // sw2, 
-			0, // sw1, 
-			255 // modulation_amplitude
-		)
-		// Apply the pixels' configurations
-		Update_All_Configs(Channel_id)
-		Apply_All_Configs(Channel_id)		
+		Set_TestPixel_ExtraCommands(
+			MOD_FREQ_REEL, // modulation_freq, 
+			0, // pulse_timescale, 
+			0, // pulse_amplitude, 
+			0, // pulse_start, 
+			0, // sw2, 
+			0, // sw1, 
+			255 // modulation_amplitude
+		)
+		// Apply the pixels' configurations
+		Update_All_Configs(Channel_id)
+		Apply_All_Configs(Channel_id)		
 
 		file_size = Math.round(((FS/MOD_FREQ1[i])*32/8)*N_PERIOD/1024)	// File size as a function of the modulation frequency and the number of period to be aquired
 		duration = (file_size*1e3*1.1/80e3)/1000
@@ -635,24 +633,24 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 		STOP_DUMP()
 		waitMs(100)
 	}
-
+
 
 	// sweep with different modulation frequencies and measures data after the LPF
 	for(i=0;i<MOD_FREQ2.length;i++)
 	{
 		MOD_FREQ_REEL = Math.round(MOD_FREQ2[i]*Math.pow(2,24)/FS)
-		Set_TestPixel_ExtraCommands(
-			MOD_FREQ_REEL, // modulation_freq, 
-			0, // pulse_timescale, 
-			0, // pulse_amplitude, 
-			0, // pulse_start, 
-			0, // sw2, 
-			0, // sw1, 
-			255 // modulation_amplitude
-		)
-		// Apply the pixels' configurations
-		Update_All_Configs(Channel_id)
-		Apply_All_Configs(Channel_id)		
+		Set_TestPixel_ExtraCommands(
+			MOD_FREQ_REEL, // modulation_freq, 
+			0, // pulse_timescale, 
+			0, // pulse_amplitude, 
+			0, // pulse_start, 
+			0, // sw2, 
+			0, // sw1, 
+			255 // modulation_amplitude
+		)
+		// Apply the pixels' configurations
+		Update_All_Configs(Channel_id)
+		Apply_All_Configs(Channel_id)		
 
 		file_size = Math.round(((FS/MOD_FREQ2[i])*32/8)*N_PERIOD/1024)	// File size as a function of the modulation frequency and the number of period to be aquired
 		duration = (file_size*1e3*1.1/80e3)/1000
@@ -666,9 +664,9 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 		waitMs(100)
 	}
 	
-	// switch all the pixels off
-	Reset_All_Configs(Channel_id)
-	Apply_All_Configs(Channel_id)
+	// switch all the pixels off
+	Reset_All_Configs(Channel_id)
+	Apply_All_Configs(Channel_id)
 
 	sendStopDREChannels(3)
 }
@@ -732,34 +730,34 @@ function Set_Pixel_Config(Pixel_ID,PHI_Delay,PHI_Rotate,Gain_BBFB,Bias_Amplitude
 	t_PhiR[Pixel_ID] = PHI_Rotate;
 }
 //----------------------------------------------------------------------------------------------------------------------------
-function Set_TestPixel_ExtraCommands(modulation_freq, pulse_timescale, pulse_amplitude, pulse_start, sw2, sw1, modulation_amplitude){
-
-	modulation_freq_l= Math.pow(2,0);
-	modulation_freq_mask= 0xFFFFFF;
-	
-	t_command3= (modulation_freq & modulation_freq_mask) * modulation_freq_l;
-
-	
-	pulse_timescale_l= Math.pow(2,20);
-	pulse_timescale_mask= 0xFFF;
-	pulse_amplitude_l= Math.pow(2,12);
-	pulse_amplitude_mask= 0xFF;
-	pulse_start_l= Math.pow(2,11);
-	pulse_start_mask= 0x1;
-	sw2_l= Math.pow(2,9);
-	sw2_mask= 0x3;
-	sw1_l= Math.pow(2,8);
-	sw1_mask= 0x1;
-	modulation_amplitude_l= Math.pow(2,0);
-	modulation_amplitude_mask= 0xFF;
-	
-	t_command4= (pulse_timescale & pulse_timescale_mask) * pulse_timescale_l
-	+ (pulse_amplitude & pulse_amplitude_mask) * pulse_amplitude_l
-	+ (pulse_start & pulse_start_mask) * pulse_start_l
-	+ (sw2 & sw2_mask) * sw2_l
-	+ (sw1 & sw1_mask) * sw1_l
-	+ (modulation_amplitude & modulation_amplitude_mask) * modulation_amplitude_l;
-}
+function Set_TestPixel_ExtraCommands(modulation_freq, pulse_timescale, pulse_amplitude, pulse_start, sw2, sw1, modulation_amplitude){
+
+	modulation_freq_l= Math.pow(2,0);
+	modulation_freq_mask= 0xFFFFFF;
+	
+	t_command3= (modulation_freq & modulation_freq_mask) * modulation_freq_l;
+
+	
+	pulse_timescale_l= Math.pow(2,20);
+	pulse_timescale_mask= 0xFFF;
+	pulse_amplitude_l= Math.pow(2,12);
+	pulse_amplitude_mask= 0xFF;
+	pulse_start_l= Math.pow(2,11);
+	pulse_start_mask= 0x1;
+	sw2_l= Math.pow(2,9);
+	sw2_mask= 0x3;
+	sw1_l= Math.pow(2,8);
+	sw1_mask= 0x1;
+	modulation_amplitude_l= Math.pow(2,0);
+	modulation_amplitude_mask= 0xFF;
+	
+	t_command4= (pulse_timescale & pulse_timescale_mask) * pulse_timescale_l
+	+ (pulse_amplitude & pulse_amplitude_mask) * pulse_amplitude_l
+	+ (pulse_start & pulse_start_mask) * pulse_start_l
+	+ (sw2 & sw2_mask) * sw2_l
+	+ (sw1 & sw1_mask) * sw1_l
+	+ (modulation_amplitude & modulation_amplitude_mask) * modulation_amplitude_l;
+}
 
 //----------------------------------------------------------------------------------------------------------------------------
 function Set_Pixel_Off(Pixel_ID){
