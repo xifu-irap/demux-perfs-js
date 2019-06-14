@@ -21,6 +21,7 @@ function test_sequence(
 	dacMode,
 	Spread,
 	Npix,
+	Ncarriers,
 	FS,
 	DoGBW,
 	DoScienceSpectra,
@@ -28,6 +29,7 @@ function test_sequence(
 	spectra_duration_ms,
 	DoEnergyResol,
 	ER_nbr_pulses_meas,
+	ER_nbr_files,
 	Threshold,
 	ModulationRatio,
 	saveIQ,
@@ -53,13 +55,15 @@ function test_sequence(
 	setAndMemorize( "Fgrid"					, FS/Fgridratio)
 	setAndMemorize( "dacMode"				, dacMode)
 	setAndMemorize( "Spread"				, Spread )
-	setAndMemorize( "Npix"					, Npix )	// Defined in the script DRE_Tools_REFERENCE
-	setAndMemorize( "FS"					, FS)		// Defined in the script DRE_Tools_REFERENCE
+	setAndMemorize( "Npix"					, Npix )
+	setAndMemorize( "Ncarriers"					, Ncarriers )
+	setAndMemorize( "FS"					, FS)
 	setAndMemorize( "DoGBW"					, DoGBW)
 	setAndMemorize( "DoScienceSpectra"		, DoScienceSpectra)
 	setAndMemorize( "nbr_spectra"			, nbr_spectra)
 	setAndMemorize( "spectra_duration_ms"	, spectra_duration_ms)
 	setAndMemorize( "ER_nbr_pulses_meas"	, ER_nbr_pulses_meas)
+	setAndMemorize( "ER_nbr_files"	, ER_nbr_files)
 	setAndMemorize( "Threshold"	, Threshold)
 	setAndMemorize( "ModulationRatio"	, ModulationRatio)
 	setAndMemorize( "saveIQ"	, saveIQ)
@@ -67,18 +71,21 @@ function test_sequence(
 
 	copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
 	
+	// Sauvegarde des scripts
 	getLatestValue("DISP_BackupsCurrentDirectory")
 	mkpath(DISP_BackupsCurrentDirectory+"\\SCRIPTS_GSE\\demux-perfs-js")
-	copyFileToBackupDir(".\\Launcher.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Launcher.dscript") // sauvegarde du script included
-	copyFileToBackupDir(".\\Tools.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Tools.dscript") // sauvegarde du script included
-	copyFileToBackupDir(".\\Startup.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Startup.dscript") // sauvegarde du script de demarrage included
+	copyFileToBackupDir(".\\Launcher.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Launcher.dscript") 
+	copyFileToBackupDir(".\\Tools.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Tools.dscript") 
+	copyFileToBackupDir(".\\Startup.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Startup.dscript") 
+	copyFileToBackupDir(".\\Configs.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Configs.dscript") 
+	copyFileToBackupDir(".\\frequency_sets.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\frequency_sets.dscript") 
 	copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/").pop()) // sauvegarde du script courant
 	copyDirToBackupDir(getEGSEDirectory()+"\\EP",".\\EP_PARAMETERS")	
 
 	saveMemorizedParametersToBackupDir("SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/").pop().split(".")[0]+"_PARAMETERS.txt")
 	
 	// Computing the carrier frequencies
-	carriers_param=carrier_freq2(Fgridratio, Npix)
+	carriers_param=carrier_freq2(Fgridratio, Ncarriers)
 	//carriers_param = carrier_freq(Spread, Fgrid, Npix)
 	FREQtab=carriers_param.FREQtab
 	PHIItab=carriers_param.PHIItab
@@ -97,7 +104,7 @@ function test_sequence(
 		ScanGBW(Channel_ID, Default_amp, Gain, FREQtab[test_pix_index])}
 	
 	// Configuration of the DEMUX firmware (pixels)
-	configure_DEMUX_pixels(Channel_ID, Default_amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only)
+	configure_DEMUX_pixels(Channel_ID, Ncarriers, Default_amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only)
 
 	//  Start DEMUX
 	sendStartDREChannels(3)
@@ -113,10 +120,9 @@ function test_sequence(
 	if (DoScienceSpectra) {
 	mk_science_data_files(Channel_ID, nbr_spectra, spectra_duration_ms)}
 
-
 	if (DoEnergyResol){
 	// Measurement of energy resolution
-	mk_energy_resol_tst(Channel_ID, ER_nbr_pulses_meas, ModulationRatio, Threshold, saveIQ)}
+	mk_energy_resol_tst(Channel_ID, ER_nbr_pulses_meas, ER_nbr_files, ModulationRatio, Threshold, saveIQ)}
 
 	Stop_HK_collection()
 	saveLogToBackupDir("scriptlog.txt")
@@ -164,7 +170,7 @@ function configure_DEMUX_channel(Channel_ID, SQUID_interne, BIAS_trunc, FBCK_gai
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only)
+function configure_DEMUX_pixels(Channel_ID, Ncar, Amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only)
 // This function configures the pixels' parameters of the DEMUX firmware for the test
 // In this configuration 39 standard pixels and the test pixel are used.
 // Input parameters:
@@ -176,12 +182,13 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, PHIItab, test_pi
 //			the index of the standard pixel to be replaced by the test pixel
 //			if -1 the test pixel is switched off
 {
+	Reset_All_Configs(0)
 	if (Test_pix_only){
 		print("Standard pixels switched off")
 		Reset_All_Configs(Channel_ID)
 	} else {
 		print("Standard pixels switched on")
-		for(var Pixel_ID=0;Pixel_ID<Npix;Pixel_ID++)
+		for(var Pixel_ID=0;Pixel_ID<Ncar;Pixel_ID++)
 		{
 			Set_Pixel_Config(
 				Pixel_ID,		// Pixel_ID
@@ -203,7 +210,6 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, PHIItab, test_pi
 	// Correction Phase
 	PhiC_Testdeg = Get_PhiC(Freq_Test)
 	if (test_pix_index==-1) // switching test pixel off
-
 	{
 		print("switching test pixel off")
 		amp_pixel_test = 0
@@ -213,35 +219,21 @@ function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, PHIItab, test_pi
 	else
 	{
 		// Switch off the pixel where we will place the test pixel 
-
 		print("switching standard pixel ", test_pix_index, " off")
 		Set_Pixel_Off(test_pix_index)
 	}
 
-	
+	Set_Pixel_Config(
+		40,		// Pixel_ID
+		PhiC_Testdeg,				// PHI_Delay (degree) (Phi_C)
+		0,				// Test_PHI_Rotate (degree)
+		Gain,			// Gain_BBFB
+		amp_pixel_test,			// Bias_Amplitude
+		Freq_Test,	// Frequency
+		PhiIdeg	// Test_PHI_Initial (degree)
+		)
 
-
-Set_Pixel_Config(
-
-				40,		// Pixel_ID
-
-				PhiC_Testdeg,				// PHI_Delay (degree) (Phi_C)
-
-				0,				// Test_PHI_Rotate (degree)
-
-				Gain,			// Gain_BBFB
-
-				amp_pixel_test,			// Bias_Amplitude
-
-				Freq_Test,	// Frequency
-
-				PhiIdeg	// Test_PHI_Initial (degree)
-
-				)
-
-				
-
-	// Apply the configuration of the standard pixels
+	// Apply the pixels configuration 
 	Update_All_Configs(0)
 	Apply_All_Configs(0)		
 }
@@ -323,7 +315,6 @@ function mk_science_data_files(Channel_ID, nbr_files, duration_ms)
 		STOP_DUMP()
 	}
 
-
 	if (false){
 		for(i=0;i<nbr_files;i++){
 			//Dump IQ-TST (test pixel - data @ 20Msps)
@@ -331,12 +322,11 @@ function mk_science_data_files(Channel_ID, nbr_files, duration_ms)
 			waitMs(duration_ms)
 			STOP_DUMP()
 		}
-
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-function mk_energy_resol_tst(Channel_id,  Npulses_meas, ModulationRatio, Threshold, saveIQ)
+function mk_energy_resol_tst(Channel_id,  Npulses_meas, ER_nbr_files, ModulationRatio, Threshold, saveIQ)
 // This function makes the measurements necessary to estimate the energy resolution
 {
 	print(">>---------------------------------------------------------")
@@ -347,28 +337,31 @@ function mk_energy_resol_tst(Channel_id,  Npulses_meas, ModulationRatio, Thresho
 	
 	print(">>---------------------------------------------------------")
 	print("  - Measuring energy resolution")
-	print("  - PULSE Measurements: ")
-//	sendConfigureEventProcessor(1,Threshold) // => Switch EP on
-	sendStartEventProcessor(1000,"check_resol",Threshold)
-	sendStartDREDaqAcquisition(8) // IQ-ALL
-	if (saveIQ)
-		{
-		print("Saving IQ data")
-		sendStartDumpedDataBackup(0)
-		}
+	
+	for (measure=0; measure<ER_nbr_files; measure++)
+	{
+		print("  - PULSE Measurements ("+(measure+1).toString()+" / "+ER_nbr_files.toString()+"): ")
+		sendStartEventProcessor(0,"check_resol",Threshold)
+		sendStartDREDaqAcquisition(8) // IQ-ALL
+		if (saveIQ)
+			{
+			print("Saving IQ data")
+			sendStartDumpedDataBackup(0)
+			}
 
-	sendPulsesAndWaitingForInjectionDone(Channel_id,Npulses_meas,70,ModulationRatio)
+		sendPulsesAndWaitingForInjectionDone(Channel_id,Npulses_meas,65,ModulationRatio)
 
-	sendStopEventProcessor()
-	sendStopDumpedDataBackup()
-	sendStopDREDaqAcquisition()
+		sendStopEventProcessor()
+		sendStopDumpedDataBackup()
+		sendStopDREDaqAcquisition()
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 function clean_stop()
 {
+	sendStopDREPulses()
 	sendStopEventProcessor()
-	//sendConfigureEventProcessor(0,65535)
 	sendStopDREHkAcquisition()
 	sendStopDREChannels(3)
 	sendStopDumpedDataBackup()
