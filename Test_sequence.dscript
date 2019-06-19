@@ -329,14 +329,20 @@ function mk_science_data_files(Channel_ID, nbr_files, duration_ms)
 function mk_energy_resol_tst(Channel_id,  Npulses_meas, ER_nbr_files, ModulationRatio, Threshold, saveIQ)
 // This function makes the measurements necessary to estimate the energy resolution
 {
-	print(">>---------------------------------------------------------")
-	print(">>- Measuring ADC dumps with pulses")
-	START_DUMP("IN-BIA" ,0,Channel_id,"_PULSE")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,20,50,ModulationRatio)
-	STOP_DUMP()
+	print(">>---------------------------------------------------------")
+	print(">> - Measuring ADC dumps with pulses")
+	START_DUMP("IN-BIA" ,0,Channel_id,"_PULSE")
+	sendPulsesAndWaitingForInjectionDone(Channel_id,20,50,ModulationRatio)
+	STOP_DUMP()
+	
+	print(">>---------------------------------------------------------")
+	print(">> - Measuring IQ dumps with pulses")
+	START_DUMP("IQ-ALL" ,0,Channel_id,"_PULSE")
+	sendPulsesAndWaitingForInjectionDone(Channel_id,20,50,ModulationRatio)
+	STOP_DUMP()
 	
 	print(">>---------------------------------------------------------")
-	print("  - Measuring energy resolution")
+	print(">>  - Measuring energy resolution")
 	
 	for (measure=0; measure<ER_nbr_files; measure++)
 	{
@@ -360,7 +366,7 @@ function mk_energy_resol_tst(Channel_id,  Npulses_meas, ER_nbr_files, Modulation
 ////////////////////////////////////////////////////////////////////////////////
 function clean_stop()
 {
-	sendStopDREPulses()
+	sendStopDREPulses()
 	sendStopEventProcessor()
 	sendStopDREHkAcquisition()
 	sendStopDREChannels(3)
