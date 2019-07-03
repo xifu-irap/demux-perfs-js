@@ -33,7 +33,7 @@ function test_sequence(
 	Threshold,
 	ModulationRatio,
 	saveIQ,
-	Test_pix_only,
+	Test_pix_only,
 	openloop
 	)
 // This function makes one test sequence for a set of parameters
@@ -68,8 +68,8 @@ function test_sequence(
 	setAndMemorize( "Threshold"	, Threshold)
 	setAndMemorize( "ModulationRatio"	, ModulationRatio)
 	setAndMemorize( "saveIQ"	, saveIQ)
-	setAndMemorize( "Test_pix_only"	, Test_pix_only)
-	setAndMemorize( "openloop"	, openloop)
+	setAndMemorize( "Test_pix_only"	, Test_pix_only)
+	setAndMemorize( "openloop"	, openloop)
 
 	copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
 	
@@ -80,7 +80,8 @@ function test_sequence(
 	copyFileToBackupDir(".\\Tools.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Tools.dscript") 
 	copyFileToBackupDir(".\\Startup.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Startup.dscript") 
 	copyFileToBackupDir(".\\Configs.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Configs.dscript") 
-	copyFileToBackupDir(".\\frequency_sets.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\frequency_sets.dscript") 
+	copyFileToBackupDir(".\\frequency_sets.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\frequency_sets.dscript") 
+	copyFileToBackupDir(".\\EEPCalibration.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\EEPCalibration.dscript") 
 	copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/").pop()) // sauvegarde du script courant
 	copyDirToBackupDir(getEGSEDirectory()+"\\EP",".\\EP_PARAMETERS")	
 
@@ -107,9 +108,9 @@ function test_sequence(
 	
 	// Configuration of the DEMUX firmware (pixels)
 	configure_DEMUX_pixels(Channel_ID, Ncarriers, Default_amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only)
-
-	if (openloop) {
-		switch_to_openloop(Channel_ID)}
+
+	if (openloop) {
+		switch_to_openloop(Channel_ID)}
 
 	//  Start DEMUX
 	sendStartDREChannels(3)
@@ -381,42 +382,42 @@ function mk_energy_resol_tst(Channel_id,  Npulses_meas, ER_nbr_files, Modulation
 		sendStopDREDaqAcquisition()
 	}
 }
-
-////////////////////////////////////////////////////////////////////////////////
-function switch_to_openloop(Channel_ID)
-{
-// reducing pixel amplitude
-Amplitude=10
-Set_Pixel_Config(40,-1,-1,-1,Amplitude,-1,-1)
-
-// configuring internal switches
-sw1=1
-Set_TestPixel_ExtraCommands(-1, -1, -1, -1, -1, sw1, -1)
-
-Channel_CMD(
-	Channel_ID,			// Channel_id
-	0,					// Loop_Control
-	0,					// StartStop (don't touch, always STOP)
-	0,					// Delock_ON (0 not active)
-	1,					// ADC_ON
-	1,					// DACB_ON
-	0,					// DACF_OFF
-	-1,		// Select_Input
-	1,					// Bias_Enabled
-	0,					// Feedback_disabled
-	-1,					// Bias_Slope_Speed
-	-1,			// Bias_Truncation
-	-1,			// Feedback_Truncation
-	-1,				// Compensation_Gain (32767 => unitary gain)
-	-1,					// Feedback_Reverse
-	-1,				// Wait for relock (0..7)
-	-1			// Delock_level (maximum positive value)
-	)
-
-	Update_All_Configs(0)
-	Apply_All_Configs(0)		
-
-}
+
+////////////////////////////////////////////////////////////////////////////////
+function switch_to_openloop(Channel_ID)
+{
+// reducing pixel amplitude
+Amplitude=10
+Set_Pixel_Config(40,-1,-1,-1,Amplitude,-1,-1)
+
+// configuring internal switches
+sw1=1
+Set_TestPixel_ExtraCommands(-1, -1, -1, -1, -1, sw1, -1)
+
+Channel_CMD(
+	Channel_ID,			// Channel_id
+	0,					// Loop_Control
+	0,					// StartStop (don't touch, always STOP)
+	0,					// Delock_ON (0 not active)
+	1,					// ADC_ON
+	1,					// DACB_ON
+	0,					// DACF_OFF
+	-1,		// Select_Input
+	1,					// Bias_Enabled
+	0,					// Feedback_disabled
+	-1,					// Bias_Slope_Speed
+	-1,			// Bias_Truncation
+	-1,			// Feedback_Truncation
+	-1,				// Compensation_Gain (32767 => unitary gain)
+	-1,					// Feedback_Reverse
+	-1,				// Wait for relock (0..7)
+	-1			// Delock_level (maximum positive value)
+	)
+
+	Update_All_Configs(0)
+	Apply_All_Configs(0)		
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 function clean_stop()
