@@ -21,26 +21,26 @@ function best_config(dre_firmware_id){
 			ModulationRatio = 64.5 // 64.5% modulation corresponds to 7keV with LPA 75um pixels
 			break
 			
-//		case 0x0213: 
-//			print("Config 0x0213")
-//			Default_amp = 32
-//			Gain = 13
-//			BIAS_trunc = 3
-//			FBCK_trunc = 3
-//			FBCK_gain = 19000 // max 32767
-//			ModulationRatio = 68 // => 75.7% modulation ratio corresponds to 7keV with pixel "banc froid"
-//			break
-			
-		case 0x0213: // Dans le cas ou j'ajoute 20dB d'atténuation en entrée ADC
-			print("Config 0x0213")
-			Default_amp = 60
-			Gain = 65
-			BIAS_trunc = 3
-			FBCK_trunc = 1
-			FBCK_gain = 9000 // max 32767
-			ModulationRatio = 68 // => 75.7% modulation ratio corresponds to 7keV with pixel "banc froid"
-			break
-			
+//		case 0x0213: 
+//			print("Config 0x0213")
+//			Default_amp = 32
+//			Gain = 13
+//			BIAS_trunc = 3
+//			FBCK_trunc = 3
+//			FBCK_gain = 19000 // max 32767
+//			ModulationRatio = 68 // => 75.7% modulation ratio corresponds to 7keV with pixel "banc froid"
+//			break
+			
+		case 0x0213: // Dans le cas ou j'ajoute 20dB d'atténuation en entrée ADC
+			print("Config 0x0213")
+			Default_amp = 58
+			Gain = 65
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 9000 // max 32767
+			ModulationRatio = 68 // => 75.7% modulation ratio corresponds to 7keV with pixel "banc froid"
+			break
+			
 		case 0x0212: 
 			print("Config 0x0212")
 			Default_amp = 30

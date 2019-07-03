@@ -13,7 +13,8 @@ DoEnergyResol = false
 DoGBW = false
 DoScienceSpectra = false
 Test_pix_only = false
-openloop = false
+openloop = false
+NeighbourPix_Off = false
 saveIQ = true  // If true the IQ files are saved during the energy resolution measurement (huge files)
 
 // Definition of parameters ///////////////////////////////////////////////////////////////////
@@ -97,7 +98,8 @@ for (iteration = 0; iteration < 1;iteration+=1)
 		Threshold,
 		ModulationRatio,
 		saveIQ,
-		Test_pix_only,
+		Test_pix_only,
+		NeighbourPix_Off,
 		openloop
 		)
 }

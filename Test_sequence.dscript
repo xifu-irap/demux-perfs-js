@@ -33,7 +33,8 @@ function test_sequence(
 	Threshold,
 	ModulationRatio,
 	saveIQ,
-	Test_pix_only,
+	Test_pix_only,
+	NeighbourPix_Off,
 	openloop
 	)
 // This function makes one test sequence for a set of parameters
@@ -68,7 +69,8 @@ function test_sequence(
 	setAndMemorize( "Threshold"	, Threshold)
 	setAndMemorize( "ModulationRatio"	, ModulationRatio)
 	setAndMemorize( "saveIQ"	, saveIQ)
-	setAndMemorize( "Test_pix_only"	, Test_pix_only)
+	setAndMemorize( "Test_pix_only"	, Test_pix_only)
+	setAndMemorize( "NeighbourPix_Off"	, NeighbourPix_Off)
 	setAndMemorize( "openloop"	, openloop)
 
 	copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
@@ -107,7 +109,7 @@ function test_sequence(
 		ScanGBW(Channel_ID, Default_amp, Gain, FREQtab[test_pix_index])}
 	
 	// Configuration of the DEMUX firmware (pixels)
-	configure_DEMUX_pixels(Channel_ID, Ncarriers, Default_amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only)
+	configure_DEMUX_pixels(Channel_ID, Ncarriers, Default_amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only, NeighbourPix_Off)
 
 	if (openloop) {
 		switch_to_openloop(Channel_ID)}
@@ -179,7 +181,7 @@ function configure_DEMUX_channel(Channel_ID, SQUID_interne, BIAS_trunc, FBCK_gai
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-function configure_DEMUX_pixels(Channel_ID, Ncar, Amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only)
+function configure_DEMUX_pixels(Channel_ID, Ncar, Amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only, NeighbourPix_Off)
 // This function configures the pixels' parameters of the DEMUX firmware for the test
 // In this configuration 39 standard pixels and the test pixel are used.
 // Input parameters:
@@ -241,7 +243,12 @@ function configure_DEMUX_pixels(Channel_ID, Ncar, Amp, Gain, FREQtab, PHIItab, t
 		Freq_Test,	// Frequency
 		PhiIdeg	// Test_PHI_Initial (degree)
 		)
-
+
+	if (NeighbourPix_Off) // switching test pixel neighbours off
+	{
+			if (test_pix_index>0) { Set_Pixel_Off(test_pix_index-1)}
+			if (test_pix_index<39) { Set_Pixel_Off(test_pix_index+1)}
+	}
 	// Apply the pixels configuration 
 	Update_All_Configs(0)
 	Apply_All_Configs(0)		
