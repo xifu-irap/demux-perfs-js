@@ -902,31 +902,31 @@ function START_DUMP(dump_type,i,channelID,filename_comment){
 	DUMP_MODE = 0
 	error = false
 	switch(dump_type){
-		case "IN-BIA":
+		case "IN-BIA":
 			print("Starting dump of IN-BIA data")
 			if(channelID==0) DUMP_MODE = 0
 			else DUMP_MODE = 4
 			break
 		case "IN-FBK":
-			print("Starting dump of IN-FBK data")
+			print("Starting dump of IN-FBK data")
 			if(channelID==0) DUMP_MODE = 1
 			else DUMP_MODE = 5
 			break
 		case "BI-FBK":
-			print("Starting dump of BI-FBK data")
+			print("Starting dump of BI-FBK data")
 			if(channelID==0) DUMP_MODE = 2
 			else DUMP_MODE = 6
 			break
 		case "IQ-TST":
-			print("Starting dump of IQ-TST data")
+			print("Starting dump of IQ-TST data")
 			if(channelID==0) DUMP_MODE = 9
 			else DUMP_MODE = 10
 			break
 		case "IQ-ALL":
-			print("Starting dump of IQ-ALL data")
+			print("Starting dump of IQ-ALL data")
 			DUMP_MODE = 8
 			break
-		case "COUNTR":
+		case "COUNTR":
 			print("Starting dump of COUNTR data")
 			DUMP_MODE = 15
 			break
@@ -1033,7 +1033,7 @@ function zipData()
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-function sendPulsesAndWaitingForInjectionDone(Channel_id,nbPulses, pulsesFreq, ModulationRatio)
+function sendPulsesAndWaitingForInjectionDone(Channel_id, nbPulses, pulsesFreq, ModulationRatio)
 {
 	print("  - injecting ",nbPulses,"pulses at ",pulsesFreq+" Hz....")
 	sendStartDREPulses(Channel_id,nbPulses,pulsesFreq,ModulationRatio)

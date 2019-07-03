@@ -33,7 +33,8 @@ function test_sequence(
 	Threshold,
 	ModulationRatio,
 	saveIQ,
-	Test_pix_only
+	Test_pix_only,
+	openloop
 	)
 // This function makes one test sequence for a set of parameters
 {
@@ -67,7 +68,8 @@ function test_sequence(
 	setAndMemorize( "Threshold"	, Threshold)
 	setAndMemorize( "ModulationRatio"	, ModulationRatio)
 	setAndMemorize( "saveIQ"	, saveIQ)
-	setAndMemorize( "Test_pix_only"	, Test_pix_only)
+	setAndMemorize( "Test_pix_only"	, Test_pix_only)
+	setAndMemorize( "openloop"	, openloop)
 
 	copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
 	
@@ -105,6 +107,9 @@ function test_sequence(
 	
 	// Configuration of the DEMUX firmware (pixels)
 	configure_DEMUX_pixels(Channel_ID, Ncarriers, Default_amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only)
+
+	if (openloop) {
+		switch_to_openloop(Channel_ID)}
 
 	//  Start DEMUX
 	sendStartDREChannels(3)
@@ -119,6 +124,9 @@ function test_sequence(
 	// Measurement of IQ files for spectra characterisation
 	if (DoScienceSpectra) {
 	mk_science_data_files(Channel_ID, nbr_spectra, spectra_duration_ms)}
+
+	// Checking pulse shape on different signals 
+	check_pulses(Channel_ID, ModulationRatio)
 
 	if (DoEnergyResol){
 	// Measurement of energy resolution
@@ -326,21 +334,32 @@ function mk_science_data_files(Channel_ID, nbr_files, duration_ms)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-function mk_energy_resol_tst(Channel_id,  Npulses_meas, ER_nbr_files, ModulationRatio, Threshold, saveIQ)
+function check_pulses(Channel_id, ModulationRatio)
 // This function makes the measurements necessary to estimate the energy resolution
 {
-	print(">>---------------------------------------------------------")
-	print(">> - Measuring ADC dumps with pulses")
-	START_DUMP("IN-BIA" ,0,Channel_id,"_PULSE")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,20,50,ModulationRatio)
-	STOP_DUMP()
-	
-	print(">>---------------------------------------------------------")
-	print(">> - Measuring IQ dumps with pulses")
-	START_DUMP("IQ-ALL" ,0,Channel_id,"_PULSE")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,20,50,ModulationRatio)
-	STOP_DUMP()
+	print(">>---------------------------------------------------------")
+	print(">> - Measuring ADC and BIAS dumps with pulses")
+	START_DUMP("IN-BIA" ,0,Channel_id,"_PULSE")
+	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,ModulationRatio)
+	STOP_DUMP()
 	
+	print(">>---------------------------------------------------------")
+	print(">> - Measuring ADC and FEEDBACK dumps with pulses")
+	START_DUMP("IN-FBK" ,0,Channel_id,"_PULSE")
+	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,ModulationRatio)
+	STOP_DUMP()
+	
+	print(">>---------------------------------------------------------")
+	print(">> - Measuring IQ dumps with pulses")
+	START_DUMP("IQ-ALL" ,0,Channel_id,"_PULSE")
+	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,ModulationRatio)
+	STOP_DUMP()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+function mk_energy_resol_tst(Channel_id,  Npulses_meas, ER_nbr_files, ModulationRatio, Threshold, saveIQ)
+// This function makes the measurements necessary to estimate the energy resolution
+{	
 	print(">>---------------------------------------------------------")
 	print(">>  - Measuring energy resolution")
 	
@@ -362,6 +381,42 @@ function mk_energy_resol_tst(Channel_id,  Npulses_meas, ER_nbr_files, Modulation
 		sendStopDREDaqAcquisition()
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////////
+function switch_to_openloop(Channel_ID)
+{
+// reducing pixel amplitude
+Amplitude=10
+Set_Pixel_Config(40,-1,-1,-1,Amplitude,-1,-1)
+
+// configuring internal switches
+sw1=1
+Set_TestPixel_ExtraCommands(-1, -1, -1, -1, -1, sw1, -1)
+
+Channel_CMD(
+	Channel_ID,			// Channel_id
+	0,					// Loop_Control
+	0,					// StartStop (don't touch, always STOP)
+	0,					// Delock_ON (0 not active)
+	1,					// ADC_ON
+	1,					// DACB_ON
+	0,					// DACF_OFF
+	-1,		// Select_Input
+	1,					// Bias_Enabled
+	0,					// Feedback_disabled
+	-1,					// Bias_Slope_Speed
+	-1,			// Bias_Truncation
+	-1,			// Feedback_Truncation
+	-1,				// Compensation_Gain (32767 => unitary gain)
+	-1,					// Feedback_Reverse
+	-1,				// Wait for relock (0..7)
+	-1			// Delock_level (maximum positive value)
+	)
+
+	Update_All_Configs(0)
+	Apply_All_Configs(0)		
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 function clean_stop()
