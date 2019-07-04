@@ -73,14 +73,14 @@ UNCALIBRATED = 2
 function DRE_General_CMD(Start_Sending_TM,Select_TM,Start_Sending_HK,Select_HK)
 // 4 inputs
 {
-	Start_Sending_TM_l		= Math.pow(2,7);
+	Start_Sending_TM_l = Math.pow(2,7);
 	Start_Sending_TM_mask	= 0x1;
-	Select_TM_l				= Math.pow(2,3);
-	Select_TM_mask			= 0xF;
-	Start_Sending_HK_l		= Math.pow(2,2);
-	Start_Sending_HK_mask	= 0x1;
-	Select_HK_l				= Math.pow(2,0);
-	Select_HK_mask			= 0x3;
+	Select_TM_l = Math.pow(2,3);
+	Select_TM_mask = 0xF;
+	Start_Sending_HK_l = Math.pow(2,2);
+	Start_Sending_HK_mask = 0x1;
+	Select_HK_l = Math.pow(2,0);
+	Select_HK_mask = 0x3;
 	
 	address = 0;
 	value = (Start_Sending_TM & Start_Sending_TM_mask) * Start_Sending_TM_l
@@ -208,12 +208,12 @@ function get_session_name()
 function SendPulse(Channel_id, Pulse_timescale, Pulse_Amplitude, Send_Pulse)
 // SW2, SW1 and Test_Bias_Modulation_Amplitude are not explicitely configured and hence are set to "0"
 {
-	Pulse_timescale_l	= Math.pow(2,20);
-	Pulse_Amplitude_l	= Math.pow(2,12);
-	Send_Pulse_l		= Math.pow(2,11);
+	Pulse_timescale_l = Math.pow(2,20);
+	Pulse_Amplitude_l = Math.pow(2,12);
+	Send_Pulse_l = Math.pow(2,11);
 	
-	address 	= 1 + Channel_id*(2+Npix*2+4) + 2 + 2*Npix + 3;
-	value 		= Pulse_timescale*Pulse_timescale_l + Pulse_Amplitude*Pulse_Amplitude_l + Send_Pulse*Send_Pulse_l;
+	address = 1 + Channel_id*(2+Npix*2+4) + 2 + 2*Npix + 3;
+	value = Pulse_timescale*Pulse_timescale_l + Pulse_Amplitude*Pulse_Amplitude_l + Send_Pulse*Send_Pulse_l;
 	sendConfigureDREOneRegister(address, value)
 }
 
@@ -487,14 +487,14 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 	PhiC_Testdeg = Get_PhiC(Freq_Test)
 	
 	// Setting the test pixel's configuration
-	Set_Pixel_Config(
-		40,		// Pixel_ID
-		PhiC_Testdeg,				// PHI_Delay (degree) (Phi_C)
-		0,				// Test_PHI_Rotate (degree)
-		BBFB_gain,			// Gain_BBFB
-		bias_Amp,			// Bias_Amplitude
-		Freq_Test,	// Frequency
-		0	// Test_PHI_Initial (degree)
+	Set_Pixel_Config(
+		Pixel_ID=40,  // test pixel ID
+		PHI_Delay=PhiC_Testdeg,
+		PHI_Rotate=0,
+		Gain_BBFB=BBFB_gain,
+		Bias_Amplitude=bias_Amp,
+		Frequency=Freq_Test,
+		PHI_Initial=0
 		)
 
 	// Apply the pixels' configurations
@@ -508,15 +508,15 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 	for(i=0;i<MOD_FREQ1.length;i++)
 	{
 		MOD_FREQ_REEL = Math.round(MOD_FREQ1[i]*Math.pow(2,24)/FS)
-		Set_TestPixel_ExtraCommands(
-			MOD_FREQ_REEL, // modulation_freq, 
-			0, // pulse_timescale, 
-			0, // pulse_amplitude, 
-			0, // pulse_start, 
-			0, // sw2, 
-			0, // sw1, 
-			255 // modulation_amplitude
-		)
+		Set_TestPixel_ExtraCommands(
+			modulation_freq=MOD_FREQ_REEL,
+			pulse_timescale=0,
+			pulse_amplitude=0,
+			pulse_start=0,
+			sw2=0,  // Feedback
+			sw1=0,  // Closed loop
+			modulation_amplitude=255
+			)
 		// Apply the pixels' configurations
 		Update_All_Configs(Channel_id)
 		Apply_All_Configs(Channel_id)		
@@ -538,15 +538,15 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 	for(i=0;i<MOD_FREQ2.length;i++)
 	{
 		MOD_FREQ_REEL = Math.round(MOD_FREQ2[i]*Math.pow(2,24)/FS)
-		Set_TestPixel_ExtraCommands(
-			MOD_FREQ_REEL, // modulation_freq, 
-			0, // pulse_timescale, 
-			0, // pulse_amplitude, 
-			0, // pulse_start, 
-			0, // sw2, 
-			0, // sw1, 
-			255 // modulation_amplitude
-		)
+		Set_TestPixel_ExtraCommands(
+			modulation_freq=MOD_FREQ_REEL,
+			pulse_timescale=0,
+			pulse_amplitude=0,
+			pulse_start=0,
+			sw2=0,  // Feedback
+			sw1=0,  // Closed loop
+			modulation_amplitude=255
+			)
 		// Apply the pixels' configurations
 		Update_All_Configs(Channel_id)
 		Apply_All_Configs(Channel_id)		
@@ -575,17 +575,17 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 //-------------------------------------------------------------------------------------------------------------------------------------//
 
 ///////////////// Pixels Configuration tables initialization //////////////////////////////
-var t_Freq 	= new Array(Npix + 1);
-var t_Amp	= new Array(Npix+ 1);
-var t_Gain	= new Array(Npix+ 1);
-var t_PhiC	= new Array(Npix+ 1);
-var t_PhiI	= new Array(Npix+ 1);
-var t_PhiR	= new Array(Npix+ 1);
+var t_Freq = new Array(Npix + 1);
+var t_Amp = new Array(Npix+ 1);
+var t_Gain = new Array(Npix+ 1);
+var t_PhiC = new Array(Npix+ 1);
+var t_PhiI = new Array(Npix+ 1);
+var t_PhiR = new Array(Npix+ 1);
 var t_command3 = -1;
 var t_command4 = -1;
 for(i=0;i<Npix+1;i++){
 	t_Freq[i] = -1;
-	t_Amp[i]  = -1;
+	t_Amp[i] = -1;
 	t_Gain[i] = -1;
 	t_PhiC[i] = -1;
 	t_PhiI[i] = -1;

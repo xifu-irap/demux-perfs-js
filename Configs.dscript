@@ -7,39 +7,39 @@ function best_config(dre_firmware_id){
 			Gain = 7
 			BIAS_trunc = 2
 			FBCK_trunc = 0
-			FBCK_gain = 17110 // max 32767
-			ModulationRatio = 64.5 // 64.5% modulation corresponds to 7keV with LPA 75um pixels
+			FBCK_gain = 17110 // max 32767
+			Pulse = "CBE"
 			break
 			
 		case 0x020A: 
 			print("Config 0x020A")
 			Default_amp = 50
-			Gain = 7
+			Gain = 10
 			BIAS_trunc = 3
 			FBCK_trunc = 3
-			FBCK_gain = 29000 // max 32767
-			ModulationRatio = 64.5 // 64.5% modulation corresponds to 7keV with LPA 75um pixels
+			FBCK_gain = 28000 // max 32767
+			Pulse = "CBE"
 			break
 			
-//		case 0x0213: 
-//			print("Config 0x0213")
-//			Default_amp = 32
-//			Gain = 13
-//			BIAS_trunc = 3
-//			FBCK_trunc = 3
-//			FBCK_gain = 19000 // max 32767
-//			ModulationRatio = 68 // => 75.7% modulation ratio corresponds to 7keV with pixel "banc froid"
-//			break
-			
-		case 0x0213: // Dans le cas ou j'ajoute 20dB d'atténuation en entrée ADC
+		case 0x0213: 
 			print("Config 0x0213")
-			Default_amp = 58
-			Gain = 65
+			Default_amp = 32
+			Gain = 13
 			BIAS_trunc = 3
-			FBCK_trunc = 1
-			FBCK_gain = 9000 // max 32767
-			ModulationRatio = 68 // => 75.7% modulation ratio corresponds to 7keV with pixel "banc froid"
+			FBCK_trunc = 3
+			FBCK_gain = 19000 // max 32767
+			Pulse = "banc"
 			break
+			
+//		case 0x0213: // Dans le cas ou j'ajoute 20dB d'atténuation en entrée ADC
+//			print("Config 0x0213")
+//			Default_amp = 58
+//			Gain = 65
+//			BIAS_trunc = 3
+//			FBCK_trunc = 1
+//			FBCK_gain = 9000 // max 32767
+//			Pulse = "banc"
+//			break
 			
 		case 0x0212: 
 			print("Config 0x0212")
@@ -48,7 +48,7 @@ function best_config(dre_firmware_id){
 			BIAS_trunc = 3
 			FBCK_trunc = 3
 			FBCK_gain = 32500 // max 32767
-			ModulationRatio = 99 // => corresponds to 75.7% modulation ratio and to 7keV with pixel "banc froid"
+			Pulse = "banc"
 			break
 			
 		case 0x0211: 
@@ -58,7 +58,7 @@ function best_config(dre_firmware_id){
 			BIAS_trunc = 3
 			FBCK_trunc = 3
 			FBCK_gain = 32500 // max 32767
-			ModulationRatio = 99 // => corresponds to 75.7% modulation ratio and to 7keV with pixel "banc froid"
+			Pulse = "banc"
 			break
 			
 		case 0x0210: 
@@ -68,7 +68,7 @@ function best_config(dre_firmware_id){
 			BIAS_trunc = 3
 			FBCK_trunc = 3
 			FBCK_gain = 32000 // max 32767
-			ModulationRatio = 138 // => corresponds to 75.7% modulation ratio and to 7keV with pixel "banc froid"
+			Pulse = "banc"
 			break
 
 		case 0x020F: // 020F
@@ -78,18 +78,33 @@ function best_config(dre_firmware_id){
 			BIAS_trunc = 3
 			FBCK_trunc = 3
 			FBCK_gain = 32000 // max 32767
-			ModulationRatio = 64.5 // 64.5% modulation corresponds to 7keV with LPA 75um pixels
+			Pulse = "CBE"
 			break
 			
 		default:
 			print("Unknown firmware id. Can't define configuration.")
-		}
+		}
+
+	switch (Pulse) {
+		case "CBE": 
+			ModulationRatio = 64.5 //  7keV with LPA 75um pixels
+			TES_NL = 1.361
+			break
+		case "banc": 
+			ModulationRatio = 68 //  7keV with "banc" pixels
+			TES_NL = 1.361
+			break
+		default:
+			print("Unknown pulse !")
+		}
+		
 	return {
 		Default_amp: Default_amp,
 		Gain: Gain,
 		BIAS_trunc: BIAS_trunc,
 		FBCK_trunc: FBCK_trunc,
 		FBCK_gain: FBCK_gain,
-		ModulationRatio: ModulationRatio
+		ModulationRatio: ModulationRatio,
+		TES_NL:TES_NL
 		}
 }

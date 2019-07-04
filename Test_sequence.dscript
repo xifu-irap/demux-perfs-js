@@ -31,7 +31,8 @@ function test_sequence(
 	ER_nbr_pulses_meas,
 	ER_nbr_files,
 	Threshold,
-	ModulationRatio,
+	ModulationRatio,
+	TES_NL,
 	saveIQ,
 	Test_pix_only,
 	NeighbourPix_Off,
@@ -42,36 +43,37 @@ function test_sequence(
 	// Opening the session
 	sendStartSession(session_name, session_comment)
 	// Saving test parameters in a file
-	setAndMemorize( "session_name"			, session_name)
-	setAndMemorize( "session_comment"		, session_comment)
-	setAndMemorize( "operator_name"			, operator_name)
-	setAndMemorize( "Channel_ID"			, Channel_ID)
-	setAndMemorize( "Default_amp"			, Default_amp)
-	setAndMemorize( "test_pix_index"		, test_pix_index)
-	setAndMemorize( "amp_pixel_test"		, amp_pixel_test)
-	setAndMemorize( "SQUID_interne"		, SQUID_interne)
-	setAndMemorize( "Gain"					, Gain)
-	setAndMemorize( "BIAS_trunc"			, BIAS_trunc)
-	setAndMemorize( "FBCK_trunc"			, FBCK_trunc)
-	setAndMemorize( "FBCK_gain"			, FBCK_gain)
-	setAndMemorize( "Fgrid"					, FS/Fgridratio)
-	setAndMemorize( "dacMode"				, dacMode)
-	setAndMemorize( "Spread"				, Spread )
-	setAndMemorize( "Npix"					, Npix )
-	setAndMemorize( "Ncarriers"					, Ncarriers )
-	setAndMemorize( "FS"					, FS)
-	setAndMemorize( "DoGBW"					, DoGBW)
-	setAndMemorize( "DoScienceSpectra"		, DoScienceSpectra)
-	setAndMemorize( "nbr_spectra"			, nbr_spectra)
-	setAndMemorize( "spectra_duration_ms"	, spectra_duration_ms)
-	setAndMemorize( "ER_nbr_pulses_meas"	, ER_nbr_pulses_meas)
-	setAndMemorize( "ER_nbr_files"	, ER_nbr_files)
-	setAndMemorize( "Threshold"	, Threshold)
-	setAndMemorize( "ModulationRatio"	, ModulationRatio)
-	setAndMemorize( "saveIQ"	, saveIQ)
-	setAndMemorize( "Test_pix_only"	, Test_pix_only)
-	setAndMemorize( "NeighbourPix_Off"	, NeighbourPix_Off)
-	setAndMemorize( "openloop"	, openloop)
+	setAndMemorize( "session_name", session_name)
+	setAndMemorize( "session_comment", session_comment)
+	setAndMemorize( "operator_name", operator_name)
+	setAndMemorize( "Channel_ID", Channel_ID)
+	setAndMemorize( "Default_amp", Default_amp)
+	setAndMemorize( "test_pix_index", test_pix_index)
+	setAndMemorize( "amp_pixel_test", amp_pixel_test)
+	setAndMemorize( "SQUID_interne", SQUID_interne)
+	setAndMemorize( "Gain", Gain)
+	setAndMemorize( "BIAS_trunc", BIAS_trunc)
+	setAndMemorize( "FBCK_trunc", FBCK_trunc)
+	setAndMemorize( "FBCK_gain", FBCK_gain)
+	setAndMemorize( "Fgrid", FS/Fgridratio)
+	setAndMemorize( "dacMode", dacMode)
+	setAndMemorize( "Spread", Spread )
+	setAndMemorize( "Npix", Npix )
+	setAndMemorize( "Ncarriers", Ncarriers )
+	setAndMemorize( "FS", FS)
+	setAndMemorize( "DoGBW"	, DoGBW)
+	setAndMemorize( "DoScienceSpectra", DoScienceSpectra)
+	setAndMemorize( "nbr_spectra", nbr_spectra)
+	setAndMemorize( "spectra_duration_ms", spectra_duration_ms)
+	setAndMemorize( "ER_nbr_pulses_meas", ER_nbr_pulses_meas)
+	setAndMemorize( "ER_nbr_files", ER_nbr_files)
+	setAndMemorize( "Threshold", Threshold)
+	setAndMemorize( "ModulationRatio", ModulationRatio)
+	setAndMemorize( "TES_NL", TES_NL)
+	setAndMemorize( "saveIQ", saveIQ)
+	setAndMemorize( "Test_pix_only", Test_pix_only)
+	setAndMemorize( "NeighbourPix_Off", NeighbourPix_Off)
+	setAndMemorize( "openloop", openloop)
 
 	copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
 	
