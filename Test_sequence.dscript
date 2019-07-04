@@ -33,8 +33,8 @@ function test_sequence(
 	Threshold,
 	ModulationRatio,
 	saveIQ,
-	Test_pix_only,
-	NeighbourPix_Off,
+	Test_pix_only,
+	NeighbourPix_Off,
 	openloop
 	)
 // This function makes one test sequence for a set of parameters
@@ -69,8 +69,8 @@ function test_sequence(
 	setAndMemorize( "Threshold"	, Threshold)
 	setAndMemorize( "ModulationRatio"	, ModulationRatio)
 	setAndMemorize( "saveIQ"	, saveIQ)
-	setAndMemorize( "Test_pix_only"	, Test_pix_only)
-	setAndMemorize( "NeighbourPix_Off"	, NeighbourPix_Off)
+	setAndMemorize( "Test_pix_only"	, Test_pix_only)
+	setAndMemorize( "NeighbourPix_Off"	, NeighbourPix_Off)
 	setAndMemorize( "openloop"	, openloop)
 
 	copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
@@ -82,8 +82,8 @@ function test_sequence(
 	copyFileToBackupDir(".\\Tools.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Tools.dscript") 
 	copyFileToBackupDir(".\\Startup.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Startup.dscript") 
 	copyFileToBackupDir(".\\Configs.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Configs.dscript") 
-	copyFileToBackupDir(".\\frequency_sets.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\frequency_sets.dscript") 
-	copyFileToBackupDir(".\\EEPCalibration.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\EEPCalibration.dscript") 
+	copyFileToBackupDir(".\\frequency_sets.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\frequency_sets.dscript") 
+	copyFileToBackupDir(".\\EEPCalibration.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\EEPCalibration.dscript") 
 	copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/").pop()) // sauvegarde du script courant
 	copyDirToBackupDir(getEGSEDirectory()+"\\EP",".\\EP_PARAMETERS")	
 
@@ -160,23 +160,23 @@ function configure_DEMUX_channel(Channel_ID, SQUID_interne, BIAS_trunc, FBCK_gai
 {
 	//// Channel settings
 	Channel_CMD(
-		Channel_ID,			// Channel_id
-		0,					// Loop_Control
-		0,					// StartStop (don't touch, always STOP)
-		0,					// Delock_ON (0 not active)
-		1,					// ADC_ON
-		1,					// DACB_ON
-		1,					// DACF_ON
-		SQUID_interne,		// Select_Input
-		1,					// Bias_Enabled
-		1,					// Feedback_Enabled
-		2,					// Bias_Slope_Speed
-		BIAS_trunc,			// Bias_Truncation
-		FBCK_trunc,			// Feedback_Truncation
-		FBCK_gain,				// Compensation_Gain (32767 => unitary gain)
-		0,					// Feedback_Reverse
-		7,				// Wait for relock (0..7)
-		0x7FF			// Delock_level (maximum positive value)
+		Channel_id=Channel_ID,
+		Loop_Control=0,
+		StartStop=0,
+		Delock_ON=0,
+		ADC_ON=1,
+		DACB_ON=1,
+		DACF_ON=1,
+		Select_Input=SQUID_interne,
+		Bias_Enabled=1,
+		Feedback_Enabled=1,
+		Bias_Slope_Speed=2,
+		Bias_Truncation=BIAS_trunc,
+		Feedback_Truncation=FBCK_trunc,
+		Compensation_Gain=FBCK_gain,
+		Feedback_Reverse=0,
+		Wait_for_relock=7,  // (0..7)
+		Delock_level=0x7FF  // (maximum positive value)
 		)
 }
 
@@ -202,30 +202,30 @@ function configure_DEMUX_pixels(Channel_ID, Ncar, Amp, Gain, FREQtab, PHIItab, t
 		for(var Pixel_ID=0;Pixel_ID<Ncar;Pixel_ID++)
 		{
 			Set_Pixel_Config(
-				Pixel_ID,		// Pixel_ID
-				-1,				// PHI_Delay (degree) (Phi_C)
-				0,				// Test_PHI_Rotate (degree)
-				Gain,			// Gain_BBFB
-				Amp,			// Bias_Amplitude
-				FREQtab[Pixel_ID],	// Frequency
-				PHIItab[Pixel_ID]	// Test_PHI_Initial (degree)
+				Pixel_ID=Pixel_ID,
+				PHI_Delay=-1,
+				PHI_Rotate=0,
+				Gain_BBFB=Gain,
+				Bias_Amplitude=Amp,
+				Frequency=FREQtab[Pixel_ID],
+				PHI_Initial=PHIItab[Pixel_ID]
 				)
 		}
 	}
 
 	////// Test pixel's settings
-	// Frequency
-	Freq_Test = FREQtab[test_pix_index]
-	// Initial Phase
-	PhiIdeg = PHIItab[test_pix_index]
-	// Correction Phase
-	PhiC_Testdeg = Get_PhiC(Freq_Test)
+	Amp_test=Amp
+	Freq_test=FREQtab[test_pix_index]
+	Gain_test=Gain
+	PhiIdeg_test = PHIItab[test_pix_index]
+	PhiC_Testdeg = Get_PhiC(Freq_test)
+
 	if (test_pix_index==-1) // switching test pixel off
 	{
 		print("switching test pixel off")
-		amp_pixel_test = 0
-		Gain = 0
-		Freq_Test = 0
+		Amp_test = 0
+		Gain_test = 0
+		Freq_test = 0
 	}
 	else
 	{
@@ -235,19 +235,28 @@ function configure_DEMUX_pixels(Channel_ID, Ncar, Amp, Gain, FREQtab, PHIItab, t
 	}
 
 	Set_Pixel_Config(
-		40,		// Pixel_ID
-		PhiC_Testdeg,				// PHI_Delay (degree) (Phi_C)
-		0,				// Test_PHI_Rotate (degree)
-		Gain,			// Gain_BBFB
-		amp_pixel_test,			// Bias_Amplitude
-		Freq_Test,	// Frequency
-		PhiIdeg	// Test_PHI_Initial (degree)
+		Pixel_ID=40,
+		PHI_Delay=PhiC_Testdeg,
+		PHI_Rotate=0,
+		Gain_BBFB=Gain_test,
+		Bias_Amplitude=Amp_test,
+		Frequency=Freq_test,
+		PHI_Initial=PhiIdeg_test
 		)
-
-	if (NeighbourPix_Off) // switching test pixel neighbours off
-	{
-			if (test_pix_index>0) { Set_Pixel_Off(test_pix_index-1)}
-			if (test_pix_index<39) { Set_Pixel_Off(test_pix_index+1)}
+	Set_TestPixel_ExtraCommands(
+		modulation_freq=0,
+		pulse_timescale=-1,
+		pulse_amplitude=-1,
+		pulse_start=-1,
+		sw2=0,  // Feedback
+		sw1=0,  // Closed loop
+		modulation_amplitude=0
+		)
+
+	if (NeighbourPix_Off) // switching test pixel neighbours off
+	{
+			if (test_pix_index>0) { Set_Pixel_Off(test_pix_index-1)}
+			if (test_pix_index<39) { Set_Pixel_Off(test_pix_index+1)}
 	}
 	// Apply the pixels configuration 
 	Update_All_Configs(0)
@@ -394,13 +403,27 @@ function mk_energy_resol_tst(Channel_id,  Npulses_meas, ER_nbr_files, Modulation
 function switch_to_openloop(Channel_ID)
 {
 // reducing pixel amplitude
-Amplitude=10
-Set_Pixel_Config(40,-1,-1,-1,Amplitude,-1,-1)
+Set_Pixel_Config(
+	Pixel_ID=40,
+	PHI_Delay=-1,
+	PHI_Rotate=-1,
+	Gain_BBFB=1,
+	Bias_Amplitude=155,
+	Frequency=-1,
+	PHI_Initial=-1
+	)
 
 // configuring internal switches
-sw1=1
-Set_TestPixel_ExtraCommands(-1, -1, -1, -1, -1, sw1, -1)
-
+Set_TestPixel_ExtraCommands(
+	modulation_freq=-1,
+	pulse_timescale=-1,
+	pulse_amplitude=-1,
+	pulse_start=-1,
+	sw2=-1,
+	sw1=1,  // open loop
+	modulation_amplitude=-1
+	)
+	
 Channel_CMD(
 	Channel_ID,			// Channel_id
 	0,					// Loop_Control

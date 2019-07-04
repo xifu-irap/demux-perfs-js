@@ -13,8 +13,6 @@ Routine listing
 ===============
 DRE_General_CMD()
 Channel_CMD()
-Pixel_CMD()
-Test_Pixel_CMD()
 SendPulse()
 DRE_resetAll()
 DRE_RESET_CONFIG_CDCM()
@@ -153,105 +151,6 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,ADC_ON,DACB_ON,
 	+ (Wait_for_relock & Wait_for_relock_mask) * Wait_for_relock_l
 	+ (Delock_level & Delock_level_mask) * Delock_level_l;
 	sendConfigureDREOneRegister(address_2, value_2);
-}
-
-//---------------------------------------------------------------------------------------------------------------------------------------
-function Pixel_CMD(Channel_id, Pixel_ID,PHI_Delay,PHI_Rotate,Gain_BBFB,Bias_Amplitude,Increment,PHI_Initial) // Pixel_ID is defined from 1 to 40
-// 8 inputs
-// This functions sends the pixel configuration to the DRE-DEMUX firmware.
-// ==> Use Set_Pixel_Config(), Update_All_Configs() and Apply_All_Configs() instead
-{
-	PHI_Delay_l = Math.pow(2,24);
-	PHI_Delay_mask = 0xFF;
-	PHI_Rotate_l = Math.pow(2,16);
-	PHI_Rotate_mask = 0xFF;
-	Gain_BBFB_l = Math.pow(2,8);
-	Gain_BBFB_mask = 0xFF;
-	Bias_Amplitude_l = Math.pow(2,0);
-	Bias_Amplitude_mask = 0xFF;
-	
-	address_1 = 1 + Channel_id*(2+2*Npix+4) + 2 + 2*Npix;
-	value_1 = (PHI_Delay & PHI_Delay_mask) * PHI_Delay_l
-	+ (PHI_Rotate & PHI_Rotate_mask) * PHI_Rotate_l
-	+ (Gain_BBFB & Gain_BBFB_mask) * Gain_BBFB_l
-	+ (Bias_Amplitude & Bias_Amplitude_mask) * Bias_Amplitude_l;
-	sendConfigureDREOneRegister(address_1, value_1);
-	
-	
-	Increment_l = Math.pow(2,12);
-	Increment_mask = 0xFFFF;
-	PHI_Initial_l = Math.pow(2,0);
-	PHI_Initial_mask = 0xFFF;
-	
-	address_2 = address_1 + 1;
-	value_2 = (Increment & Increment_mask) * Increment_l
-	+ (PHI_Initial & PHI_Initial_mask) * PHI_Initial_l;
-	sendConfigureDREOneRegister(address_2, value_2);
-}
-
-//---------------------------------------------------------------------------------------------------------------------------------------
-function Test_Pixel_CMD(Channel_id,Test_PHI_Delay,Test_PHI_Rotate,Test_PHI_Initial,Test_Gain_BBFB,Test_Bias_Amplitude,Test_Increment,Test_Bias_Modulation_Increment,Test_Bias_Modulation_Amplitude,SW2,SW1,Pulse_timescale,Pulse_Amplitude,Send_Pulse)
-//14 inputs
-
-// OBSOLETE
-{
-	Test_PHI_Delay_l = Math.pow(2,24);
-	Test_PHI_Delay_mask = 0xFF;
-	Test_PHI_Rotate_l = Math.pow(2,16);
-	Test_PHI_Rotate_mask = 0xFF;
-	Test_Gain_BBFB_l = Math.pow(2,8);
-	Test_Gain_BBFB_mask = 0xFF;
-	Test_Bias_Amplitude_l = Math.pow(2,0);
-	Test_Bias_Amplitude_mask = 0xFF;
-	
-	address_1 = 1 + Channel_id*(2+2*Npix+4) + 2+2*Npix;
-	value_1 = (Test_PHI_Delay & Test_PHI_Delay_mask) * Test_PHI_Delay_l
-	+ (Test_PHI_Rotate & Test_PHI_Rotate_mask) * Test_PHI_Rotate_l
-	+ (Test_Gain_BBFB & Test_Gain_BBFB_mask) * Test_Gain_BBFB_l
-	+ (Test_Bias_Amplitude & Test_Bias_Amplitude_mask) * Test_Bias_Amplitude_l;
-	sendConfigureDREOneRegister(address_1, value_1);
-
-	
-	Test_Increment_l = Math.pow(2,12);
-	Test_Increment_mask = 0xFFFFF;
-	Test_PHI_Initial_l = Math.pow(2,0);
-	Test_PHI_Initial_mask = 0xFFF;
-	
-	address_2 = address_1 + 1;
-	value_2 = (Test_Increment & Test_Increment_mask) * Test_Increment_l
-	+ (Test_PHI_Initial & Test_PHI_Initial_mask) * Test_PHI_Initial_l;
-	sendConfigureDREOneRegister(address_2, value_2);
-	
-	
-	Test_Bias_Modulation_Increment_l = Math.pow(2,0);
-	Test_Bias_Modulation_Increment_mask = 0xFFFFFF;
-	
-	address_3 = address_1 + 2;
-	value_3 = (Test_Bias_Modulation_Increment & Test_Bias_Modulation_Increment_mask) * Test_Bias_Modulation_Increment_l;
-	sendConfigureDREOneRegister(address_3, value_3);
-	
-	
-	Pulse_timescale_l = Math.pow(2,20);
-	Pulse_timescale_mask = 0xFFF;
-	Pulse_Amplitude_l = Math.pow(2,12);
-	Pulse_Amplitude_mask = 0xFF;
-	Send_Pulse_l = Math.pow(2,11);
-	Send_Pulse_mask = 0x1;
-	SW2_l = Math.pow(2,9);
-	SW2_mask = 0x3;
-	SW1_l = Math.pow(2,8);
-	SW1_mask = 0x1;
-	Test_Bias_Modulation_Amplitude_l = Math.pow(2,0);
-	Test_Bias_Modulation_Amplitude_mask = 0xFF;
-	
-	address_4 = address_1 + 3;
-	value_4 = (Pulse_timescale & Pulse_timescale_mask) * Pulse_timescale_l
-	+ (Pulse_Amplitude & Pulse_Amplitude_mask) * Pulse_Amplitude_l
-	+ (Send_Pulse & Send_Pulse_mask) * Send_Pulse_l
-	+ (SW2 & SW2_mask) * SW2_l
-	+ (SW1 & SW1_mask) * SW1_l
-	+ (Test_Bias_Modulation_Amplitude & Test_Bias_Modulation_Amplitude_mask) * Test_Bias_Modulation_Amplitude_l;
-	sendConfigureDREOneRegister(address_4, value_4);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
