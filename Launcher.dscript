@@ -10,11 +10,11 @@ session_name=get_session_name()
 
 // Definition of tests to be done
 DoEnergyResol = true
-DoGBW = false
-DoScienceSpectra = false
+DoGBW = true
+DoScienceSpectra = true
 Test_pix_only = false
 openloop = false
-NeighbourPix_Off = true
+NeighbourPix_Off = false
 saveIQ = false  // If true the IQ files are saved during the energy resolution measurement (huge files)
 
 // Definition of parameters ///////////////////////////////////////////////////////////////////
@@ -34,8 +34,8 @@ Gain = config.Gain
 BIAS_trunc = config.BIAS_trunc
 FBCK_trunc = config.FBCK_trunc
 FBCK_gain = config.FBCK_gain
-ModulationRatio = config.ModulationRatio
-TES_NL = config.TES_NL
+ModulationRatio = config.ModulationRatio
+TES_NL = config.TES_NL
 
 Channel_ID = 0
 test_pix_index	= 31
@@ -53,9 +53,9 @@ nbr_spectra = 40
 spectra_duration_ms = 1000
 
 //ER_nbr_pulses_meas	= 2019
-ER_nbr_pulses_meas	= 3141
+//ER_nbr_pulses_meas	= 3141
 //ER_nbr_pulses_meas	= 31415
-//ER_nbr_pulses_meas	= 314159 // Une heure 20 minutes
+ER_nbr_pulses_meas	= 314159 // Une heure 20 minutes
 ER_nbr_files = 1
 Threshold  = 150  // TRIGGER threshold
 
@@ -98,6 +98,7 @@ for (iteration = 0; iteration < 1;iteration+=1)
 		ER_nbr_files,
 		Threshold,
 		ModulationRatio,
+		TES_NL,
 		saveIQ,
 		Test_pix_only,
 		NeighbourPix_Off,

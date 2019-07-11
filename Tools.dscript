@@ -487,14 +487,14 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 	PhiC_Testdeg = Get_PhiC(Freq_Test)
 	
 	// Setting the test pixel's configuration
-	Set_Pixel_Config(
-		Pixel_ID=40,  // test pixel ID
-		PHI_Delay=PhiC_Testdeg,
-		PHI_Rotate=0,
-		Gain_BBFB=BBFB_gain,
-		Bias_Amplitude=bias_Amp,
-		Frequency=Freq_Test,
-		PHI_Initial=0
+	Set_Pixel_Config(
+		Pixel_ID=40,  // test pixel ID
+		PHI_Delay=PhiC_Testdeg,
+		PHI_Rotate=0,
+		Gain_BBFB=BBFB_gain,
+		Bias_Amplitude=bias_Amp,
+		Frequency=Freq_Test,
+		PHI_Initial=0
 		)
 
 	// Apply the pixels' configurations
@@ -508,14 +508,14 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 	for(i=0;i<MOD_FREQ1.length;i++)
 	{
 		MOD_FREQ_REEL = Math.round(MOD_FREQ1[i]*Math.pow(2,24)/FS)
-		Set_TestPixel_ExtraCommands(
-			modulation_freq=MOD_FREQ_REEL,
-			pulse_timescale=0,
-			pulse_amplitude=0,
-			pulse_start=0,
-			sw2=0,  // Feedback
-			sw1=0,  // Closed loop
-			modulation_amplitude=255
+		Set_TestPixel_ExtraCommands(
+			modulation_freq=MOD_FREQ_REEL,
+			pulse_timescale=0,
+			pulse_amplitude=0,
+			pulse_start=0,
+			sw2=0,  // Feedback
+			sw1=0,  // Closed loop
+			modulation_amplitude=255
 			)
 		// Apply the pixels' configurations
 		Update_All_Configs(Channel_id)
@@ -538,14 +538,14 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 	for(i=0;i<MOD_FREQ2.length;i++)
 	{
 		MOD_FREQ_REEL = Math.round(MOD_FREQ2[i]*Math.pow(2,24)/FS)
-		Set_TestPixel_ExtraCommands(
-			modulation_freq=MOD_FREQ_REEL,
-			pulse_timescale=0,
-			pulse_amplitude=0,
-			pulse_start=0,
-			sw2=0,  // Feedback
-			sw1=0,  // Closed loop
-			modulation_amplitude=255
+		Set_TestPixel_ExtraCommands(
+			modulation_freq=MOD_FREQ_REEL,
+			pulse_timescale=0,
+			pulse_amplitude=0,
+			pulse_start=0,
+			sw2=0,  // Feedback
+			sw1=0,  // Closed loop
+			modulation_amplitude=255
 			)
 		// Apply the pixels' configurations
 		Update_All_Configs(Channel_id)
@@ -608,6 +608,21 @@ function Reset_All_Configs(channelId){
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
+function Reset_All_Configs_except_test_pixel(channelId){
+	for(i=0;i<Npix;i++){
+		t_Freq[i] = 0;
+		t_Amp[i]  = 0;
+		t_Gain[i] = 0;
+		t_PhiC[i] = 0;
+		t_PhiI[i] = 0;
+		t_PhiR[i] = 0;
+	}
+	t_command3 = -1
+	t_command4 = -1
+	sendConfigureDREPixelsBuffer(channelId,t_Freq,t_Amp,t_Gain,t_PhiC,t_PhiI,t_PhiR,t_command3,t_command4)
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
 function Apply_All_Configs(channelId){
 	sendDREPixelsBuffer(channelId)
 	waitMs(50)			// Wait for the GSE sending time
@@ -627,7 +642,8 @@ function Set_Pixel_Config(Pixel_ID,PHI_Delay,PHI_Rotate,Gain_BBFB,Bias_Amplitude
 	t_PhiC[Pixel_ID] = PHI_Delay;
 	t_PhiI[Pixel_ID] = PHI_Initial;
 	t_PhiR[Pixel_ID] = PHI_Rotate;
-}
+}
+
 //----------------------------------------------------------------------------------------------------------------------------
 function Set_TestPixel_ExtraCommands(modulation_freq, pulse_timescale, pulse_amplitude, pulse_start, sw2, sw1, modulation_amplitude){
 
@@ -636,9 +652,8 @@ function Set_TestPixel_ExtraCommands(modulation_freq, pulse_timescale, pulse_amp
 	
 	t_command3= (modulation_freq & modulation_freq_mask) * modulation_freq_l;
 
-	
 	pulse_timescale_l= Math.pow(2,20);
-	pulse_timescale_mask= 0xFFF;
+	pulse_timescale_mask= 0xF;
 	pulse_amplitude_l= Math.pow(2,12);
 	pulse_amplitude_mask= 0xFF;
 	pulse_start_l= Math.pow(2,11);

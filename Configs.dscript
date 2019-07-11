@@ -7,7 +7,7 @@ function best_config(dre_firmware_id){
 			Gain = 7
 			BIAS_trunc = 2
 			FBCK_trunc = 0
-			FBCK_gain = 17110 // max 32767
+			FBCK_gain = 17110 // max 32767
 			Pulse = "CBE"
 			break
 			
@@ -18,7 +18,7 @@ function best_config(dre_firmware_id){
 			BIAS_trunc = 3
 			FBCK_trunc = 3
 			FBCK_gain = 28000 // max 32767
-			Pulse = "CBE"
+			Pulse = "CBE"
 			break
 			
 		case 0x0213: 
@@ -28,19 +28,39 @@ function best_config(dre_firmware_id){
 			BIAS_trunc = 3
 			FBCK_trunc = 3
 			FBCK_gain = 19000 // max 32767
-			Pulse = "banc"
+			Pulse = "banc"
 			break
 			
-//		case 0x0213: // Dans le cas ou j'ajoute 20dB d'atténuation en entrée ADC
-//			print("Config 0x0213")
-//			Default_amp = 58
-//			Gain = 65
-//			BIAS_trunc = 3
-//			FBCK_trunc = 1
-//			FBCK_gain = 9000 // max 32767
-//			Pulse = "banc"
-//			break
+		case 0x0214: 
+			print("Config 0x0214")
+			Default_amp = 32
+			Gain = 8
+			BIAS_trunc = 3
+			FBCK_trunc = 3
+			FBCK_gain = 19000 // max 32767
+			Pulse = "banc"
+			break
 			
+		case 0x0215: 
+			print("Config 0x0215")
+			Default_amp = 32
+			Gain =7
+			BIAS_trunc = 3
+			FBCK_trunc = 3
+			FBCK_gain = 19000 // max 32767
+			Pulse = "banc"
+			break
+			
+		case 0x0216: 
+			print("Config 0x0216")
+			Default_amp = 120
+			Gain =30
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 17000 // max 32767
+			Pulse = "CBE"
+			break
+			
 		case 0x0212: 
 			print("Config 0x0212")
 			Default_amp = 30
@@ -48,7 +68,7 @@ function best_config(dre_firmware_id){
 			BIAS_trunc = 3
 			FBCK_trunc = 3
 			FBCK_gain = 32500 // max 32767
-			Pulse = "banc"
+			Pulse = "banc"
 			break
 			
 		case 0x0211: 
@@ -58,7 +78,7 @@ function best_config(dre_firmware_id){
 			BIAS_trunc = 3
 			FBCK_trunc = 3
 			FBCK_gain = 32500 // max 32767
-			Pulse = "banc"
+			Pulse = "banc"
 			break
 			
 		case 0x0210: 
@@ -68,7 +88,7 @@ function best_config(dre_firmware_id){
 			BIAS_trunc = 3
 			FBCK_trunc = 3
 			FBCK_gain = 32000 // max 32767
-			Pulse = "banc"
+			Pulse = "banc"
 			break
 
 		case 0x020F: // 020F
@@ -78,25 +98,25 @@ function best_config(dre_firmware_id){
 			BIAS_trunc = 3
 			FBCK_trunc = 3
 			FBCK_gain = 32000 // max 32767
-			Pulse = "CBE"
+			Pulse = "CBE"
 			break
 			
 		default:
 			print("Unknown firmware id. Can't define configuration.")
-		}
-
-	switch (Pulse) {
-		case "CBE": 
-			ModulationRatio = 64.5 //  7keV with LPA 75um pixels
-			TES_NL = 1.361
-			break
-		case "banc": 
-			ModulationRatio = 68 //  7keV with "banc" pixels
-			TES_NL = 1.361
-			break
-		default:
-			print("Unknown pulse !")
-		}
+		}
+
+	switch (Pulse) {
+		case "CBE": 
+			ModulationRatio = 64.5 //  7keV with LPA 75um pixels
+			TES_NL = 1.361
+			break
+		case "banc": 
+			ModulationRatio = 68 //  7keV with "banc" pixels
+			TES_NL = 1.361
+			break
+		default:
+			print("Unknown pulse !")
+		}
 		
 	return {
 		Default_amp: Default_amp,
@@ -104,7 +124,7 @@ function best_config(dre_firmware_id){
 		BIAS_trunc: BIAS_trunc,
 		FBCK_trunc: FBCK_trunc,
 		FBCK_gain: FBCK_gain,
-		ModulationRatio: ModulationRatio,
+		ModulationRatio: ModulationRatio,
 		TES_NL:TES_NL
 		}
 }

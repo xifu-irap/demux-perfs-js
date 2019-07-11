@@ -31,7 +31,7 @@ function test_sequence(
 	ER_nbr_pulses_meas,
 	ER_nbr_files,
 	Threshold,
-	ModulationRatio,
+	ModulationRatio,
 	TES_NL,
 	saveIQ,
 	Test_pix_only,
@@ -68,8 +68,8 @@ function test_sequence(
 	setAndMemorize( "ER_nbr_pulses_meas", ER_nbr_pulses_meas)
 	setAndMemorize( "ER_nbr_files", ER_nbr_files)
 	setAndMemorize( "Threshold", Threshold)
-	setAndMemorize( "ModulationRatio", ModulationRatio)
-	setAndMemorize( "TES_NL", TES_NL)
+	setAndMemorize( "ModulationRatio", ModulationRatio)
+	setAndMemorize( "TES_NL", TES_NL)
 	setAndMemorize( "saveIQ", saveIQ)
 	setAndMemorize( "Test_pix_only", Test_pix_only)
 	setAndMemorize( "NeighbourPix_Off", NeighbourPix_Off)
@@ -404,26 +404,29 @@ function mk_energy_resol_tst(Channel_id,  Npulses_meas, ER_nbr_files, Modulation
 ////////////////////////////////////////////////////////////////////////////////
 function switch_to_openloop(Channel_ID)
 {
-// reducing pixel amplitude
+// Switching standard pixels OFF
+Reset_All_Configs_except_test_pixel(Channel_ID)
+
+// Switching test pixel ON
 Set_Pixel_Config(
 	Pixel_ID=40,
 	PHI_Delay=-1,
 	PHI_Rotate=-1,
-	Gain_BBFB=1,
-	Bias_Amplitude=155,
+	Gain_BBFB=2,
+	Bias_Amplitude=255,
 	Frequency=-1,
 	PHI_Initial=-1
 	)
 
 // configuring internal switches
 Set_TestPixel_ExtraCommands(
-	modulation_freq=-1,
-	pulse_timescale=-1,
-	pulse_amplitude=-1,
-	pulse_start=-1,
-	sw2=-1,
-	sw1=1,  // open loop
-	modulation_amplitude=-1
+	modulation_freq=0,
+	pulse_timescale=0,
+	pulse_amplitude=0,
+	pulse_start=0,
+	sw2=0,
+	sw1=0,  // open loop
+	modulation_amplitude=0
 	)
 	
 Channel_CMD(
