@@ -53,9 +53,10 @@ nbr_spectra = 40
 spectra_duration_ms = 1000
 
 //ER_nbr_pulses_meas	= 2019
-//ER_nbr_pulses_meas	= 3141
+ER_nbr_pulses_meas	= 3141
 //ER_nbr_pulses_meas	= 31415
-ER_nbr_pulses_meas	= 314159 // Une heure 20 minutes
+//ER_nbr_pulses_meas	= 314159 // Une heure 20 minutes
+//ER_nbr_pulses_meas	= 1200000
 ER_nbr_files = 1
 Threshold  = 150  // TRIGGER threshold
 
