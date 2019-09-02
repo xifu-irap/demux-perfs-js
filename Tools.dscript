@@ -92,8 +92,8 @@ function DRE_General_CMD(Start_Sending_TM,Select_TM,Start_Sending_HK,Select_HK)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
-// 14 inputs
+function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,Manual_Delock,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
+// 18inputs
 {
 	Loop_Control_l = Math.pow(2,28);
 	Loop_Control_mask = 0xF;
@@ -101,6 +101,8 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,ADC_ON,DACB_ON,
 	StartStop_mask = 0x1;
 	Delock_ON_l = Math.pow(2,13);
 	Delock_ON_mask = 0x1;
+	Manual_Delock_l = Math.pow(2,14);
+	Manual_Delock_mask = 0x1;
 	ADC_ON_l = Math.pow(2,12);
 	ADC_ON_mask = 0x1;
 	DACB_ON_l = Math.pow(2,11);
@@ -124,6 +126,7 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,ADC_ON,DACB_ON,
 	value_1 = (Loop_Control & Loop_Control_mask) * Loop_Control_l
 	+ (StartStop & StartStop_mask) * StartStop_l
 	+ (Delock_ON & Delock_ON_mask) * Delock_ON_l
+	+ (Manual_Delock & Manual_Delock_mask) * Manual_Delock_l
 	+ (ADC_ON & ADC_ON_mask) * ADC_ON_l
 	+ (DACB_ON & DACB_ON_mask) * DACB_ON_l
 	+ (DACF_ON & DACF_ON_mask) * DACF_ON_l
@@ -143,7 +146,7 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,ADC_ON,DACB_ON,
 	Wait_for_relock_l = Math.pow(2,12);
 	Wait_for_relock_mask = 0x7;
 	Delock_level_l = Math.pow(2,0);
-	Delock_level_mask = 0xFFF;
+	Delock_level_mask = 0x7FF;
 	
 	address_2 = address_1 + 1;
 	value_2 = (Compensation_Gain & Compensation_Gain_mask) * Compensation_Gain_l
@@ -153,6 +156,29 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,ADC_ON,DACB_ON,
 	sendConfigureDREOneRegister(address_2, value_2);
 }
 
+//----------------------------------------------------------------------------------------------------------------------------
+function define_Channel_conf(Loop_Control,StartStop,Delock_ON,Manual_Delock,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
+{
+	return {
+		Loop_Control:Loop_Control,
+		StartStop:StartStop,
+		Delock_ON:Delock_ON,
+		Manual_Delock:Manual_Delock,
+		ADC_ON:ADC_ON,
+		DACB_ON:DACB_ON,
+		DACF_ON:DACF_ON,
+		Select_Input:Select_Input,
+		Bias_Enabled:Bias_Enabled,
+		Feedback_Enabled:Feedback_Enabled,
+		Bias_Slope_Speed:Bias_Slope_Speed,
+		Bias_Truncation:Bias_Truncation,
+		Feedback_Truncation:Feedback_Truncation,
+		Compensation_Gain:Compensation_Gain,
+		Feedback_Reverse:Feedback_Reverse,
+		Wait_for_relock:Wait_for_relock,
+		Delock_level:Delock_level
+	}
+}
 //----------------------------------------------------------------------------------------------------------------------------
 function Get_PhiC(Freq)
 // Computes the correction phase for a specific carrier frequency
@@ -222,13 +248,56 @@ function DRE_resetAll()
 // reset all DRE-DELUX parameters
 {
 	print("Clearing all registers..")
-	DRE_General_CMD(0,0,0,0)
-	Channel_CMD(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
-	Channel_CMD(1,0,0,0,0,0,0,0,0,0,0,0,0,0)
-	Reset_All_Configs(0)
-	Apply_All_Configs(0)
-	//Reset_All_Configs(1)
-	//Apply_All_Configs(1)
+	DRE_General_CMD(
+		Start_Sending_TM=0,
+		Select_TM=0,
+		Start_Sending_HK=0,
+		Select_HK=0
+		)
+	Channel_CMD(
+		Channel_id=0,
+		Loop_Control=0,
+		StartStop=0,
+		Delock_ON=0,
+		Manual_Delock=0,
+		ADC_ON=0,
+		DACB_ON=0,
+		DACF_ON=0,
+		Select_Input=0,
+		Bias_Enabled=0,
+		Feedback_Enabled=0,
+		Bias_Slope_Speed=0,
+		Bias_Truncation=0,
+		Feedback_Truncation=0,
+		Compensation_Gain=0,
+		Feedback_Reverse=0,
+		Wait_for_relock=0,
+		Delock_level=0
+		)
+	Channel_CMD(
+		Channel_id=1,
+		Loop_Control=0,
+		StartStop=0,
+		Delock_ON=0,
+		Manual_Delock=0,
+		ADC_ON=0,
+		DACB_ON=0,
+		DACF_ON=0,
+		Select_Input=0,
+		Bias_Enabled=0,
+		Feedback_Enabled=0,
+		Bias_Slope_Speed=0,
+		Bias_Truncation=0,
+		Feedback_Truncation=0,
+		Compensation_Gain=0,
+		Feedback_Reverse=0,
+		Wait_for_relock=0,
+		Delock_level=0
+		)
+	Reset_All_Configs(channelId=0)
+	Apply_All_Configs(channelId=0)
+	//Reset_All_Configs(channelId=1)
+	//Apply_All_Configs(channelId=1)
 	waitMs(10)
 }
 
@@ -642,7 +711,7 @@ function Set_Pixel_Config(Pixel_ID,PHI_Delay,PHI_Rotate,Gain_BBFB,Bias_Amplitude
 	t_PhiC[Pixel_ID] = PHI_Delay;
 	t_PhiI[Pixel_ID] = PHI_Initial;
 	t_PhiR[Pixel_ID] = PHI_Rotate;
-}
+}
 
 //----------------------------------------------------------------------------------------------------------------------------
 function Set_TestPixel_ExtraCommands(modulation_freq, pulse_timescale, pulse_amplitude, pulse_start, sw2, sw1, modulation_amplitude){
@@ -692,6 +761,8 @@ function Pixels_40_Simultaneous_Freq_Scan(Channel_id,CenterFreqTab,Span,Step,Amp
 	Channel_id,			// Channel_id
 	0,					//Loop_Control
 	0,					//StartStop (don't touch, always STOP)
+	0,					//DELOCK_ON
+	0,					//MANUAL_DELOCK
 	1,					//ADC_ON
 	1,					//DACB_ON
 	1,					//DACF_ON
@@ -702,7 +773,9 @@ function Pixels_40_Simultaneous_Freq_Scan(Channel_id,CenterFreqTab,Span,Step,Amp
 	3,					//Bias_Truncation
 	3,					//Feedback_Truncation
 	32767,				//Compensation_Gain (32767 => unitary gain)
-	TARGET				//Feedback_Reverse
+	TARGET,				//Feedback_Reverse
+	0x7,					// wait for relock				
+	0x7FF				// delock_level
 	)
 	for(var k=0;k<Math.round(Span/Step);k++){
 		Freq_List = ""
@@ -817,35 +890,35 @@ function START_DUMP(dump_type,i,channelID,filename_comment){
 	error = false
 	switch(dump_type){
 		case "IN-BIA":
-			print("Starting dump of IN-BIA data")
+			print("    > Starting dump of IN-BIA data")
 			if(channelID==0) DUMP_MODE = 0
 			else DUMP_MODE = 4
 			break
 		case "IN-FBK":
-			print("Starting dump of IN-FBK data")
+			print("    > Starting dump of IN-FBK data")
 			if(channelID==0) DUMP_MODE = 1
 			else DUMP_MODE = 5
 			break
 		case "BI-FBK":
-			print("Starting dump of BI-FBK data")
+			print("    > Starting dump of BI-FBK data")
 			if(channelID==0) DUMP_MODE = 2
 			else DUMP_MODE = 6
 			break
 		case "IQ-TST":
-			print("Starting dump of IQ-TST data")
+			print("    > Starting dump of IQ-TST data")
 			if(channelID==0) DUMP_MODE = 9
 			else DUMP_MODE = 10
 			break
 		case "IQ-ALL":
-			print("Starting dump of IQ-ALL data")
+			print("    > Starting dump of IQ-ALL data")
 			DUMP_MODE = 8
 			break
 		case "COUNTR":
-			print("Starting dump of COUNTR data")
+			print("    > Starting dump of COUNTR data")
 			DUMP_MODE = 15
 			break
 		default:
-			print("dump_type error")
+			print("    > dump_type error")
 			error = true
 			break
 		}
@@ -991,3 +1064,55 @@ function waitingForDDR3Empty()
 	}while(OK_DDR3Occupation > 0)
 		abortOneRequest(req)
 }
+
+//---------------------------------------------------------------------------------------------------------------------------------------
+function firmware_valid(version, version_limit) {
+	return (version>=parseInt(version_limit,16))
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------
+function load_pulse(pixel_type) {
+
+	getLatestValue("DRE_FirmwareId")
+	if (firmware_valid(DRE_FirmwareId, "21C"))
+		{
+		path=".\\pulses\\"
+		switch (pixel_type) 
+			{
+			case "CBE":
+				filename = "fake_pulse_CBE.txt"
+				break
+			case "banc":
+				filename = "fake_pulse_banc.txt"
+				break
+			default:
+				filename = "fake_pulse_empty.txt"
+			}
+		print(">>---------------------------------------------------------")
+		print(">>  Loading pulse shape into the firmware")
+
+		print("  - Loading values from file " + filename + "...")
+		txt = readTextFile(path+filename)
+		BRAM_base_address = 0x00AF // 175
+		timescale = parseInt(txt[0],10)
+		values = new Array()
+
+		print("  - Sending values to the firmware...")
+		configureAckTimeout(0)  // Supprime l'attente d'acknowledge entre le script et le dispatcher pour etre plus raide
+		for (index = 0; index < txt.length;++index)
+		{
+			values[index] = parseInt(txt[index+1],16) // <<<<<<==========<<<<===== CHRISTOPHE CHANGE LE 16 EN 10 SI C EN DECIMAL
+			sendConfigureDREOneRegister(BRAM_base_address + index, values[index])
+		}
+		plot(values)
+		configureAckTimeout(5000) // Reactivation de l'acknowledge
+		print("  - Done!")
+	} else 
+	{
+		print("  Warning! This firmware does not allow to update the pulse shape.")
+		timescale=16
+	}
+	return timescale
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------

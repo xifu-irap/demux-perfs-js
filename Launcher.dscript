@@ -1,5 +1,4 @@
 include("./Test_sequence.dscript")
-//include("./Test_sequence_unlock.dscript")
 include("./Configs.dscript")
 
 // Stopping every previouly unstopped readout...
@@ -8,14 +7,33 @@ clean_stop()
 operator_name=get_operator_name()
 session_name=get_session_name()
 
+//-------------------------------
 // Definition of tests to be done
+//-------------------------------
+DoGBW = false
+
+DoScienceSpectra = false
+nbr_spectra = 40
+spectra_duration_ms = 1000
+
 DoEnergyResol = true
-DoGBW = true
-DoScienceSpectra = true
+PixelType="CBE"  // (CBE, banc, autre = RAZ)
+//ER_nbr_pulses_meas	= 2019
+ER_nbr_pulses_meas	= 314
+//ER_nbr_pulses_meas	= 31415
+//ER_nbr_pulses_meas	= 314159 // Une heure 20 minutes
+//ER_nbr_pulses_meas	= 1200000
+ER_nbr_files = 1
+Threshold  = 150  // EP TRIGGER threshold
+saveIQ = false  // If true the IQ files are saved during the energy resolution measurement (huge files)
+
+DoDelockTst=false
+Delock_level=0x100, 
+Wait_for_relock=2  // (0..7)
+
 Test_pix_only = false
 openloop = false
 NeighbourPix_Off = false
-saveIQ = false  // If true the IQ files are saved during the energy resolution measurement (huge files)
 
 // Definition of parameters ///////////////////////////////////////////////////////////////////
 // Definition of the firmware frequency grid
@@ -38,7 +56,8 @@ ModulationRatio = config.ModulationRatio
 TES_NL = config.TES_NL
 
 Channel_ID = 0
-test_pix_index	= 31
+//test_pix_index	= 31
+test_pix_index	= 1
 SQUID_interne = 0
 index = 7
 Fgridratio = Fgridratios[index]
@@ -48,27 +67,14 @@ dacMode = dacModes[0]
 Spread = "Normal"  // Default setting
 //Spread = "Huge"
 
-// Nbr and duration of measurements for spectra characterization 
-nbr_spectra = 40
-spectra_duration_ms = 1000
-
-//ER_nbr_pulses_meas	= 2019
-ER_nbr_pulses_meas	= 3141
-//ER_nbr_pulses_meas	= 31415
-//ER_nbr_pulses_meas	= 314159 // Une heure 20 minutes
-//ER_nbr_pulses_meas	= 1200000
-ER_nbr_files = 1
-Threshold  = 150  // TRIGGER threshold
-
-
 //for (fgridIndex = 0; fgridIndex < Fgrids.length;++fgridIndex) {
 //	Fgrid = Fgrids[fgridIndex]
 
-//for (ModulationRatio = 19; ModulationRatio < 100;ModulationRatio+=20)
+//for (Gain = 1; Gain < 123; Gain*=2)
 for (iteration = 0; iteration < 1;iteration+=1)
 	{
 	session_comment = ""
-	//session_name="Modratio"+parseInt(ModulationRatio).toString()
+	//session_name="OpenLoop_Gain"+parseInt(Gain).toString()
 	print("Starting test sequence "+session_name)
 	//linearity_test_sequence(
 	test_sequence(
@@ -95,6 +101,7 @@ for (iteration = 0; iteration < 1;iteration+=1)
 		nbr_spectra,
 		spectra_duration_ms,
 		DoEnergyResol,
+		PixelType,
 		ER_nbr_pulses_meas,
 		ER_nbr_files,
 		Threshold,
@@ -103,6 +110,7 @@ for (iteration = 0; iteration < 1;iteration+=1)
 		saveIQ,
 		Test_pix_only,
 		NeighbourPix_Off,
-		openloop
+		openloop,
+		DoDelockTst
 		)
 }

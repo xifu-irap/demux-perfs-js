@@ -1,6 +1,16 @@
 
 function best_config(dre_firmware_id){
 	switch (dre_firmware_id) {
+		case 0x020A: 
+			print("Config 0x020A")
+			Default_amp = 50
+			Gain = 10
+			BIAS_trunc = 3
+			FBCK_trunc = 3
+			FBCK_gain = 28000 // max 32767
+			Pulse = "CBE"
+			break
+
 		case 0x020E: 
 			print("Config 0x020E")
 			Default_amp = 255
@@ -11,14 +21,44 @@ function best_config(dre_firmware_id){
 			Pulse = "CBE"
 			break
 			
-		case 0x020A: 
-			print("Config 0x020A")
-			Default_amp = 50
+		case 0x020F: // 020F
+			print("Config 0x020F")
+			Default_amp = 46
 			Gain = 10
 			BIAS_trunc = 3
 			FBCK_trunc = 3
-			FBCK_gain = 28000 // max 32767
+			FBCK_gain = 32000 // max 32767
 			Pulse = "CBE"
+			break
+					
+		case 0x0210: 
+			print("Config 0x0210")
+			Default_amp = 32
+			Gain = 8
+			BIAS_trunc = 3
+			FBCK_trunc = 3
+			FBCK_gain = 32000 // max 32767
+			Pulse = "banc"
+			break
+
+		case 0x0211: 
+			print("Config 0x0211")
+			Default_amp = 30
+			Gain = 10
+			BIAS_trunc = 3
+			FBCK_trunc = 3
+			FBCK_gain = 32500 // max 32767
+			Pulse = "banc"
+			break
+			
+		case 0x0212: 
+			print("Config 0x0212")
+			Default_amp = 30
+			Gain = 10
+			BIAS_trunc = 3
+			FBCK_trunc = 3
+			FBCK_gain = 32500 // max 32767
+			Pulse = "banc"
 			break
 			
 		case 0x0213: 
@@ -51,16 +91,16 @@ function best_config(dre_firmware_id){
 			Pulse = "banc"
 			break
 			
-		case 0x0216: 
-			print("Config 0x0216")
-			Default_amp = 120
-			Gain =30
-			BIAS_trunc = 3
-			FBCK_trunc = 1
-			FBCK_gain = 17000 // max 32767
-			Pulse = "CBE"
-			break
-			
+		case 0x0216: 
+			print("Config 0x0216")
+			Default_amp = 120
+			Gain =30
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 17000 // max 32767
+			Pulse = "CBE"
+			break
+			
 		case 0x0217: 
 			print("Config 0x0217")
 			Default_amp = 120
@@ -71,46 +111,46 @@ function best_config(dre_firmware_id){
 			Pulse = "CBE"
 			break
 			
-		case 0x0212: 
-			print("Config 0x0212")
-			Default_amp = 30
-			Gain = 10
-			BIAS_trunc = 3
-			FBCK_trunc = 3
-			FBCK_gain = 32500 // max 32767
-			Pulse = "banc"
-			break
-			
-		case 0x0211: 
-			print("Config 0x0211")
-			Default_amp = 30
-			Gain = 10
-			BIAS_trunc = 3
-			FBCK_trunc = 3
-			FBCK_gain = 32500 // max 32767
-			Pulse = "banc"
-			break
-			
-		case 0x0210: 
-			print("Config 0x0210")
-			Default_amp = 32
-			Gain = 8
-			BIAS_trunc = 3
-			FBCK_trunc = 3
-			FBCK_gain = 32000 // max 32767
-			Pulse = "banc"
-			break
+		case 0x0219: 
+			print("Config 0x0217")
+			Default_amp = 120
+			Gain =30
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 17000 // max 32767
+			Pulse = "CBE"
+			break
 
-		case 0x020F: // 020F
-			print("Config 0x020F")
-			Default_amp = 46
-			Gain = 10
+		case 0x021A: 
+			print("Config 0x021A")
+			Default_amp = 120
+			Gain =30
 			BIAS_trunc = 3
-			FBCK_trunc = 3
-			FBCK_gain = 32000 // max 32767
+			FBCK_trunc = 1
+			FBCK_gain = 17000 // max 32767
 			Pulse = "CBE"
 			break
 			
+		case 0x021B: 
+			print("Config 0x021B")
+			Default_amp = 120
+			Gain =30
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 17000 // max 32767
+			Pulse = "CBE"
+			break
+
+		case 0x021C: 
+			print("Config 0x021C")
+			Default_amp = 120
+			Gain =30
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 17000 // max 32767
+			Pulse = "CBE"
+			break
+				
 		default:
 			print("Unknown firmware id. Can't define configuration.")
 		}
