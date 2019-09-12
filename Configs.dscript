@@ -101,25 +101,25 @@ function best_config(dre_firmware_id){
 			Pulse = "CBE"
 			break
 			
-		case 0x0217: 
-			print("Config 0x0217")
-			Default_amp = 120
-			Gain =30
-			BIAS_trunc = 3
-			FBCK_trunc = 1
-			FBCK_gain = 17000 // max 32767
-			Pulse = "CBE"
-			break
-			
-		case 0x0219: 
-			print("Config 0x0217")
-			Default_amp = 120
-			Gain =30
-			BIAS_trunc = 3
-			FBCK_trunc = 1
-			FBCK_gain = 17000 // max 32767
-			Pulse = "CBE"
-			break
+		case 0x0217: 
+			print("Config 0x0217")
+			Default_amp = 120
+			Gain =30
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 17000 // max 32767
+			Pulse = "CBE"
+			break
+			
+		case 0x0219: 
+			print("Config 0x0219")
+			Default_amp = 120
+			Gain =20
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 17000 // max 32767
+			Pulse = "CBE"
+			break
 
 		case 0x021A: 
 			print("Config 0x021A")
@@ -144,11 +144,30 @@ function best_config(dre_firmware_id){
 		case 0x021C: 
 			print("Config 0x021C")
 			Default_amp = 120
-			Gain =30
+			Gain =25
 			BIAS_trunc = 3
 			FBCK_trunc = 1
 			FBCK_gain = 17000 // max 32767
 			Pulse = "CBE"
+			break
+				
+		case 0x021D: 
+			print("Config 0x021D")
+			Default_amp = 120
+			Gain =25
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 17000 // max 32767
+			Pulse = "CBE"
+			break
+			case 0x021E: 
+			print("Config 0x021E")
+			Default_amp = 120
+			Gain =25
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 17000 // max 32767
+			Pulse = "CBE"
 			break
 				
 		default:
@@ -157,7 +176,7 @@ function best_config(dre_firmware_id){
 
 	switch (Pulse) {
 		case "CBE": 
-			ModulationRatio = 64.5 //  7keV with LPA 75um pixels
+			ModulationRatio = 65 //  7keV with LPA 75um pixels
 			TES_NL = 1.361
 			break
 		case "banc": 

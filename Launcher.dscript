@@ -16,10 +16,11 @@ DoScienceSpectra = false
 nbr_spectra = 40
 spectra_duration_ms = 1000
 
-DoEnergyResol = true
+DoEnergyResol = false
 PixelType="CBE"  // (CBE, banc, autre = RAZ)
 //ER_nbr_pulses_meas	= 2019
-ER_nbr_pulses_meas	= 314
+ER_nbr_pulses_calib	= 2000
+ER_nbr_pulses_meas	= 3141
 //ER_nbr_pulses_meas	= 31415
 //ER_nbr_pulses_meas	= 314159 // Une heure 20 minutes
 //ER_nbr_pulses_meas	= 1200000
@@ -27,9 +28,9 @@ ER_nbr_files = 1
 Threshold  = 150  // EP TRIGGER threshold
 saveIQ = false  // If true the IQ files are saved during the energy resolution measurement (huge files)
 
-DoDelockTst=false
+DoDelockTst=true
 Delock_level=0x100, 
-Wait_for_relock=2  // (0..7)
+Wait_for_relock=30  // (0..7)
 
 Test_pix_only = false
 openloop = false
@@ -57,7 +58,7 @@ TES_NL = config.TES_NL
 
 Channel_ID = 0
 //test_pix_index	= 31
-test_pix_index	= 1
+test_pix_index	= 2
 SQUID_interne = 0
 index = 7
 Fgridratio = Fgridratios[index]
@@ -102,6 +103,7 @@ for (iteration = 0; iteration < 1;iteration+=1)
 		spectra_duration_ms,
 		DoEnergyResol,
 		PixelType,
+		ER_nbr_pulses_calib,
 		ER_nbr_pulses_meas,
 		ER_nbr_files,
 		Threshold,

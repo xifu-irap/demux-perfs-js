@@ -29,6 +29,7 @@ function test_sequence(
 	spectra_duration_ms,
 	DoEnergyResol,
 	PixelType,
+	ER_nbr_pulses_calib,
 	ER_nbr_pulses_meas,
 	ER_nbr_files,
 	Threshold,
@@ -71,6 +72,7 @@ function test_sequence(
 	setAndMemorize( "spectra_duration_ms", spectra_duration_ms)
 	setAndMemorize( "DoEnergyResol", DoEnergyResol)
 	setAndMemorize( "PixelType", PixelType)
+	setAndMemorize( "ER_nbr_pulses_calib", ER_nbr_pulses_calib)
 	setAndMemorize( "ER_nbr_pulses_meas", ER_nbr_pulses_meas)
 	setAndMemorize( "ER_nbr_files", ER_nbr_files)
 	setAndMemorize( "Threshold", Threshold)
@@ -134,12 +136,12 @@ function test_sequence(
 		)
 	configure_DEMUX_channel(Channel_ID, Channel_0_conf)
 
-	// Loading the pulse shape in the FPGA
-	pulse_timescale=load_pulse(PixelType)
+	// Loading the pulse shape in the FPGA
+	fake_pulse_timescale=load_pulse(PixelType)
 
 	// Measurement of gain bandwidth product
 	if (DoGBW) {
-		ScanGBW(Channel_ID, Default_amp, Gain, FREQtab[test_pix_index])}
+		ScanGBW(Channel_ID, Default_amp/2, Gain, FREQtab[test_pix_index])}
 	
 	// Configuration of the DEMUX firmware (pixels)
 	configure_DEMUX_pixels(Channel_ID, Ncarriers, Default_amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only, NeighbourPix_Off)
@@ -162,14 +164,14 @@ function test_sequence(
 	mk_science_data_files(Channel_ID, nbr_spectra, spectra_duration_ms)}
 
 	// Checking pulse shape on different signals 
-	check_pulses(Channel_ID, ModulationRatio)
+	check_pulses(Channel_ID, ModulationRatio, fake_pulse_timescale)
 
 	if (DoEnergyResol){
 	// Measurement of energy resolution
-	mk_energy_resol_tst(Channel_ID, ER_nbr_pulses_meas, ER_nbr_files, ModulationRatio, Threshold, saveIQ)}
+	mk_energy_resol_tst(Channel_ID, ER_nbr_pulses_calib, ER_nbr_pulses_meas, ER_nbr_files, ModulationRatio, Threshold, saveIQ, fake_pulse_timescale)}
 
 	if (DoDelockTst){
-	delock_tst(Channel_ID, Delock_level, Wait_for_relock, SQUID_interne, BIAS_trunc, FBCK_trunc, FBCK_gain)}
+	delock_tst(Channel_ID, Channel_0_conf)}
 
 	Stop_HK_collection()
 	saveLogToBackupDir("scriptlog.txt")
@@ -389,55 +391,77 @@ function mk_science_data_files(Channel_ID, nbr_files, duration_ms)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-function check_pulses(Channel_id, ModulationRatio)
+function check_pulses(Channel_id, ModulationRatio,pulse_timescale)
 // This function makes the measurements necessary to estimate the energy resolution
 {
 	print("")
 	print(">>---------------------------------------------------------")
 	print(">>  Measuring ADC and BIAS dumps with pulses")
 	START_DUMP("IN-BIA" ,0,Channel_id,"_PULSE")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,ModulationRatio)
+	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,ModulationRatio,pulse_timescale)
 	STOP_DUMP()
 	
 	print("")
 	print(">>---------------------------------------------------------")
 	print(">>  Measuring ADC and FEEDBACK dumps with pulses")
 	START_DUMP("IN-FBK" ,0,Channel_id,"_PULSE")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,ModulationRatio)
+	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,ModulationRatio,pulse_timescale)
 	STOP_DUMP()
 	
 	print("")
 	print(">>---------------------------------------------------------")
 	print(">>  Measuring IQ dumps with pulses")
 	START_DUMP("IQ-ALL" ,0,Channel_id,"_PULSE")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,ModulationRatio)
+	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,ModulationRatio,pulse_timescale)
 	STOP_DUMP()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-function mk_energy_resol_tst(Channel_id,  Npulses_meas, ER_nbr_files, ModulationRatio, Threshold, saveIQ)
+function mk_energy_resol_tst(Channel_id,  Npulses_calib,  Npulses_meas, ER_nbr_files, ModulationRatio, Threshold, saveIQ, pulse_timescale)
 // This function makes the measurements necessary to estimate the energy resolution
 {	
 	print("")
 	print(">>---------------------------------------------------------")
+	print(">>  Collecting data to build the EP filter")
+
+	print("  - Measuring noise records...")
+	sendStartDREDaqAcquisition(8) // IQ-ALL
+
+	if (saveIQ)
+		{
+		print("        Saving IQ data")
+		sendStartDumpedDataBackup2Filename(0, maDate()+"_EP_noise.dat","")
+		}
+	sendStartRecordBackup(2000,"")
+	waitingForEndOfRecord()
+	sendStopDumpedDataBackup()
+
+	print("  - Measuring event records...")
+	sendStartEventProcessor(0,"mk_EP_filter",Threshold)
+	if (saveIQ)
+		{
+		print("        Saving IQ data")
+		sendStartDumpedDataBackup2Filename(0, maDate()+"_EP_events.dat","")
+		}		
+	sendPulsesAndWaitingForInjectionDone(Channel_id,Npulses_calib,65,ModulationRatio,pulse_timescale)
+	sendStopEventProcessor()
+	sendStopDumpedDataBackup()
+
 	print(">>  Measuring energy resolution")
 	
 	for (measure=0; measure<ER_nbr_files; measure++)
 	{
 		print("  - PULSE Measurements ("+(measure+1).toString()+" / "+ER_nbr_files.toString()+"): ")
-		sendStartEventProcessor(0,"check_resol",Threshold)
-		sendStartDREDaqAcquisition(8) // IQ-ALL
+		sendStartEventProcessor(0,"meas_E_resol",Threshold)
 		if (saveIQ)
 			{
-			print("Saving IQ data")
-			sendStartDumpedDataBackup(0)
-			}
-
-		sendPulsesAndWaitingForInjectionDone(Channel_id,Npulses_meas,65,ModulationRatio)
-
+			print("        Saving IQ data")
+			sendStartDumpedDataBackup2Filename(0, maDate()+"_EP_measure.dat","")
+			}		
+		sendPulsesAndWaitingForInjectionDone(Channel_id,Npulses_meas,65,ModulationRatio,pulse_timescale)
 		sendStopEventProcessor()
 		sendStopDumpedDataBackup()
-		sendStopDREDaqAcquisition()
+		sendStopDREDaqAcquisition()
 	}
 }
 
@@ -447,23 +471,34 @@ function delock_tst(Channel_id, channel_conf) {
 	print("")
 	print(">>---------------------------------------------------------")
 	print(">>  Testing Anti-delock...")
-
 	print("  - Activation anti-delock...")
-
 	print("  - Faking delock detection by command...")
-	START_DUMP("IQ-ALL",i,Channel_id,"_Manual_Delock")        // ( dump_type, i, channelID, filename_comment )
-
-	channel_conf.StartStop=1
+
+	// Stops DRE if needed
+	channel_conf.StartStop=0
+	configure_DEMUX_channel(Channel_id, channel_conf)
+
+	// Starts DRE and configure anti-delock parameters
+	channel_conf.StartStop=1
+	channel_conf.Wait_for_relock=7  // (0..7)
+	channel_conf.Delock_level=0x7FF  // (maximum positive value)
+	configure_DEMUX_channel(Channel_id, channel_conf)  
+	waitMs(500) // wait end of ramp
+
+	// Stars data acquisition	
+	START_DUMP("IQ-ALL",i,Channel_id,"_Manual_Delock")
+
+	// activates the anti-delock function
 	channel_conf.Delock_ON=1
+	configure_DEMUX_channel(Channel_id, channel_conf)
+
+	// faking a delock detection
 	channel_conf.Manual_Delock=1
-	channel_conf.Wait_for_relock=7,  // (0..7)
-	channel_conf.Delock_level=0x7FF  // (maximum positive value)
 	configure_DEMUX_channel(Channel_id, channel_conf)
-	waitMs(500)
 
-	// Faking delock command back to 0
+	// Faking delock command back to 0
 	channel_conf.Manual_Delock=0
-	configure_DEMUX_channel(Channel_id, channel_conf)
+	configure_DEMUX_channel(Channel_id, channel_conf) 
 	waitMs(500)
 	STOP_DUMP()
 

@@ -20,12 +20,15 @@ function startup(){
 	
 	DRE_Startup()
 	
+	if (DO_SCANFB)
+	{
 	/////////////////// SCAN-FEEDBACK  /////////////////////////
 	print("\nProcessing ScanFeedback...\n")
 	sendStartScanFB(800e3,6000e3,20e3,15,0)	//sendStartScanFB(800e3,9900e3,20e3,1,0)
 	waitingForEndOfScanFB()
 	print("ScanFeedback done \n")
 	waitMs(250)
+	}
 	print("DRE Ready !\n")
 }
 

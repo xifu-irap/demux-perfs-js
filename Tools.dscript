@@ -45,6 +45,7 @@ copyFileToBackupDir()
 copyDirToBackupDir()
 copyDirToBackupDirAndExecuteBat()
 zipData()
+waitingForEndOfRecord()
 */
 
 /////////////////////// Constants ///////////////////////
@@ -638,10 +639,89 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 
 	sendStopDREChannels(3)
 }
-
-//-------------------------------------------------------------------------------------------------------------------------------------//
-////////////////////////////////// Functions working with the NEW configuration concept of the GSE //////////////////////////////////////
-//-------------------------------------------------------------------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------------------------------------------------------------------
+function ScanFeedback(Channel_id, start,stop,step,Select_Input)
+// execute a scan-feedback of the DRE-DEMUX
+{
+	sendStopDREChannels(3)
+	
+	////////Set the General_Configuration --> Select_TM
+	DRE_General_CMD(
+	0,				//Start_Sending_TM
+	9,				//Select_TM --> Channel 0 - Testpixel - I;Q @ Fs
+	0,				//Start_Sending_HK
+	0 				//Select_HK
+	)
+	
+	////////Set the Channel_Configuration in Scan-Feedback mode
+	Channel_CMD(
+	Channel_id,		// Channel ID
+	0,				//Loop_Control
+	0,				//StartStop (don't touch, always STOP)
+	1,				//ADC_ON
+	0,				//DACB_ON
+	1,				//DACF_ON
+	Select_Input,	//Select_Input
+	0,				//Bias_Enabled
+	1,				//Feedback_Enabled
+	0,				//Bias_Slope_Speed
+	0,				//Bias_Truncation
+	0,				//Feedback_Truncation
+	32767,			//Compensation_Gain (32767 => unitary gain)
+	TARGET			//Feedback_Reverse
+	)
+	
+	////////Start the Scan-Feedback
+	print("Starting Scan-Feedback..")
+	//sendStopDREChannels(3)
+	for(var i = 0;i <= parseInt((stop-start)/step); i++){
+		var freq = i*step+start
+		var filename = (("000000" +(i).toString()).slice(-6)) + "_" + (freq).toString() + "Hz_ScanFeedback.dat"
+		Test_Pixel_CMD(
+		Channel_id,							// Channel_id
+		Math.round(0*Math.pow(2,8)/360),	// Test_PHI_Delay (degree)
+		Math.round(0*Math.pow(2,8)/360),	// Test_PHI_Rotate (degree)
+		Math.round(0*Math.pow(2,12)/360),	// Test_PHI_Initial (degree)
+		0,									// Test_Gain_BBFB
+		0,									// Test_Bias_Amplitude
+		Math.round(freq*Math.pow(2,20)/FS),	// Test_Frequency (Hz)
+		Math.round(0*Math.pow(2,24)/FS),	// Test_Bias_Modulation_Frequency (Hz)
+		0,									// Test_Bias_Modulation_Amplitude (necessarily lower than "Test_Bias_Amplitude")
+		1,									// SW2
+		1,									// SW1
+		0,									// Pulse_timescale
+		0,									// Pulse_Amplitude
+		0									// Send_Pulse
+		)
+		sendStartDREChannels(3)
+		sendStopDREDaqAcquisition()							// To ensure that buffers are empty
+		waitMs(1)
+		sendStartDREDaqAcquisition(9)
+		sendStartDumpedDataBackup2Filename(20,filename,"")					// Generate a dump file of 10 ms
+		sendStopDumpedDataBackup()
+		print((freq).toString()+" Hz")
+		//sendStopDREChannels(3)
+	}
+	sendStopDREDaqAcquisition()
+	sendStopDREChannels(3)
+	Test_Pixel_CMD(
+	Channel_id,							// Channel_id
+	Math.round(0*Math.pow(2,8)/360),	// Test_PHI_Delay (degree)
+	Math.round(0*Math.pow(2,8)/360),	// Test_PHI_Rotate (degree)
+	Math.round(0*Math.pow(2,12)/360),	// Test_PHI_Initial (degree)
+	0,									// Test_Gain_BBFB
+	0,									// Test_Bias_Amplitude
+	Math.round(0*Math.pow(2,20)/FS),	// Test_Frequency (Hz)
+	Math.round(0*Math.pow(2,24)/FS),	// Test_Bias_Modulation_Frequency (Hz)
+	0,									// Test_Bias_Modulation_Amplitude (necessarily lower than "Test_Bias_Amplitude")
+	0,									// SW2
+	0,									// SW1
+	0,									// Pulse_timescale
+	0,									// Pulse_Amplitude
+	0									// Send_Pulse
+	)
+}
 
 ///////////////// Pixels Configuration tables initialization //////////////////////////////
 var t_Freq = new Array(Npix + 1);
@@ -923,9 +1003,6 @@ function START_DUMP(dump_type,i,channelID,filename_comment){
 			break
 		}
 	if((channelID==0 || channelID==1) && error==false){
-		//sendOKResetDaqFifo()
-		//waitMs(100)
-		
 		waitingForDDR3Empty()
 		sendOKResetDaqFifo()
 		
@@ -940,8 +1017,6 @@ function STOP_DUMP(){
 	// This function stops a dump data acquisition (No parameters)
 	sendStopDumpedDataBackup()
 	sendStopDREDaqAcquisition()
-	//waitingForDDR3Empty()
-	//sendOKReset()
 }
 
 ////////////////////////////////////////////// GENERIC TOOLS /////////////////////////////////////
@@ -1020,10 +1095,10 @@ function zipData()
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-function sendPulsesAndWaitingForInjectionDone(Channel_id, nbPulses, pulsesFreq, ModulationRatio)
+function sendPulsesAndWaitingForInjectionDone(Channel_id, nbPulses, pulsesFreq, ModulationRatio,TimeScale)
 {
 	print("  - injecting ",nbPulses,"pulses at ",pulsesFreq+" Hz....")
-	sendStartDREPulses(Channel_id,nbPulses,pulsesFreq,ModulationRatio)
+	sendStartDREPulses(Channel_id,nbPulses,pulsesFreq,ModulationRatio,TimeScale)
 	req = getNextValue("DRE_NbPulsesInjected,DRE_NbPulsesCommanded","toutes les 1000 ms");
 	waitingForNextValue(req)
 	while(DRE_NbPulsesInjected != DRE_NbPulsesCommanded)
@@ -1034,13 +1109,13 @@ function sendPulsesAndWaitingForInjectionDone(Channel_id, nbPulses, pulsesFreq, 
 }
 //---------------------------------------------------------------------------------------------------------------------------------------
 
-function sendPulsesAndWaitingForTimeout(Channel_id,pulsesFreq,durationMs, pulsesAmpl)
+function sendPulsesAndWaitingForTimeout(Channel_id,pulsesFreq,durationMs, pulsesAmpl,TimeScale)
 {
 	if (pulsesAmpl === undefined)
 		pulsesAmpl = 97
 	nbPulses = 0xFFFFFFF
 	print("  - injecting pulses at ",pulsesFreq+" Hz....")
-	sendStartDREPulses(Channel_id,nbPulses,pulsesFreq,pulsesAmpl)
+	sendStartDREPulses(Channel_id,nbPulses,pulsesFreq,pulsesAmpl,TimeScale)
 	startDate = new Date()
 	endDate = new Date()
 	endDate.setTime(startDate.getTime() + durationMs)
@@ -1066,18 +1141,18 @@ function waitingForDDR3Empty()
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-function firmware_valid(version, version_limit) {
-	return (version>=parseInt(version_limit,16))
+function firmware_valid(version, version_limit) {
+	return (version>=parseInt(version_limit,16))
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 function load_pulse(pixel_type) {
 
 	getLatestValue("DRE_FirmwareId")
-	if (firmware_valid(DRE_FirmwareId, "21C"))
+	if (firmware_valid(DRE_FirmwareId, "21C"))
 		{
 		path=".\\pulses\\"
-		switch (pixel_type) 
+		switch (pixel_type) 
 			{
 			case "CBE":
 				filename = "fake_pulse_CBE.txt"
@@ -1103,16 +1178,25 @@ function load_pulse(pixel_type) {
 		{
 			values[index] = parseInt(txt[index+1],16) // <<<<<<==========<<<<===== CHRISTOPHE CHANGE LE 16 EN 10 SI C EN DECIMAL
 			sendConfigureDREOneRegister(BRAM_base_address + index, values[index])
-		}
-		plot(values)
+		}
+		//plot(values)
 		configureAckTimeout(5000) // Reactivation de l'acknowledge
 		print("  - Done!")
-	} else 
+	} else 
 	{
 		print("  Warning! This firmware does not allow to update the pulse shape.")
-		timescale=16
+		timescale=1
 	}
 	return timescale
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
+
+function waitingForEndOfRecord()
+{
+	var recordReq = getNextValue("DISP_currentRecordBackupSize,DISP_commandedBackupRecordSize","toutes les 1000 ms");
+	do{
+		waitingForNextValue(recordReq)
+	}while (DISP_currentRecordBackupSize != DISP_commandedBackupRecordSize)
+	abortOneRequest(recordReq)
+}
