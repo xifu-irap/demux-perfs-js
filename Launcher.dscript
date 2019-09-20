@@ -13,7 +13,7 @@ session_name=get_session_name()
 DoGBW = true
 
 DoScienceSpectra = true
-nbr_spectra = 20
+nbr_spectra = 80
 spectra_duration_ms = 1000
 
 DoEnergyResol = true
@@ -22,10 +22,10 @@ PixelType="CBE"  // (CBE, banc, autre = RAZ)
 ER_nbr_pulses_calib	= 2000
 ER_nbr_pulses_meas	= 3141
 //ER_nbr_pulses_meas	= 31415
-//ER_nbr_pulses_meas	= 314159 // Une heure 20 minutes
+//ER_nbr_pulses_meas	= 314159  // Une heure 20 minutes
 //ER_nbr_pulses_meas	= 1200000
 ER_nbr_files = 1
-Threshold  = 150  // EP TRIGGER threshold
+Threshold  = 200  // EP TRIGGER threshold
 saveIQ = false  // If true the IQ files are saved during the energy resolution measurement (huge files)
 
 DoDelockTst=false

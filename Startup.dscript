@@ -1,4 +1,3 @@
-
 include("./Tools.dscript")
 
 function startup(){
@@ -23,7 +22,8 @@ function startup(){
 	if (DO_SCANFB)
 	{
 	/////////////////// SCAN-FEEDBACK  /////////////////////////
-	print("\nProcessing ScanFeedback...\n")
+	print("\nProcessing ScanFeedback...\n")
+	sendSetScanFBGainBBFB(16)
 	sendStartScanFB(800e3,6000e3,20e3,15,0)	//sendStartScanFB(800e3,9900e3,20e3,1,0)
 	waitingForEndOfScanFB()
 	print("ScanFeedback done \n")
