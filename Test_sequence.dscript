@@ -118,8 +118,9 @@ function test_sequence(
 	Channel_0_conf=define_Channel_conf(
 		Loop_Control=0,
 		StartStop=0,
-		Delock_ON=0,
+		Nonlinear_ON=0,
 		Manual_Delock=0,
+		Delock_ON=0,
 		ADC_ON=1,
 		DACB_ON=1,
 		DACF_ON=1,
@@ -171,7 +172,7 @@ function test_sequence(
 	mk_energy_resol_tst(Channel_ID, ER_nbr_pulses_calib, ER_nbr_pulses_meas, ER_nbr_files, ModulationRatio, Threshold, saveIQ, fake_pulse_timescale)}
 
 	if (DoDelockTst){
-	delock_tst(Channel_ID, Channel_0_conf,pulse_timescale)}
+	delock_tst(Channel_ID,Channel_0_conf,fake_pulse_timescale,test_pix_index)}
 
 	Stop_HK_collection()
 	saveLogToBackupDir("scriptlog.txt")
@@ -201,8 +202,9 @@ function configure_DEMUX_channel(Channel_ID, conf)
 		Channel_id=Channel_ID,
 		Loop_Control=conf.Loop_Control,
 		StartStop=conf.StartStop,
-		Delock_ON=conf.Delock_ON,
+		Nonlinear_ON=conf.Nonlinear_ON,
 		Manual_Delock=conf.Manual_Delock,
+		Delock_ON=conf.Delock_ON,
 		ADC_ON=conf.ADC_ON,
 		DACB_ON=conf.DACB_ON,
 		DACF_ON=conf.DACF_ON,
@@ -466,54 +468,90 @@ function mk_energy_resol_tst(Channel_id,  Npulses_calib,  Npulses_meas, ER_nbr_f
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-function delock_tst(Channel_id, channel_conf,pulse_timescale) {
+function delock_tst(Channel_id,channel_conf,pulse_timescale,test_pix_index) {
+
+	pulse_tm_scale_for_delock=3
+	pulse_amp_pourcent_for_nodelock=70
+	pulse_amp_pourcent_for_delock=80
 
 	print("")
 	print(">>---------------------------------------------------------")
 	print(">>  Testing Anti-delock...")
-	print("  - Activation anti-delock...")
-	print("  - Faking delock detection by command...")
 
-	// Stops DRE if needed
-	channel_conf.StartStop=0
+	print("  - Activating non-linear input module...")
+	channel_conf.Nonlinear_ON=1
 	configure_DEMUX_channel(Channel_id, channel_conf)
 
-	// Starts DRE and configure anti-delock parameters
+	print("")
+	print(">>---------------------------------------------------------")
+	print(">>  Measuring INPUT before and after non linear module")
+	print("  - Starting DRE-DEMUX...")
+	channel_conf.StartStop=1
+	configure_DEMUX_channel(Channel_id, channel_conf)  
+	waitMs(500) // wait end of ramp
+	START_DUMP("IN--NL" ,0,Channel_id,"_NL-carac_nodelock")
+	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,pulse_amp_pourcent_for_nodelock,pulse_tm_scale_for_delock)
+	STOP_DUMP()
+	START_DUMP("IN--NL" ,0,Channel_id,"_NL-carac_delock")
+	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,pulse_amp_pourcent_for_delock,pulse_tm_scale_for_delock)
+	STOP_DUMP()
+	print("  - Stopping DRE-DEMUX...")
+	channel_conf.StartStop=0
+	configure_DEMUX_channel(Channel_id, channel_conf)  
+
+	print("")
+	print("  - Testing a de-lock with anti-delock function ON...")
+	print("  - Starting DRE-DEMUX...")
 	channel_conf.StartStop=1
-	channel_conf.Wait_for_relock=7  // (0..7)
-	channel_conf.Delock_level=0x700  // (7FF = maximum positive value)
 	configure_DEMUX_channel(Channel_id, channel_conf)  
 	waitMs(500) // wait end of ramp
 
-	// Starts data acquisition	
-	START_DUMP("IQ-ALL",i,Channel_id,"_Manual_Delock")
-
-	// activates the anti-delock function
+	print("  - Activating anti-delock...")
+	channel_conf.Wait_for_relock=2  // (0..7)
+	channel_conf.Delock_level=600  // (600 : close to max of sine function, 2047 : maximum positive value)
 	channel_conf.Delock_ON=1
-	configure_DEMUX_channel(Channel_id, channel_conf)
-
-	// faking a delock detection
-	//channel_conf.Manual_Delock=1
-	//configure_DEMUX_channel(Channel_id, channel_conf)
-
-	// Faking delock command back to 0
-	channel_conf.Manual_Delock=0
-	configure_DEMUX_channel(Channel_id, channel_conf) 
-	waitMs(200)
+	configure_DEMUX_channel(Channel_id, channel_conf)  
+	
+	print("  - Sending 1 small pulse and 1 huge pulse")
+	START_DUMP("IQ-ALL",i,Channel_ID,"_NL_anti-Delock--ON")        // ( dump_type, i, channelID, filename_comment )
+	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,10,2)
+	waitMs(300)
+	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,pulse_amp_pourcent_for_delock,pulse_tm_scale_for_delock)
+	waitMs(300)
 	STOP_DUMP()
+	print("  - Stopping DRE-DEMUX...")
+	channel_conf.StartStop=0
+	configure_DEMUX_channel(Channel_id, channel_conf)  
 
-	print("  - Faking delock with a pulse...")
-	print("        - Sending 2 small and 2 big pulses")
-	START_DUMP("IQ-ALL",i,Channel_ID,"_Pulse_Delock")        // ( dump_type, i, channelID, filename_comment )
-	sendPulsesAndWaitingForInjectionDone(Channel_id,2,20,10,pulse_timescale)
-	waitMs(500)
-	sendPulsesAndWaitingForInjectionDone(Channel_id,2,20,99,pulse_timescale)
-	waitMs(500)
+	
+	print("")
+	print("  - Testing a de-lock with anti-delock function OFF...")
+
+	print("  - Starting DRE-DEMUX...")
+	channel_conf.StartStop=1
+	configure_DEMUX_channel(Channel_id, channel_conf)  
+	waitMs(500) // wait end of ramp
+
+	print("  - De-activating anti-delock...")
+	channel_conf.Delock_ON=0		// anti-delock off
+	configure_DEMUX_channel(Channel_id, channel_conf)  
+
+	print("  - Sending 1 small pulse and 1 huge pulse")
+	START_DUMP("IQ-ALL",i,Channel_ID,"_NL_anti-Delock-OFF")        // ( dump_type, i, channelID, filename_comment )
+	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,10,2)
+	waitMs(300)
+	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,pulse_amp_pourcent_for_delock,pulse_tm_scale_for_delock)
+	waitMs(300)
 	STOP_DUMP()
 	
-	print("Desactivating the anti-delock function...")
+	print("  - Stopping DRE-DEMUX...")
+	channel_conf.StartStop=0
+	print("  - De-activating the anti-delock function...")
 	channel_conf.Delock_ON=0
+	print("  - De-ctivating non-linear input module...")
+	channel_conf.Nonlinear_ON=0
 	configure_DEMUX_channel(Channel_id, channel_conf)
+
 }
 	
 ////////////////////////////////////////////////////////////////////////////////
@@ -574,6 +612,7 @@ function switch_to_openloop(Channel_ID, gain, channel_conf)
 ////////////////////////////////////////////////////////////////////////////////
 function clean_stop()
 {
+	print(">>---------------------------------------------------------")
 	sendStopDREPulses()
 	sendStopEventProcessor()
 	sendStopDREHkAcquisition()

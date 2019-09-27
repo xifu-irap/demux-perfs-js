@@ -1,5 +1,6 @@
 
-function best_config(dre_firmware_id){
+function best_config(dre_firmware_id){
+	print(dre_firmware_id)
 	switch (dre_firmware_id) {
 		case 0x020A: 
 			print("Config 0x020A")
@@ -122,17 +123,7 @@ function best_config(dre_firmware_id){
 			break
 
 		case 0x021A: 
-			print("Config 0x021A")
-			Default_amp = 120
-			Gain =30
-			BIAS_trunc = 3
-			FBCK_trunc = 1
-			FBCK_gain = 17000 // max 32767
-			Pulse = "CBE"
-			break
-			
 		case 0x021B: 
-			print("Config 0x021B")
 			Default_amp = 120
 			Gain =30
 			BIAS_trunc = 3
@@ -142,34 +133,18 @@ function best_config(dre_firmware_id){
 			break
 
 		case 0x021C: 
-			print("Config 0x021C")
-			Default_amp = 120
-			Gain =25
-			BIAS_trunc = 3
-			FBCK_trunc = 1
-			FBCK_gain = 17000 // max 32767
-			Pulse = "CBE"
-			break
-				
 		case 0x021D: 
-			print("Config 0x021D")
-			Default_amp = 120
-			Gain =25
-			BIAS_trunc = 3
-			FBCK_trunc = 1
-			FBCK_gain = 17000 // max 32767
-			Pulse = "CBE"
-			break
-			case 0x021E: 
-			print("Config 0x021E")
-			Default_amp = 120
-			Gain =25
-			BIAS_trunc = 3
-			FBCK_trunc = 1
-			FBCK_gain = 17000 // max 32767
-			Pulse = "CBE"
-			break
-				
+		case 0x021E: 
+		case 0x021F: 
+		case 0x0221: 
+			Default_amp = 120
+			Gain =25
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 17000 // max 32767
+			Pulse = "CBE"
+			break
+
 		default:
 			print("Unknown firmware id. Can't define configuration.")
 		}

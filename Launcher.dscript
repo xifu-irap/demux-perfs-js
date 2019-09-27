@@ -10,10 +10,10 @@ session_name=get_session_name()
 //-------------------------------
 // Definition of tests to be done
 //-------------------------------
-DoGBW = true
+DoGBW = false
 
-DoScienceSpectra = true
-nbr_spectra = 80
+DoScienceSpectra = false
+nbr_spectra = 50
 spectra_duration_ms = 1000
 
 DoEnergyResol = true
@@ -28,7 +28,7 @@ ER_nbr_files = 1
 Threshold  = 200  // EP TRIGGER threshold
 saveIQ = false  // If true the IQ files are saved during the energy resolution measurement (huge files)
 
-DoDelockTst=false
+DoDelockTst=true
 Delock_level=0x100, 
 Wait_for_relock=2  // (0..7)
 
@@ -72,47 +72,46 @@ Spread = "Normal"  // Default setting
 //	Fgrid = Fgrids[fgridIndex]
 
 //for (Gain = 1; Gain < 123; Gain*=2)
-for (iteration = 0; iteration < 1;iteration+=1)
+for (iteration = 0; iteration < 1;iteration++) 
 	{
-	session_comment = ""
-	//session_name="OpenLoop_Gain"+parseInt(Gain).toString()
-	print("Starting test sequence "+session_name)
-	//linearity_test_sequence(
-	test_sequence(
-		session_name,
-		session_comment,
-		operator_name,
-		Channel_ID,
-		Default_amp,
-		test_pix_index,
-		amp_pixel_test,
-		SQUID_interne,
-		Gain,
-		BIAS_trunc,
-		FBCK_trunc,
-		FBCK_gain,
-		Fgridratio,
-		dacMode,
-		Spread,
-		Npix,
-		Ncarriers,
-		FS,
-		DoGBW,
-		DoScienceSpectra,
-		nbr_spectra,
-		spectra_duration_ms,
-		DoEnergyResol,
-		PixelType,
-		ER_nbr_pulses_calib,
-		ER_nbr_pulses_meas,
-		ER_nbr_files,
-		Threshold,
-		ModulationRatio,
-		TES_NL,
-		saveIQ,
-		Test_pix_only,
-		NeighbourPix_Off,
-		openloop,
-		DoDelockTst
-		)
-}
+		session_comment = ""
+		print("Starting test sequence "+session_name)
+		//linearity_test_sequence(
+		test_sequence(
+			session_name,
+			session_comment,
+			operator_name,
+			Channel_ID,
+			Default_amp,
+			test_pix_index,
+			amp_pixel_test,
+			SQUID_interne,
+			Gain,
+			BIAS_trunc,
+			FBCK_trunc,
+			FBCK_gain,
+			Fgridratio,
+			dacMode,
+			Spread,
+			Npix,
+			Ncarriers,
+			FS,
+			DoGBW,
+			DoScienceSpectra,
+			nbr_spectra,
+			spectra_duration_ms,
+			DoEnergyResol,
+			PixelType,
+			ER_nbr_pulses_calib,
+			ER_nbr_pulses_meas,
+			ER_nbr_files,
+			Threshold,
+			ModulationRatio,
+			TES_NL,
+			saveIQ,
+			Test_pix_only,
+			NeighbourPix_Off,
+			openloop,
+			DoDelockTst
+			)
+	}

@@ -8,44 +8,6 @@ Developped by: A. Clenet / L. Ravera
 Project: Athena X-IFU / DRE-DEMUX
 
 This library contains basic functions to configure the DRE-DEMUX prototype
-
-Routine listing
-===============
-DRE_General_CMD()
-Channel_CMD()
-SendPulse()
-DRE_resetAll()
-DRE_RESET_CONFIG_CDCM()
-DRE_RESET_DAC_AD9726()
-DRE_CONFIG_DACS_AD9726()
-DRE_CONFIG_DAC_AD9726()
-DRE_CONFIG_DAC_AD9726_MODE()
-DRE_RESET_MMCM()
-DRE_CLK_SELECT()
-DRE_ADC1_DFSB()
-DRE_Startup()
-DRE_Stop()
-ScanFeedback()
-waitingForEndOfScanFB()
-ScanGBW()
-Reset_All_Configs()
-Apply_All_Configs()
-Update_All_Configs()
-Set_Pixel_Config()
-Pixels_40_Simultaneous_Freq_Scan()
-Pixels_40_Simultaneous_IV_Scan()
-START_DUMP()
-STOP_DUMP()
-maDate()
-setAndMemorize()
-saveMemorizedParametersToBackupDir()
-saveStringToBackupDir()
-saveLogToBackupDir()
-copyFileToBackupDir()
-copyDirToBackupDir()
-copyDirToBackupDirAndExecuteBat()
-zipData()
-waitingForEndOfRecord()
 */
 
 /////////////////////// Constants ///////////////////////
@@ -93,17 +55,19 @@ function DRE_General_CMD(Start_Sending_TM,Select_TM,Start_Sending_HK,Select_HK)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,Manual_Delock,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
+function Channel_CMD(Channel_id,Loop_Control,StartStop,Nonlinear_ON,Manual_Delock,Delock_ON,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
 // 18inputs
 {
 	Loop_Control_l = Math.pow(2,28);
 	Loop_Control_mask = 0xF;
 	StartStop_l = Math.pow(2,16);
 	StartStop_mask = 0x1;
-	Delock_ON_l = Math.pow(2,13);
-	Delock_ON_mask = 0x1;
+	Nonlinear_ON_l = Math.pow(2,15);
+	Nonlinear_ON_mask = 0x1;
 	Manual_Delock_l = Math.pow(2,14);
 	Manual_Delock_mask = 0x1;
+	Delock_ON_l = Math.pow(2,13);
+	Delock_ON_mask = 0x1;
 	ADC_ON_l = Math.pow(2,12);
 	ADC_ON_mask = 0x1;
 	DACB_ON_l = Math.pow(2,11);
@@ -126,8 +90,9 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,Manual_Delock,A
 	address_1 = 1 + Channel_id*(2+2*Npix+4);
 	value_1 = (Loop_Control & Loop_Control_mask) * Loop_Control_l
 	+ (StartStop & StartStop_mask) * StartStop_l
-	+ (Delock_ON & Delock_ON_mask) * Delock_ON_l
+	+ (Nonlinear_ON & Nonlinear_ON_mask) * Nonlinear_ON_l
 	+ (Manual_Delock & Manual_Delock_mask) * Manual_Delock_l
+	+ (Delock_ON & Delock_ON_mask) * Delock_ON_l
 	+ (ADC_ON & ADC_ON_mask) * ADC_ON_l
 	+ (DACB_ON & DACB_ON_mask) * DACB_ON_l
 	+ (DACF_ON & DACF_ON_mask) * DACF_ON_l
@@ -158,13 +123,14 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,Delock_ON,Manual_Delock,A
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
-function define_Channel_conf(Loop_Control,StartStop,Delock_ON,Manual_Delock,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
+function define_Channel_conf(Loop_Control,StartStop,Nonlinear_ON,Manual_Delock,Delock_ON,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
 {
 	return {
 		Loop_Control:Loop_Control,
 		StartStop:StartStop,
-		Delock_ON:Delock_ON,
+		Nonlinear_ON:Nonlinear_ON,
 		Manual_Delock:Manual_Delock,
+		Delock_ON:Delock_ON,
 		ADC_ON:ADC_ON,
 		DACB_ON:DACB_ON,
 		DACF_ON:DACF_ON,
@@ -259,8 +225,9 @@ function DRE_resetAll()
 		Channel_id=0,
 		Loop_Control=0,
 		StartStop=0,
-		Delock_ON=0,
+		Nonlinear_ON=0,
 		Manual_Delock=0,
+		Delock_ON=0,
 		ADC_ON=0,
 		DACB_ON=0,
 		DACF_ON=0,
@@ -279,8 +246,9 @@ function DRE_resetAll()
 		Channel_id=1,
 		Loop_Control=0,
 		StartStop=0,
-		Delock_ON=0,
+		Nonlinear_ON=0,
 		Manual_Delock=0,
+		Delock_ON=0,
 		ADC_ON=0,
 		DACB_ON=0,
 		DACF_ON=0,
@@ -597,7 +565,7 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 		
 		comment = "_GBW_" + (("0000000"+(Math.round(MOD_FREQ_REEL*FS/Math.pow(2,24))).toString()).slice(-7))+ "Hz_Gain" + Gain.toString()		
 		dump_type = "IQ-TST"
-		START_DUMP(dump_type,i,0,comment)        // ( dump_type, i, channelID, filename_comment )   with dump_type = [ADC, BIAS, FEEDBACK, IQ_ALL, IQ_TST, COUNTER]
+		START_DUMP(dump_type,i,0,comment)        // ( dump_type, i, channelID, filename_comment )
 		waitMs(file_size*1e3*1.1/80e3)
 		STOP_DUMP()
 		waitMs(100)
@@ -627,7 +595,7 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 		
 		comment = "_GBW_" + (("0000000"+(Math.round(MOD_FREQ_REEL*FS/Math.pow(2,24))).toString()).slice(-7))+ "Hz_Gain" + Gain.toString()
 		dump_type = "IQ-ALL"
-		START_DUMP(dump_type,i,0,comment)        // ( dump_type, i, channelID, filename_comment )   with dump_type = [ADC, BIAS, FEEDBACK, IQ_ALL, IQ_TESTBBFB, COUNTER]
+		START_DUMP(dump_type,i,0,comment)        // ( dump_type, i, channelID, filename_comment )   
 		waitMs(file_size*1e3*1.1/80e3)
 		STOP_DUMP()
 		waitMs(100)
@@ -639,89 +607,7 @@ function ScanGBW(Channel_id, bias_Amp, BBFB_gain, Freq_Test){			// Scan GBW usin
 
 	sendStopDREChannels(3)
 }
-
-//---------------------------------------------------------------------------------------------------------------------------------------
-function ScanFeedback(Channel_id, start,stop,step,Select_Input)
-// execute a scan-feedback of the DRE-DEMUX
-{
-	sendStopDREChannels(3)
-	
-	////////Set the General_Configuration --> Select_TM
-	DRE_General_CMD(
-	0,				//Start_Sending_TM
-	9,				//Select_TM --> Channel 0 - Testpixel - I;Q @ Fs
-	0,				//Start_Sending_HK
-	0 				//Select_HK
-	)
-	
-	////////Set the Channel_Configuration in Scan-Feedback mode
-	Channel_CMD(
-	Channel_id,		// Channel ID
-	0,				//Loop_Control
-	0,				//StartStop (don't touch, always STOP)
-	1,				//ADC_ON
-	0,				//DACB_ON
-	1,				//DACF_ON
-	Select_Input,	//Select_Input
-	0,				//Bias_Enabled
-	1,				//Feedback_Enabled
-	0,				//Bias_Slope_Speed
-	0,				//Bias_Truncation
-	0,				//Feedback_Truncation
-	32767,			//Compensation_Gain (32767 => unitary gain)
-	TARGET			//Feedback_Reverse
-	)
-	
-	////////Start the Scan-Feedback
-	print("Starting Scan-Feedback..")
-	//sendStopDREChannels(3)
-	for(var i = 0;i <= parseInt((stop-start)/step); i++){
-		var freq = i*step+start
-		var filename = (("000000" +(i).toString()).slice(-6)) + "_" + (freq).toString() + "Hz_ScanFeedback.dat"
-		Test_Pixel_CMD(
-		Channel_id,							// Channel_id
-		Math.round(0*Math.pow(2,8)/360),	// Test_PHI_Delay (degree)
-		Math.round(0*Math.pow(2,8)/360),	// Test_PHI_Rotate (degree)
-		Math.round(0*Math.pow(2,12)/360),	// Test_PHI_Initial (degree)
-		0,									// Test_Gain_BBFB
-		0,									// Test_Bias_Amplitude
-		Math.round(freq*Math.pow(2,20)/FS),	// Test_Frequency (Hz)
-		Math.round(0*Math.pow(2,24)/FS),	// Test_Bias_Modulation_Frequency (Hz)
-		0,									// Test_Bias_Modulation_Amplitude (necessarily lower than "Test_Bias_Amplitude")
-		1,									// SW2
-		1,									// SW1
-		0,									// Pulse_timescale
-		0,									// Pulse_Amplitude
-		0									// Send_Pulse
-		)
-		sendStartDREChannels(3)
-		sendStopDREDaqAcquisition()							// To ensure that buffers are empty
-		waitMs(1)
-		sendStartDREDaqAcquisition(9)
-		sendStartDumpedDataBackup2Filename(20,filename,"")					// Generate a dump file of 10 ms
-		sendStopDumpedDataBackup()
-		print((freq).toString()+" Hz")
-		//sendStopDREChannels(3)
-	}
-	sendStopDREDaqAcquisition()
-	sendStopDREChannels(3)
-	Test_Pixel_CMD(
-	Channel_id,							// Channel_id
-	Math.round(0*Math.pow(2,8)/360),	// Test_PHI_Delay (degree)
-	Math.round(0*Math.pow(2,8)/360),	// Test_PHI_Rotate (degree)
-	Math.round(0*Math.pow(2,12)/360),	// Test_PHI_Initial (degree)
-	0,									// Test_Gain_BBFB
-	0,									// Test_Bias_Amplitude
-	Math.round(0*Math.pow(2,20)/FS),	// Test_Frequency (Hz)
-	Math.round(0*Math.pow(2,24)/FS),	// Test_Bias_Modulation_Frequency (Hz)
-	0,									// Test_Bias_Modulation_Amplitude (necessarily lower than "Test_Bias_Amplitude")
-	0,									// SW2
-	0,									// SW1
-	0,									// Pulse_timescale
-	0,									// Pulse_Amplitude
-	0									// Send_Pulse
-	)
-}
+
 
 ///////////////// Pixels Configuration tables initialization //////////////////////////////
 var t_Freq = new Array(Npix + 1);
@@ -953,9 +839,9 @@ function START_DUMP(dump_type,i,channelID,filename_comment){
 	//This function starts a data dump in a specific acquisition mode (Starts the BBFB, starts the data acquisition).
 	// Input parameters:
 	//		dump_type (string)
+	//			IN--NL		corresponds to a dump of the INPUT signal Before and After the non linear module
 	//			IN-BIA		corresponds to a dump of the INPUT and BIAS raw data
 	//			IN-FBK		corresponds to a dump of the INPUT and FEEDBACK raw data
-	//			BI-FBK		corresponds to a dump of the BIAS and FEEDBACK raw data
 	//			IQ-TST		corresponds to a dump of the internal test pixel data (i.e. clocked at 20Msps)
 	//			IQ-ALL		corresponds to a dump of the output science data (i.e. all the science pixels sampled at 156 ksps)
 	//			COUNTR		corresponds to a dump of the internal test counter data
@@ -969,17 +855,17 @@ function START_DUMP(dump_type,i,channelID,filename_comment){
 	DUMP_MODE = 0
 	error = false
 	switch(dump_type){
-		case "IN-BIA":
-			print("    > Starting dump of IN-BIA data")
+		case "IN--NL":
+			print("    > Starting dump of NL--IN data")
 			if(channelID==0) DUMP_MODE = 0
 			else DUMP_MODE = 4
 			break
-		case "IN-FBK":
-			print("    > Starting dump of IN-FBK data")
+		case "IN-BIA":
+			print("    > Starting dump of NL-FBK data")
 			if(channelID==0) DUMP_MODE = 1
 			else DUMP_MODE = 5
 			break
-		case "BI-FBK":
+		case "IN-FBK":
 			print("    > Starting dump of BI-FBK data")
 			if(channelID==0) DUMP_MODE = 2
 			else DUMP_MODE = 6
@@ -1191,6 +1077,23 @@ function load_pulse(pixel_type) {
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
+function set_pixels_gain(gain)
+{
+	for(i=0;i<Npix;i++)
+	{
+		Set_Pixel_Config(
+			Pixel_ID=i,
+			PHI_Delay=-1,
+			PHI_Rotate=-1,
+			Gain_BBFB=gain,
+			Bias_Amplitude=-1,
+			Frequency=-1,
+			PHI_Initial=-1
+			)	
+	}
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------
 
 function waitingForEndOfRecord()
 {
@@ -1200,3 +1103,27 @@ function waitingForEndOfRecord()
 	}while (DISP_currentRecordBackupSize != DISP_commandedBackupRecordSize)
 	abortOneRequest(recordReq)
 }
+
+//---------------------------------------------------------------------------------------------------------------------------------------
+
+function maxi(m)
+{
+   var nb = maxi.arguments;
+   for(var i=1; i<nb.length; i++)
+      if(nb[i] > m)
+         m = nb[i];
+   return m;
+}
+//---------------------------------------------------------------------------------------------------------------------------------------
+
+function mini(m)
+{
+   var nb = mini.arguments;
+   for(var i=1; i<nb.length; i++)
+      if(nb[i] < m)
+         m = nb[i];
+   return m;
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------
+
