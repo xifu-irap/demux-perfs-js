@@ -1043,9 +1043,12 @@ function load_pulse(pixel_type) {
 			case "CBE":
 				filename = "fake_pulse_CBE.txt"
 				break
-			case "banc":
-				filename = "fake_pulse_banc.txt"
-				break
+			case "banc":
+				filename = "fake_pulse_banc.txt"
+				break
+			case "delock":
+				filename = "fake_pulse_fast_rise.txt"
+				break
 			default:
 				filename = "fake_pulse_empty.txt"
 			}

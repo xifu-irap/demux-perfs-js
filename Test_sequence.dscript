@@ -468,11 +468,10 @@ function mk_energy_resol_tst(Channel_id,  Npulses_calib,  Npulses_meas, ER_nbr_f
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-function delock_tst(Channel_id,channel_conf,pulse_timescale,test_pix_index) {
-
-	pulse_tm_scale_for_delock=3
-	pulse_amp_pourcent_for_nodelock=70
-	pulse_amp_pourcent_for_delock=80
+function delock_tst(Channel_id,channel_conf,test_pix_index,PixelType) {
+
+	pulse_amp_pourcent_delock_limit=20
+	pulse_amp_pourcent_for_delock=90
 
 	print("")
 	print(">>---------------------------------------------------------")
@@ -481,24 +480,28 @@ function delock_tst(Channel_id,channel_conf,pulse_timescale,test_pix_index) {
 	print("  - Activating non-linear input module...")
 	channel_conf.Nonlinear_ON=1
 	configure_DEMUX_channel(Channel_id, channel_conf)
-
-	print("")
-	print(">>---------------------------------------------------------")
-	print(">>  Measuring INPUT before and after non linear module")
-	print("  - Starting DRE-DEMUX...")
-	channel_conf.StartStop=1
-	configure_DEMUX_channel(Channel_id, channel_conf)  
-	waitMs(500) // wait end of ramp
-	START_DUMP("IN--NL" ,0,Channel_id,"_NL-carac_nodelock")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,pulse_amp_pourcent_for_nodelock,pulse_tm_scale_for_delock)
-	STOP_DUMP()
-	START_DUMP("IN--NL" ,0,Channel_id,"_NL-carac_delock")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,pulse_amp_pourcent_for_delock,pulse_tm_scale_for_delock)
-	STOP_DUMP()
-	print("  - Stopping DRE-DEMUX...")
-	channel_conf.StartStop=0
-	configure_DEMUX_channel(Channel_id, channel_conf)  
 
+	// Loading a pulse shape with a fast rise in the FPGA
+	print("  - Loading a pulse shape with a fast rise...")
+	timescale=load_pulse("delock")
+
+	print("")
+	print(">>---------------------------------------------------------")
+	print(">>  Measuring INPUT before and after non linear module")
+	print("  - Starting DRE-DEMUX...")
+	channel_conf.StartStop=1
+	configure_DEMUX_channel(Channel_id, channel_conf)  
+	waitMs(500) // wait end of ramp
+	START_DUMP("IN--NL" ,0,Channel_id,"_NL-carac_nodelock")
+	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,pulse_amp_pourcent_delock_limit,timescale)
+	STOP_DUMP()
+	START_DUMP("IN--NL" ,0,Channel_id,"_NL-carac_delock")
+	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,pulse_amp_pourcent_delock_limit+10,timescale)
+	STOP_DUMP()
+	print("  - Stopping DRE-DEMUX...")
+	channel_conf.StartStop=0
+	configure_DEMUX_channel(Channel_id, channel_conf)  
+
 	print("")
 	print("  - Testing a de-lock with anti-delock function ON...")
 	print("  - Starting DRE-DEMUX...")
@@ -507,17 +510,17 @@ function delock_tst(Channel_id,channel_conf,pulse_timescale,test_pix_index) {
 	waitMs(500) // wait end of ramp
 
 	print("  - Activating anti-delock...")
-	channel_conf.Wait_for_relock=2  // (0..7)
+	channel_conf.Wait_for_relock=1  // (0..7)
 	channel_conf.Delock_level=600  // (600 : close to max of sine function, 2047 : maximum positive value)
 	channel_conf.Delock_ON=1
 	configure_DEMUX_channel(Channel_id, channel_conf)  
 	
 	print("  - Sending 1 small pulse and 1 huge pulse")
 	START_DUMP("IQ-ALL",i,Channel_ID,"_NL_anti-Delock--ON")        // ( dump_type, i, channelID, filename_comment )
-	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,10,2)
-	waitMs(300)
-	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,pulse_amp_pourcent_for_delock,pulse_tm_scale_for_delock)
-	waitMs(300)
+	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,10,timescale)
+	waitMs(300)
+	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,pulse_amp_pourcent_for_delock,timescale)
+	waitMs(300)
 	STOP_DUMP()
 	print("  - Stopping DRE-DEMUX...")
 	channel_conf.StartStop=0
@@ -540,7 +543,7 @@ function delock_tst(Channel_id,channel_conf,pulse_timescale,test_pix_index) {
 	START_DUMP("IQ-ALL",i,Channel_ID,"_NL_anti-Delock-OFF")        // ( dump_type, i, channelID, filename_comment )
 	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,10,2)
 	waitMs(300)
-	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,pulse_amp_pourcent_for_delock,pulse_tm_scale_for_delock)
+	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,pulse_amp_pourcent_for_delock,timescale)
 	waitMs(300)
 	STOP_DUMP()
 	
@@ -551,7 +554,9 @@ function delock_tst(Channel_id,channel_conf,pulse_timescale,test_pix_index) {
 	print("  - De-ctivating non-linear input module...")
 	channel_conf.Nonlinear_ON=0
 	configure_DEMUX_channel(Channel_id, channel_conf)
-
+
+	// Re-loading the initial pulse shape in the FPGA
+	fake_pulse_timescale=load_pulse(PixelType)
 }
 	
 ////////////////////////////////////////////////////////////////////////////////
