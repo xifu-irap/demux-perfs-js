@@ -55,8 +55,7 @@ function DRE_General_CMD(Start_Sending_TM,Select_TM,Start_Sending_HK,Select_HK)
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-function Channel_CMD(Channel_id,Loop_Control,StartStop,Nonlinear_ON,Manual_Delock,Delock_ON,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
-// 18inputs
+function mk_channel_cmd1(Loop_Control,StartStop,Nonlinear_ON,Manual_Delock,Delock_ON,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation)
 {
 	Loop_Control_l = Math.pow(2,28);
 	Loop_Control_mask = 0xF;
@@ -87,8 +86,7 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,Nonlinear_ON,Manual_Deloc
 	Feedback_Truncation_l = Math.pow(2,0);
 	Feedback_Truncation_mask = 0x3;
 	
-	address_1 = 1 + Channel_id*(2+2*Npix+4);
-	value_1 = (Loop_Control & Loop_Control_mask) * Loop_Control_l
+	channel_cmd1 = (Loop_Control & Loop_Control_mask) * Loop_Control_l
 	+ (StartStop & StartStop_mask) * StartStop_l
 	+ (Nonlinear_ON & Nonlinear_ON_mask) * Nonlinear_ON_l
 	+ (Manual_Delock & Manual_Delock_mask) * Manual_Delock_l
@@ -102,9 +100,13 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,Nonlinear_ON,Manual_Deloc
 	+ (Bias_Slope_Speed & Bias_Slope_Speed_mask) * Bias_Slope_Speed_l
 	+ (Bias_Truncation & Bias_Truncation_mask) * Bias_Truncation_l
 	+ (Feedback_Truncation & Feedback_Truncation_mask) * Feedback_Truncation_l;
-	sendConfigureDREOneRegister(address_1, value_1);
-	
-	
+
+	return(channel_cmd1)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------
+function mk_channel_cmd2(Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
+{
 	Compensation_Gain_l = Math.pow(2,16);
 	Compensation_Gain_mask = 0xFFFF;
 	Feedback_Reverse_l = Math.pow(2,15);
@@ -114,12 +116,63 @@ function Channel_CMD(Channel_id,Loop_Control,StartStop,Nonlinear_ON,Manual_Deloc
 	Delock_level_l = Math.pow(2,0);
 	Delock_level_mask = 0x7FF;
 	
-	address_2 = address_1 + 1;
-	value_2 = (Compensation_Gain & Compensation_Gain_mask) * Compensation_Gain_l
+	channel_cmd2 = (Compensation_Gain & Compensation_Gain_mask) * Compensation_Gain_l
 	+ (Feedback_Reverse & Feedback_Reverse_mask) * Feedback_Reverse_l
 	+ (Wait_for_relock & Wait_for_relock_mask) * Wait_for_relock_l
 	+ (Delock_level & Delock_level_mask) * Delock_level_l;
-	sendConfigureDREOneRegister(address_2, value_2);
+	
+	return(channel_cmd2)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------
+function mk_tst_pix_cmd1(Phi_delay,Phi_rotate,Gain_bbfb,Bias_amp)
+{
+	Phi_delay_l = Math.pow(2,24);
+	Phi_delay_mask = 0xFF;
+	Phi_rotate_l = Math.pow(2,16);
+	Phi_rotate_mask	= 0xFF;
+	Gain_bbfb_l = Math.pow(2,8);
+	Gain_bbfb_mask = 0xFF;
+	Bias_amp_l = Math.pow(2,0);
+	Bias_amp_mask = 0xFF;
+	
+	tst_pix_cmd1 = (Phi_delay & Phi_delay_mask) * Phi_delay_l
+	+ (Phi_rotate & Phi_rotate_mask) * Phi_rotate_l
+	+ (Gain_bbfb & Gain_bbfb_mask) * Gain_bbfb_l
+	+ (Bias_amp & Bias_amp_mask) * Bias_amp_l;
+	
+	return(tst_pix_cmd1)
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------
+function Channel_CMD(Channel_id,Loop_Control,StartStop,Nonlinear_ON,Manual_Delock,Delock_ON,ADC_ON,DACB_ON,DACF_ON,Select_Input,Bias_Enabled,Feedback_Enabled,Bias_Slope_Speed,Bias_Truncation,Feedback_Truncation,Compensation_Gain,Feedback_Reverse,Wait_for_relock,Delock_level)
+// 18inputs
+{
+	channel_cmd1 = mk_channel_cmd1(
+		Loop_Control=Loop_Control,
+		StartStop=StartStop,
+		Nonlinear_ON=Nonlinear_ON,
+		Manual_Delock=Manual_Delock,
+		Delock_ON=Delock_ON,
+		ADC_ON=ADC_ON,
+		DACB_ON=DACB_ON,
+		DACF_ON=DACF_ON,
+		Select_Input=Select_Input,
+		Bias_Enabled=Bias_Enabled,
+		Feedback_Enabled=Feedback_Enabled,
+		Bias_Slope_Speed=Bias_Slope_Speed,
+		Bias_Truncation=Bias_Truncation,
+		Feedback_Truncation=Feedback_Truncation)
+	address_1 = 1 + Channel_id*(2+2*Npix+4);
+	sendConfigureDREOneRegister(address_1, channel_cmd1);
+	
+	channel_cmd2 = mk_channel_cmd2(
+		Compensation_Gain=Compensation_Gain,
+		Feedback_Reverse=Feedback_Reverse,
+		Wait_for_relock=Wait_for_relock,
+		Delock_level=Delock_level)
+	address_2 = address_1 + 1;
+	sendConfigureDREOneRegister(address_2, channel_cmd2);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------
@@ -180,7 +233,7 @@ function Get_PhiI_from_freq(Freq, Freq_max)
 //----------------------------------------------------------------------------------------------------------------------------
 function get_operator_name()
 {
-	OperatorTab = ["", "Laurent", "Odile", "David", "Paul", "Bernard", "Wilfried", "Christophe"]
+	OperatorTab = ["", "Laurent", "Odile", "David", "Bernard", "Wilfried", "Christophe", "Yann"]
 	OperatorId = getItem("Please, select the operator name:", OperatorTab)
 	if (OperatorId == -1) {
 		Operator_name = getText("Please, type the operator name:", "")
@@ -1043,12 +1096,12 @@ function load_pulse(pixel_type) {
 			case "CBE":
 				filename = "fake_pulse_CBE.txt"
 				break
-			case "banc":
-				filename = "fake_pulse_banc.txt"
-				break
-			case "delock":
-				filename = "fake_pulse_fast_rise.txt"
-				break
+			case "banc":
+				filename = "fake_pulse_banc.txt"
+				break
+			case "delock":
+				filename = "fake_pulse_fast_rise.txt"
+				break
 			default:
 				filename = "fake_pulse_empty.txt"
 			}

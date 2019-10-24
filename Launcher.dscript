@@ -10,13 +10,14 @@ session_name=get_session_name()
 //-------------------------------
 // Definition of tests to be done
 //-------------------------------
-DoGBW = true
+DoGBW = false
 
 DoScienceSpectra = true
+DoScienceSpectra20Msps = true
 nbr_spectra = 50
 spectra_duration_ms = 1000
 
-DoEnergyResol = true
+DoEnergyResol = false
 PixelType="CBE"  // (CBE, banc, autre = RAZ)
 //ER_nbr_pulses_meas	= 2019
 ER_nbr_pulses_calib	= 2000
@@ -98,6 +99,7 @@ for (iteration = 0; iteration < 1;iteration++)
 			FS,
 			DoGBW,
 			DoScienceSpectra,
+			DoScienceSpectra20Msps,
 			nbr_spectra,
 			spectra_duration_ms,
 			DoEnergyResol,
