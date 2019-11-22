@@ -1030,7 +1030,7 @@ function copyDirToBackupDirAndExecuteBat(sourceDir,subdir, batFile)
 function zipData()
 {
 	getLatestValue("DISP_BackupsCurrentDirectory")
-	exec(getEGSEDirectory()+"\\rar.exe m -ep "+DISP_BackupsCurrentDirectory+"\\DATA\\data.rar "+DISP_BackupsCurrentDirectory+"\\DATA\\*.dat")
+	exec(getEGSEDirectory()+"\\rar.exe m -ep "+DISP_BackupsCurrentDirectory+"\\DATA\\data.rar "+DISP_BackupsCurrentDirectory+"\\DATA\\*.*")
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------

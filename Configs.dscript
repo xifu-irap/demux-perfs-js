@@ -144,12 +144,28 @@ function best_config(dre_firmware_id){
 			FBCK_gain = 17000 // max 32767
 			Pulse = "CBE"
 			break
-		case 0x0222: 
+		case 0x0222: 
+			Default_amp = 120
+			Gain =25
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 16500 // max 32767
+			Pulse = "CBE"
+			break
+		case 0x0223: 
 			Default_amp = 120
 			Gain =25
 			BIAS_trunc = 3
 			FBCK_trunc = 1
-			FBCK_gain = 17000 // max 32767
+			FBCK_gain = 16500 // max 32767
+			Pulse = "CBE"
+			break
+		case 0x0224: 
+			Default_amp = 120
+			Gain =25
+			BIAS_trunc = 3
+			FBCK_trunc = 1
+			FBCK_gain = 16500 // max 32767
 			Pulse = "CBE"
 			break
 

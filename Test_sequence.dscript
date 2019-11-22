@@ -24,7 +24,7 @@ function test_sequence(
 	Ncarriers,
 	FS,
 	DoGBW,
-	DoScienceSpectra,
+	DoScienceSpectra,
 	DoScienceSpectra20Msps,
 	nbr_spectra,
 	spectra_duration_ms,
@@ -68,8 +68,8 @@ function test_sequence(
 	setAndMemorize( "Ncarriers", Ncarriers )
 	setAndMemorize( "FS", FS)
 	setAndMemorize( "DoGBW"	, DoGBW)
-	setAndMemorize( "DoScienceSpectra", DoScienceSpectra)
-	setAndMemorize( "DoScienceSpectra20Msps", DoScienceSpectra20Msps)
+	setAndMemorize( "DoScienceSpectra", DoScienceSpectra)
+	setAndMemorize( "DoScienceSpectra20Msps", DoScienceSpectra20Msps)
 	setAndMemorize( "nbr_spectra", nbr_spectra)
 	setAndMemorize( "spectra_duration_ms", spectra_duration_ms)
 	setAndMemorize( "DoEnergyResol", DoEnergyResol)
@@ -465,8 +465,8 @@ function mk_energy_resol_tst(Channel_id,  Npulses_calib,  Npulses_meas, ER_nbr_f
 		sendPulsesAndWaitingForInjectionDone(Channel_id,Npulses_meas,65,ModulationRatio,pulse_timescale)
 		sendStopEventProcessor()
 		sendStopDumpedDataBackup()
-		sendStopDREDaqAcquisition()
 	}
+	sendStopDREDaqAcquisition()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

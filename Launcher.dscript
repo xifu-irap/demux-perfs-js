@@ -10,26 +10,26 @@ session_name=get_session_name()
 //-------------------------------
 // Definition of tests to be done
 //-------------------------------
-DoGBW = false
+DoGBW = true
 
 DoScienceSpectra = true
-DoScienceSpectra20Msps = true
+DoScienceSpectra20Msps = false
 nbr_spectra = 50
 spectra_duration_ms = 1000
 
-DoEnergyResol = false
+DoEnergyResol = true
 PixelType="CBE"  // (CBE, banc, autre = RAZ)
 //ER_nbr_pulses_meas	= 2019
 ER_nbr_pulses_calib	= 2000
+//ER_nbr_pulses_meas	= 3141
 ER_nbr_pulses_meas	= 3141
-//ER_nbr_pulses_meas	= 31415
 //ER_nbr_pulses_meas	= 314159  // Une heure 20 minutes
 //ER_nbr_pulses_meas	= 1200000
-ER_nbr_files = 1
+ER_nbr_files = 3
 Threshold  = 200  // EP TRIGGER threshold
 saveIQ = false  // If true the IQ files are saved during the energy resolution measurement (huge files)
 
-DoDelockTst=true
+DoDelockTst=false
 Delock_level=0x100, 
 Wait_for_relock=2  // (0..7)
 
@@ -74,8 +74,10 @@ Spread = "Normal"  // Default setting
 
 //for (Gain = 1; Gain < 123; Gain*=2)
 for (iteration = 0; iteration < 1;iteration++) 
+//for (test_pix_index = 3; test_pix_index < 39;test_pix_index+=5) 
 	{
 		session_comment = ""
+//		session_name = "pixId-"+test_pix_index.toString()
 		print("Starting test sequence "+session_name)
 		//linearity_test_sequence(
 		test_sequence(
