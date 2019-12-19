@@ -466,7 +466,7 @@ function mk_energy_resol_tst(Channel_id,  Npulses_calib,  Npulses_meas, ER_nbr_f
 		sendStopEventProcessor()
 		sendStopDumpedDataBackup()
 	}
-	sendStopDREDaqAcquisition()
+	sendStopDREDaqAcquisition()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

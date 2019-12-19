@@ -3,6 +3,30 @@ function carrier_freq2(fgridratio, nbcarriers)
 // This function computes the set of carrier frequencies
 	{
 	switch (nbcarriers) {
+		case 1:  // 1 carrier at Fs/4
+			// Sampling frequency:          19530000 Hz
+			// Mean frequency spacing:        N/A
+			// 1-sigma frequency dispersion:    0 Hz
+			// Frequency grid:                  Fs/4
+		    // Crest factor: 1.41
+			// Set of carrier frequencies (Hz):
+			freqtab=[19530000./4.];
+		   	// Set of carrier initial phases (Deg):
+   			phitab=[0];
+			break;
+		
+		case 2:  // 2 carriers at Fs/8 and Fs/4
+			// Sampling frequency:          19530000 Hz
+			// Mean frequency spacing:        N/A
+			// 1-sigma frequency dispersion:    0 Hz
+			// Frequency grid:                  Fs/4
+		    // Crest factor: 1.41
+			// Set of carrier frequencies (Hz):
+			freqtab=[19530000./8., 19530000./4.];
+		   	// Set of carrier initial phases (Deg):
+   			phitab=[0, 90];
+			break;
+		
 		case 20:
 			// Sampling frequency:          19530000 Hz
 			// Mean frequency spacing:        200000 Hz
@@ -23,7 +47,7 @@ function carrier_freq2(fgridratio, nbcarriers)
 				];
 			break;
 
-		default: 
+		default:   // 40 carriers
 			switch (fgridratio) {
 				case Math.pow(2,8):		
 					// Sampling frequency:          19530000 Hz
@@ -54,23 +78,23 @@ function carrier_freq2(fgridratio, nbcarriers)
 					// Mean frequency spacing:        100000 Hz
 					// 1-sigma frequency dispersion:    2000 Hz
 					// Frequency grid:                  2384 Hz
-					// Crest factor: 3.02
+					// Crest factor: 2.8736
 					// Set of carrier frequencies (Hz):
 					freqtab=[
-						998909.91211, 1096655.27344, 1201552.73438, 1301682.12891, 1399427.49023, 1501940.91797, 1602070.31250, 1697431.64062,
-						1802329.10156, 1904842.52930, 1997819.82422, 2102717.28516, 2198078.61328, 2298208.00781, 2398337.40234, 2500850.83008,
-						2600980.22461, 2703493.65234, 2801239.01367, 2898984.37500, 3001497.80273, 3101627.19727, 3201756.59180, 3299501.95312,
-						3402015.38086, 3499760.74219, 3599890.13672, 3697635.49805, 3797764.89258, 3895510.25391, 4000407.71484, 4102921.14258,
-						4195898.43750, 4298411.86523, 4398541.25977, 4501054.68750, 4601184.08203, 4698929.44336, 4801442.87109, 4901572.26562
+						996525.8789062, 1094271.2402344, 1196784.6679688, 1299298.0957031, 1399427.4902344, 1499556.8847656, 1599686.2792969, 1697431.6406250,
+						1799945.0683594, 1902458.4960938, 2000203.8574219, 2097949.2187500, 2198078.6132812, 2300592.0410156, 2400721.4355469, 2498466.7968750,
+						2600980.2246094, 2696341.5527344, 2798854.9804688, 2896600.3417969, 2996729.7363281, 3099243.1640625, 3199372.5585938, 3299501.9531250,
+						3397247.3144531, 3499760.7421875, 3602274.1699219, 3697635.4980469, 3800148.9257812, 3897894.2871094, 3998023.6816406, 4100537.1093750,
+						4200666.5039062, 4296027.8320312, 4400925.2929688, 4498670.6542969, 4598800.0488281, 4698929.4433594, 4799058.8378906, 4899188.2324219
 						];
 					// Set of carrier initial phases (Deg):
 					phitab=[
-						27.86133, 111.53320, 354.02344, 244.33594, 31.11328, 352.08984, 174.55078, 167.34375,
-						23.64258, 32.43164, 320.44922, 110.21484, 68.20312, 10.54687, 348.13477, 96.94336,
-						200.03906, 276.85547, 185.00977, 113.29102, 291.70898, 295.66406, 119.35547, 185.97656,
-						6.59180, 159.34570, 254.79492, 229.48242, 95.97656, 340.66406, 41.13281, 256.81641,
-						270.61523, 265.34180, 288.89648, 217.44141, 54.75586, 280.10742, 148.27148, 304.89258
-						];
+						   107.7727850,    203.1627632,    298.8801967,    127.5994160,    188.5333522,      2.4112296,     67.1484022,    171.1652201,
+						   150.8047598,    322.1950151,    130.0851989,     81.4760375,    122.0745452,     50.3190029,    241.3635474,    325.3371947,
+						   347.0680053,    355.4681262,    255.6400237,    168.1738017,    299.6908905,     48.5313223,     62.9947822,    170.4643769,
+						   206.6976474,    151.1035278,     36.3290275,    131.4925075,     21.9212012,    265.7612321,    144.8605492,    270.6517507,
+						   326.9658489,    349.3146804,    313.9478634,     73.1778711,    129.7487013,    132.9821082,    205.3450111,    139.3232841
+					];
 					break;
 
 				case Math.pow(2,14):
@@ -314,8 +338,8 @@ function carrier_freq(Spread, Fgrid, nbcarriers)
 function print_freq_tab(FREQtab)
 // This function print a set of nfrequencies
 	{
-	print("")
-	print(">>---------------------------------------------------------")
+	print("")
+	print(">>---------------------------------------------------------")
 	print("The values of the carrier frequencies set in the firmware are:")
 	Ncol=8
 	Nlines=5
@@ -338,7 +362,7 @@ function print_freq_tab(FREQtab)
 function print_phi_tab(PHIItab)
 // This function print a set of nfrequencies
 	{
-	print("")
+	print("")
 	print("The values of the initial phases set in the firmware are:")
 	Ncol=8
 	Nlines=5

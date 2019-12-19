@@ -1183,3 +1183,47 @@ function mini(m)
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 
+function check_DAC_BIAS_mode()
+// !!! WARNING
+// This function may stop a sequence of periodic HK collection.
+{
+	mask=Math.pow(2,23)-1
+
+// Verification du mode demande
+
+	// Request data from DAC
+	sendConfigureDREOneRegister(0xAE,0x8E00)
+	waitMs(10)
+	sendConfigureDREOneRegister(0xAD,0x40000000)  // choix canal SPI sur DAC bias 173
+	waitMs(10)
+	sendConfigureDREOneRegister(0xAD,0x40000020)  // Ecriture de la data SPI pour le DAC_BIAS_CH0 (registre 173)
+	waitMs(10)
+	sendConfigureDREOneRegister(0xAD,0x40000000)  // Reset du registre 173
+	waitMs(10)
+	sendStartDREHkAcquisition(2)	// request  the register HK
+	waitMs(200)
+	getLatestValue("DRE_registers")
+	DAC_mode=(DRE_registers[173] & mask)
+	switch (DAC_mode) {
+	case 0x5040:
+		print("DAC bias mode selected to Self-calibrated")
+		// Verification que le DAC est bien dans le mode
+		sendConfigureDREOneRegister(0xAE,0x8E00)
+		sendConfigureDREOneRegister(0xAD,0x40000000)  // choix canal SPI sur DAC bias 173
+		sendConfigureDREOneRegister(0xAD,0x40000020)  // Ecriture de la data SPI pour le DAC_BIAS_CH0 (registre 173)
+		sendConfigureDREOneRegister(0xAD,0x40000000)  // Reset du registre 173
+		sendStartDREHkAcquisition(2)	// request  the register HK
+		waitMs(200)
+		getLatestValue("DRE_registers")
+		DAC_mode_OK=(DRE_registers[173] & mask)
+		print(DAC_mode_OK)
+		if (DAC_mode_OK==0x0840)
+			{print("DAC bias mode selection confirmed")}
+		else
+			{print("Warning, DAC bias mode not confirmed!!")}
+
+		break
+	default:
+		print("DAC bias configured in DON'T KNOW mode !!")
+	}
+}
