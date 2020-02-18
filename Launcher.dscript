@@ -13,7 +13,7 @@ session_name=get_session_name()
 DoGBW = true
 
 DoScienceSpectra = true
-DoScienceSpectra20Msps = false
+DoScienceSpectra20Msps = true
 nbr_spectra = 50
 spectra_duration_ms = 1000
 
@@ -39,7 +39,7 @@ NeighbourPix_Off = false
 
 // Definition of parameters ///////////////////////////////////////////////////////////////////
 // Definition of the firmware frequency grid
-Fgridratios = new Array(Math.pow(2,20),Math.pow(2,19),Math.pow(2,18),Math.pow(2,17),Math.pow(2,16),Math.pow(2,15),Math.pow(2,14),Math.pow(2,13),Math.pow(2,8))
+Fgridratios = new Array(Math.pow(2,20),Math.pow(2,19),Math.pow(2,18),Math.pow(2,17),Math.pow(2,16),Math.pow(2,15),Math.pow(2,14),Math.pow(2,13),Math.pow(2,8),Math.pow(2,14)+Math.pow(2,20))
 Ncarriers=40
 
 // liste des modes du DAC AD9726:
@@ -61,7 +61,7 @@ Channel_ID = 0
 //test_pix_index	= 31
 test_pix_index	= 0
 SQUID_interne = 0
-index = 7
+index = 6
 Fgridratio = Fgridratios[index]
 dacMode = dacModes[0]
 

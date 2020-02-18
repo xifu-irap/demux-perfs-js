@@ -3,30 +3,30 @@ function carrier_freq2(fgridratio, nbcarriers)
 // This function computes the set of carrier frequencies
 	{
 	switch (nbcarriers) {
-		case 1:  // 1 carrier at Fs/4
-			// Sampling frequency:          19530000 Hz
-			// Mean frequency spacing:        N/A
-			// 1-sigma frequency dispersion:    0 Hz
-			// Frequency grid:                  Fs/4
-		    // Crest factor: 1.41
-			// Set of carrier frequencies (Hz):
-			freqtab=[19530000./4.];
-		   	// Set of carrier initial phases (Deg):
-   			phitab=[0];
-			break;
-		
-		case 2:  // 2 carriers at Fs/8 and Fs/4
-			// Sampling frequency:          19530000 Hz
-			// Mean frequency spacing:        N/A
-			// 1-sigma frequency dispersion:    0 Hz
-			// Frequency grid:                  Fs/4
-		    // Crest factor: 1.41
-			// Set of carrier frequencies (Hz):
-			freqtab=[19530000./8., 19530000./4.];
-		   	// Set of carrier initial phases (Deg):
-   			phitab=[0, 90];
-			break;
-		
+		case 1:  // 1 carrier at Fs/4
+			// Sampling frequency:          19530000 Hz
+			// Mean frequency spacing:        N/A
+			// 1-sigma frequency dispersion:    0 Hz
+			// Frequency grid:                  Fs/4
+		    // Crest factor: 1.41
+			// Set of carrier frequencies (Hz):
+			freqtab=[19530000./4.];
+		   	// Set of carrier initial phases (Deg):
+   			phitab=[0];
+			break;
+
+		case 2:  // 2 carriers at Fs/8 and Fs/4
+			// Sampling frequency:          19530000 Hz
+			// Mean frequency spacing:        N/A
+			// 1-sigma frequency dispersion:    0 Hz
+			// Frequency grid:                  Fs/4
+		    // Crest factor: 1.41
+			// Set of carrier frequencies (Hz):
+			freqtab=[19530000./8., 19530000./4.];
+		   	// Set of carrier initial phases (Deg):
+   			phitab=[0, 90];
+			break;
+
 		case 20:
 			// Sampling frequency:          19530000 Hz
 			// Mean frequency spacing:        200000 Hz
@@ -70,6 +70,30 @@ function carrier_freq2(fgridratio, nbcarriers)
 						161.27930, 175.07812, 185.36133, 167.69531, 77.69531, 270.70313, 69.78516, 174.02344,
 						286.96289, 347.34375, 319.65820, 39.11133, 334.33594, 208.47656, 350.41992, 36.38672,
 						98.43750, 320.27344, 313.68164, 221.57227, 116.19141, 305.68359, 151.87500, 130.95703
+						];
+					break;
+
+				case Math.pow(2,14) + Math.pow(2,20):		
+					// Sampling frequency:          19530000 Hz
+					// Mean frequency spacing:        100000 Hz
+					// 1-sigma frequency dispersion:    2000 Hz
+					// Frequency grid:                  1192 + 18 Hz
+					// Crest factor:                    3.3326942790726974
+					// Set of carrier frequencies (Hz):
+					freqtab=[    
+						1002411.46088, 1101684.09348, 1200956.72607, 1297808.07495, 1399501.99127, 1498774.62387, 1602889.82391, 1697319.88907,     
+						1800224.44725, 1897075.79613, 2002401.63803, 2099252.98691, 2199736.26137, 2301430.17769, 2397070.88470, 2496343.51730,     
+						2596826.79176, 2702152.63367, 2799003.98254, 2894644.68956, 2996338.60588, 3096821.88034, 3197305.15480, 3301420.35484,     
+						3400692.98744, 3501176.26190, 3598027.61078, 3698510.88524, 3792940.95039, 3899477.43416, 3998750.06676, 4096812.05750,     
+						4199716.61568, 4301410.53200, 4400683.16460, 4499955.79720, 4601649.71352, 4702132.98798, 4798984.33685, 4897046.32759 
+						];
+					// Set of carrier initial phases (Deg):
+					phitab=[    
+						277.23498,  7.30595, 184.02708, 116.07985, 271.29163, 201.37568, 80.00372, 330.46316,     
+						258.41903, 101.07190, 16.50202, 60.37930, 177.31398, 50.29364, 349.66483, 150.34686,     
+						240.29073, 111.05765, 30.82543, 16.23958, 295.46884, 276.54160, 147.28161, 231.50081,     
+						131.77617, 318.90882, 296.02194, 83.09532, 157.06794, 167.31125, 197.56132, 195.29495,     
+						238.12825, 221.43332, 16.93967, 79.18655, 135.30477, 64.18820, 59.84188, 334.02784 
 						];
 					break;
 

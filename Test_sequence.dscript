@@ -335,6 +335,10 @@ function mk_dumps(Channel_ID, duration_ms)
 	START_DUMP("IN-FBK",0,Channel_ID,"")
 	waitMs(duration_ms)
 	STOP_DUMP()
+	
+	START_DUMP("COUNTR",0,Channel_ID,"")
+	waitMs(duration_ms)
+	STOP_DUMP()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -430,13 +434,7 @@ function mk_energy_resol_tst(Channel_id,  Npulses_calib,  Npulses_meas, ER_nbr_f
 
 	print("  - Measuring noise records...")
 	sendStartDREDaqAcquisition(8) // IQ-ALL
-
-	if (saveIQ)
-		{
-		print("        Saving IQ data")
-		sendStartDumpedDataBackup2Filename(0, maDate()+"_EP_noise.dat","")
-		}
-	sendStartRecordBackup(2000,"")
+	sendStartRecordBackup(2000,maDate()+"_mk_EP_filter_noise_record.fits")
 	waitingForEndOfRecord()
 	sendStopDumpedDataBackup()
 

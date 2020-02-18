@@ -1153,11 +1153,24 @@ function set_pixels_gain(gain)
 
 function waitingForEndOfRecord()
 {
+if (typeof DISP_dumpState === 'undefined')
+{	
 	var recordReq = getNextValue("DISP_currentRecordBackupSize,DISP_commandedBackupRecordSize","toutes les 1000 ms");
 	do{
 		waitingForNextValue(recordReq)
 	}while (DISP_currentRecordBackupSize != DISP_commandedBackupRecordSize)
 	abortOneRequest(recordReq)
+	}
+	else
+	{
+	var recordReq = getNextValue("DISP_dumpState","toutes les 100 ms");
+	waitMs(250)
+	do{
+		waitingForNextValue(recordReq)
+	}
+	while(DISP_dumpState != 0)
+	abortOneRequest(recordReq)
+}
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
