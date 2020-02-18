@@ -1,5 +1,4 @@
 include("./Tools.dscript")
-include("./frequency_sets.dscript")
 
 ////////////////////////////////////////////////////////////////////////////////
 // Test sequence
@@ -17,11 +16,7 @@ function test_sequence(
 	BIAS_trunc,
 	FBCK_trunc,
 	FBCK_gain,
-	Fgridratio,
 	dacMode,
-	Spread,
-	Npix,
-	Ncarriers,
 	FS,
 	DoGBW,
 	DoScienceSpectra,
@@ -36,13 +31,7 @@ function test_sequence(
 	Threshold,
 	ModulationRatio,
 	TES_NL,
-	saveIQ,
-	Test_pix_only,
-	NeighbourPix_Off,
-	openloop,
-	DoDelockTst, 
-	Delock_level, 
-	Wait_for_relock
+	saveIQ
 	)
 // This function makes one test sequence for a set of parameters
 {
@@ -61,11 +50,7 @@ function test_sequence(
 	setAndMemorize( "BIAS_trunc", BIAS_trunc)
 	setAndMemorize( "FBCK_trunc", FBCK_trunc)
 	setAndMemorize( "FBCK_gain", FBCK_gain)
-	setAndMemorize( "Fgrid", FS/Fgridratio)
 	setAndMemorize( "dacMode", dacMode)
-	setAndMemorize( "Spread", Spread )
-	setAndMemorize( "Npix", Npix )
-	setAndMemorize( "Ncarriers", Ncarriers )
 	setAndMemorize( "FS", FS)
 	setAndMemorize( "DoGBW"	, DoGBW)
 	setAndMemorize( "DoScienceSpectra", DoScienceSpectra)
@@ -81,12 +66,6 @@ function test_sequence(
 	setAndMemorize( "ModulationRatio", ModulationRatio)
 	setAndMemorize( "TES_NL", TES_NL)
 	setAndMemorize( "saveIQ", saveIQ)
-	setAndMemorize( "Test_pix_only", Test_pix_only)
-	setAndMemorize( "NeighbourPix_Off", NeighbourPix_Off)
-	setAndMemorize( "openloop", openloop)
-	setAndMemorize( "DoDelockTst", DoDelockTst)
-	setAndMemorize( "Delock_level", Delock_level)
-	setAndMemorize( "Wait_for_relock", Wait_for_relock)
 
 	copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
 	
@@ -97,18 +76,33 @@ function test_sequence(
 	copyFileToBackupDir(".\\Tools.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Tools.dscript") 
 	copyFileToBackupDir(".\\Startup.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Startup.dscript") 
 	copyFileToBackupDir(".\\Configs.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Configs.dscript") 
-	copyFileToBackupDir(".\\frequency_sets.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\frequency_sets.dscript") 
-	copyFileToBackupDir(".\\EEPCalibration.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\EEPCalibration.dscript") 
 	copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/").pop()) // sauvegarde du script courant
 	copyDirToBackupDir(getEGSEDirectory()+"\\EP",".\\EP_PARAMETERS")	
 
 	saveMemorizedParametersToBackupDir("SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/").pop().split(".")[0]+"_PARAMETERS.txt")
 	
-	// Computing the carrier frequencies
-	carriers_param=carrier_freq2(Fgridratio, Ncarriers)
-	//carriers_param = carrier_freq(Spread, Fgrid, Npix)
-	FREQtab=carriers_param.FREQtab
-	PHIItab=carriers_param.PHIItab
+	////// Defining the carrier frequencies
+	// Sampling frequency:          19530000 Hz
+	// Mean frequency spacing:        100000 Hz
+	// 1-sigma frequency dispersion:    2000 Hz
+	// Frequency grid:                  1192 Hz
+	// Crest factor: 3.15
+	// Set of carrier frequencies (Hz):
+	FREQtab=[
+		1002485.96191, 1096655.27344, 1199168.70117, 1300490.11230, 1399427.49023, 1499556.88477, 1597302.24609, 1697431.64062,
+		1797561.03516, 1896498.41309, 2001395.87402, 2100333.25195, 2200462.64648, 2298208.00781, 2400721.43555, 2496082.76367,
+		2600980.22461, 2699917.60254, 2802431.03027, 2902560.42480, 3001497.80273, 3100435.18066, 3196988.52539, 3299501.95312,
+		3399631.34766, 3498568.72559, 3599890.13672, 3701211.54785, 3801340.94238, 3901470.33691, 3998023.68164, 4102921.14258,
+		4200666.50391, 4297219.84863, 4398541.25977, 4498670.65430, 4602376.09863, 4702505.49316, 4799058.83789, 4896804.19922
+		];
+	// Set of carrier initial phases (Deg):
+	PHIItab=[
+		188.96484, 231.59180, 303.48633, 74.79492, 75.76172, 29.17969, 347.25586, 350.06836,
+		130.42969, 350.68359, 43.06641, 205.75195, 30.84961, 223.85742, 69.52148, 308.75977,
+		128.40820, 154.95117, 82.52930, 82.88086, 165.49805, 142.73438, 137.28516, 339.16992,
+		49.13086, 167.69531, 279.31641, 110.83008, 38.49609, 36.82617, 276.76758, 42.09961,
+		119.53125, 200.12695, 69.78516, 225.08789, 347.51953, 283.00781, 348.31055, 184.13086
+		];
 	
 	// Resetting the DEMUX firmware
 	DRE_resetAll()
@@ -147,10 +141,7 @@ function test_sequence(
 		ScanGBW(Channel_ID, Default_amp/2, Gain, FREQtab[test_pix_index])}
 	
 	// Configuration of the DEMUX firmware (pixels)
-	configure_DEMUX_pixels(Channel_ID, Ncarriers, Default_amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only, NeighbourPix_Off)
-
-	if (openloop) {
-		switch_to_openloop(Channel_ID, Gain)}
+	configure_DEMUX_pixels(Channel_ID, Default_amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test)
 
 	//  Start DEMUX
 	sendStartDREChannels(3)
@@ -158,9 +149,6 @@ function test_sequence(
 
 	// Measurement of the data dumps
 	mk_dumps(Channel_ID, 1000)
-
-	// Measurement of one DDS output dump (for test only)
-	//mk_dumps_DDSout(1000)
 
 	// Measurement of IQ files for spectra characterisation
 	if (DoScienceSpectra) {
@@ -172,9 +160,6 @@ function test_sequence(
 	if (DoEnergyResol){
 	// Measurement of energy resolution
 	mk_energy_resol_tst(Channel_ID, ER_nbr_pulses_calib, ER_nbr_pulses_meas, ER_nbr_files, ModulationRatio, Threshold, saveIQ, fake_pulse_timescale)}
-
-	if (DoDelockTst){
-	delock_tst(Channel_ID,Channel_0_conf,fake_pulse_timescale,test_pix_index)}
 
 	Stop_HK_collection()
 	saveLogToBackupDir("scriptlog.txt")
@@ -224,7 +209,7 @@ function configure_DEMUX_channel(Channel_ID, conf)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-function configure_DEMUX_pixels(Channel_ID, Ncar, Amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test, Test_pix_only, NeighbourPix_Off)
+function configure_DEMUX_pixels(Channel_ID, Amp, Gain, FREQtab, PHIItab, test_pix_index, amp_pixel_test)
 // This function configures the pixels' parameters of the DEMUX firmware for the test
 // In this configuration 39 standard pixels and the test pixel are used.
 // Input parameters:
@@ -235,25 +220,21 @@ function configure_DEMUX_pixels(Channel_ID, Ncar, Amp, Gain, FREQtab, PHIItab, t
 //		test_pix_index: (number)
 //			the index of the standard pixel to be replaced by the test pixel
 //			if -1 the test pixel is switched off
-{
+{
+	Ncar=FREQtab.length
 	Reset_All_Configs(0)
-	if (Test_pix_only){
-		print("Standard pixels switched off")
-		Reset_All_Configs(Channel_ID)
-	} else {
-		print("Standard pixels switched on")
-		for(var Pixel_ID=0;Pixel_ID<Ncar;Pixel_ID++)
-		{
-			Set_Pixel_Config(
-				Pixel_ID=Pixel_ID,
-				PHI_Delay=-1,
-				PHI_Rotate=0,
-				Gain_BBFB=Gain,
-				Bias_Amplitude=Amp,
-				Frequency=FREQtab[Pixel_ID],
-				PHI_Initial=PHIItab[Pixel_ID]
-				)
-		}
+	print("Standard pixels switched on")
+	for(var Pixel_ID=0;Pixel_ID<Ncar;Pixel_ID++)
+	{
+		Set_Pixel_Config(
+			Pixel_ID=Pixel_ID,
+			PHI_Delay=-1,
+			PHI_Rotate=0,
+			Gain_BBFB=Gain,
+			Bias_Amplitude=Amp,
+			Frequency=FREQtab[Pixel_ID],
+			PHI_Initial=PHIItab[Pixel_ID]
+			)
 	}
 
 	////// Test pixel's settings
@@ -296,11 +277,6 @@ function configure_DEMUX_pixels(Channel_ID, Ncar, Amp, Gain, FREQtab, PHIItab, t
 		modulation_amplitude=0
 		)
 
-	if (NeighbourPix_Off) // switching test pixel neighbours off
-	{
-			if (test_pix_index>0) { Set_Pixel_Off(test_pix_index-1)}
-			if (test_pix_index<39) { Set_Pixel_Off(test_pix_index+1)}
-	}
 	// Apply the pixels configuration 
 	Update_All_Configs(0)
 	Apply_All_Configs(0)		
@@ -333,38 +309,6 @@ function mk_dumps(Channel_ID, duration_ms)
 	STOP_DUMP()
 	
 	START_DUMP("IN-FBK",0,Channel_ID,"")
-	waitMs(duration_ms)
-	STOP_DUMP()
-	
-	START_DUMP("COUNTR",0,Channel_ID,"")
-	waitMs(duration_ms)
-	STOP_DUMP()
-}
-
-////////////////////////////////////////////////////////////////////////////////
-function mk_dumps_DDSout(duration_ms)
-// This function makes a dump of one DDS output.
-// This is only compatible with some test versions of the firmware
-//		duration_ms: number
-//			duration of each dump
-{
-	print(">>---------------------------------------------------------")
-	print(">>  Measuring DDS output dump")
-
-	Channel_ID = 1
-	START_DUMP("IN-BIA", 0, Channel_ID, "DDSout1")
-	waitMs(duration_ms)
-	STOP_DUMP()
-
-	START_DUMP("IN-FBK", 0, Channel_ID, "DDSout2")
-	waitMs(duration_ms)
-	STOP_DUMP()
-
-	START_DUMP("BI-FBK", 0, Channel_ID, "DDSout3")
-	waitMs(duration_ms)
-	STOP_DUMP()
-
-	START_DUMP("IQ-TST", 0, Channel_ID, "DDSout4")
 	waitMs(duration_ms)
 	STOP_DUMP()
 }
@@ -408,14 +352,7 @@ function check_pulses(Channel_id, ModulationRatio,pulse_timescale)
 	START_DUMP("IN-BIA" ,0,Channel_id,"_PULSE")
 	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,ModulationRatio,pulse_timescale)
 	STOP_DUMP()
-	
-	print("")
-	print(">>---------------------------------------------------------")
-	print(">>  Measuring ADC and FEEDBACK dumps with pulses")
-	START_DUMP("IN-FBK" ,0,Channel_id,"_PULSE")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,10,50,ModulationRatio,pulse_timescale)
-	STOP_DUMP()
-	
+		
 	print("")
 	print(">>---------------------------------------------------------")
 	print(">>  Measuring IQ dumps with pulses")
@@ -467,159 +404,7 @@ function mk_energy_resol_tst(Channel_id,  Npulses_calib,  Npulses_meas, ER_nbr_f
 	sendStopDREDaqAcquisition()
 }
 
-////////////////////////////////////////////////////////////////////////////////
-function delock_tst(Channel_id,channel_conf,test_pix_index,PixelType) {
-
-	pulse_amp_pourcent_delock_limit=20
-	pulse_amp_pourcent_for_delock=90
-
-	print("")
-	print(">>---------------------------------------------------------")
-	print(">>  Testing Anti-delock...")
-
-	print("  - Activating non-linear input module...")
-	channel_conf.Nonlinear_ON=1
-	configure_DEMUX_channel(Channel_id, channel_conf)
-
-	// Loading a pulse shape with a fast rise in the FPGA
-	print("  - Loading a pulse shape with a fast rise...")
-	timescale=load_pulse("delock")
-
-	print("")
-	print(">>---------------------------------------------------------")
-	print(">>  Measuring INPUT before and after non linear module")
-
-	print("  - Starting DRE-DEMUX...")
-	channel_conf.StartStop=1
-	configure_DEMUX_channel(Channel_id, channel_conf)  
-	waitMs(500) // wait end of ramp
-
-	START_DUMP("IN--NL" ,0,Channel_id,"_NL-carac_nodelock")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,1,50,pulse_amp_pourcent_delock_limit,timescale)
-	STOP_DUMP()
-
-	START_DUMP("IN--NL" ,0,Channel_id,"_NL-carac_delock")
-	sendPulsesAndWaitingForInjectionDone(Channel_id,1,50,pulse_amp_pourcent_delock_limit+10,timescale)
-	STOP_DUMP()
-
-	print("  - Stopping DRE-DEMUX...")
-	channel_conf.StartStop=0
-	configure_DEMUX_channel(Channel_id, channel_conf)  
-
-
-
-	print("")
-	print("  - Testing a de-lock with anti-delock function ON...")
-
-	print("  - Starting DRE-DEMUX...")
-	channel_conf.StartStop=1
-	configure_DEMUX_channel(Channel_id, channel_conf)  
-	waitMs(500) // wait end of ramp
-
-	print("  - Activating anti-delock...")
-	channel_conf.Wait_for_relock=1  // (0..7)
-	channel_conf.Delock_level=600  // (600 : close to max of sine function, 2047 : maximum positive value)
-	channel_conf.Delock_ON=1
-	configure_DEMUX_channel(Channel_id, channel_conf)  
 	
-	print("  - Sending 1 huge pulse")
-	START_DUMP("IQ-ALL",i,Channel_ID,"_NL_anti-Delock--ON")        // ( dump_type, i, channelID, filename_comment )
-	waitMs(300)
-	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,pulse_amp_pourcent_for_delock,timescale)
-	waitMs(300)
-	STOP_DUMP()
-
-	print("  - Stopping DRE-DEMUX...")
-	channel_conf.StartStop=0
-	configure_DEMUX_channel(Channel_id, channel_conf)  
-
-	
-	print("")
-	print("  - Testing a de-lock with anti-delock function OFF...")
-
-	print("  - Starting DRE-DEMUX...")
-	channel_conf.StartStop=1
-	configure_DEMUX_channel(Channel_id, channel_conf)  
-	waitMs(500) // wait end of ramp
-
-	print("  - De-activating anti-delock...")
-	channel_conf.Delock_ON=0		// anti-delock off
-	configure_DEMUX_channel(Channel_id, channel_conf)  
-
-	print("  - Sending 1 huge pulse")
-	START_DUMP("IQ-ALL",i,Channel_ID,"_NL_anti-Delock-OFF")        // ( dump_type, i, channelID, filename_comment )
-	waitMs(300)
-	sendPulsesAndWaitingForInjectionDone(Channel_id,1,20,pulse_amp_pourcent_for_delock,timescale)
-	waitMs(300)
-	STOP_DUMP()
-	
-	print("  - Stopping DRE-DEMUX...")
-	channel_conf.StartStop=0
-	print("  - De-activating the anti-delock function...")
-	channel_conf.Delock_ON=0
-	print("  - De-ctivating non-linear input module...")
-	channel_conf.Nonlinear_ON=0
-	configure_DEMUX_channel(Channel_id, channel_conf)
-
-	// Re-loading the initial pulse shape in the FPGA
-	fake_pulse_timescale=load_pulse(PixelType)
-}
-	
-////////////////////////////////////////////////////////////////////////////////
-function switch_to_openloop(Channel_ID, gain, channel_conf)
-{
-	print("")
-	print(">>---------------------------------------------------------")
-	print(">>  Switching to Open loop configuration...")
-
-	// Switching standard pixels OFF
-	Reset_All_Configs_except_test_pixel(Channel_ID)
-
-	// Switching test pixel ON
-	Set_Pixel_Config(
-		Pixel_ID=40,
-		PHI_Delay=-1,
-		PHI_Rotate=-1,
-		Gain_BBFB=gain,
-		Bias_Amplitude=255,
-		Frequency=-1,
-		PHI_Initial=-1
-		)
-
-	// configuring internal switches
-	Set_TestPixel_ExtraCommands(
-		modulation_freq=0,
-		pulse_timescale=0,
-		pulse_amplitude=0,
-		pulse_start=0,
-		sw2=0,
-		sw1=1,  // open loop
-		modulation_amplitude=0
-		)
-		
-	channel_conf.DACF_ON=0
-	channel_conf.Feedback_Enabled=0
-	configure_DEMUX_channel(Channel_ID, channel_conf)
-
-	Update_All_Configs(channelId=Channel_ID)
-	Apply_All_Configs(channelId=Channel_ID)		
-
-	//Doing a Dump IQ-TST (test pixel - data @ 20Msps)
-	sendStartDREChannels(3)
-	waitMs(1000)
-
-	START_DUMP("IQ-TST",i,Channel_ID,"_Open_Loop")        // ( dump_type, i, channelID, filename_comment )
-	waitMs(500)
-	STOP_DUMP()
-	
-	waitMs(500)
-	START_DUMP("IQ-ALL",i,Channel_ID,"_Open_Loop")        // ( dump_type, i, channelID, filename_comment )
-	waitMs(500)
-	STOP_DUMP()
-
-	sendStopDREChannels(3)
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 function clean_stop()
 {
