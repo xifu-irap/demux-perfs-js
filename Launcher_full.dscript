@@ -5,7 +5,8 @@ include("./Configs.dscript")
 clean_stop()
 
 operator_name=get_operator_name()
-session_name=get_session_name()
+DACBIAS=get_dac_ref("bias")
+DACFBCK=get_dac_ref("feedback")
 
 //-------------------------------
 // Definition of tests to be done
@@ -20,8 +21,8 @@ spectra_duration_ms = 1000
 DoEnergyResol = true
 PixelType="CBE"  // (CBE, banc, autre = RAZ)
 ER_nbr_pulses_calib	= 2000
-ER_nbr_pulses_meas	= 3141
-ER_nbr_files = 10
+ER_nbr_pulses_meas	= 31410
+ER_nbr_files = 1
 Threshold  = 200  // EP TRIGGER threshold
 saveIQ = false  // If true the IQ files are saved during the energy resolution measurement (huge files)
 
@@ -47,7 +48,7 @@ dacMode = dacModes[0]
 for (test_pix_index = 10; test_pix_index < 40;test_pix_index+=20) 
 	{
 		session_comment = ""
-		session_name = session_name + "pixId-"+test_pix_index.toString()+"_full"
+		session_name =  "DACBIAS-"+DACBIAS + "_DACFBCK-" + DACFBCK + "_pix-"+test_pix_index.toString()+"_full"
 		print("Starting test sequence "+session_name)
 		test_sequence(
 			session_name,
