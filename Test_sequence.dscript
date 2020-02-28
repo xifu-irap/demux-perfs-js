@@ -71,8 +71,8 @@ function test_sequence(
 	
 	// Sauvegarde des scripts
 	getLatestValue("DISP_BackupsCurrentDirectory")
-	mkpath(DISP_BackupsCurrentDirectory+"\\OUTPUT")
-	mkpath(DISP_BackupsCurrentDirectory+"\\SCRIPTS_GSE\\demux-perfs-js")
+	mkpath(DISP_BackupsCurrentDirectory+"\\OUTPUTS")
+	mkpath(DISP_BackupsCurrentDirectory+"\\SCRIPTS_GSE\\demux-perfs-js")
 	copyFileToBackupDir(".\\Launcher.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Launcher.dscript") 
 	copyFileToBackupDir(".\\Tools.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Tools.dscript") 
 	copyFileToBackupDir(".\\Startup.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\Startup.dscript") 

@@ -242,19 +242,21 @@ function get_operator_name()
 		}
 	return(Operator_name)
 }
-
-//----------------------------------------------------------------------------------------------------------------------------
-function get_dac_ref(dacplace)
-{
-	DACreftab = ["", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17"]
-	DACrefid = getItem("Please, select the DAC-" + dacplace + " reference :", DACreftab)
-	if (DACrefid == -1) {
-		DACref = getText("Please, select the DAC-" + dacplace + " reference :", "")
-		} else {
-		DACref=DACreftab[DACrefid]
-	}
-	return(DACref)
-}
+
+//----------------------------------------------------------------------------------------------------------------------------
+function get_dac_ref(dacplace)
+{
+	DACreftab = ["", "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", 
+							"100", "101", "102", "103", "104", "105", "106", "107", "108", "109", "110", "111", "112", "113", "114", "115", "116",
+							"IRAP10", "IRAP11"]
+	DACrefid = getItem("Please, select the DAC-" + dacplace + " reference :", DACreftab)
+	if (DACrefid == -1) {
+		DACref = getText("Please, select the DAC-" + dacplace + " reference :", "")
+		} else {
+		DACref=DACreftab[DACrefid]
+	}
+	return(DACref)
+}
 
 //----------------------------------------------------------------------------------------------------------------------------
 function get_session_name()

@@ -48,7 +48,7 @@ dacMode = dacModes[0]
 for (test_pix_index = 10; test_pix_index < 40;test_pix_index+=20) 
 	{
 		session_comment = ""
-		session_name =  "DACBIAS-"+DACBIAS + "_DACFBCK-" + DACFBCK + "_pix-"+test_pix_index.toString()+"_full"
+		session_name =  "BIAS-"+DACBIAS + "_FBCK-" + DACFBCK + "_pix-"+test_pix_index.toString()+"_full"
 		print("Starting test sequence "+session_name)
 		test_sequence(
 			session_name,
