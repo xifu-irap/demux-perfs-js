@@ -1,0 +1,90 @@
+include("./tools.dscript")
+// DRE general commands clk source selection for the FPGA : DRE_CLK_CDCM_SELECT _CMD(CLK_CDCM_SELECT ) possible values:  1 CDCM(CLK=4.88MHz) , 0 FPGA_BOARD (CLK=5MHz)
+//DRE_CLK_CDCM_SELECT_CMD(0)
+// DRE general commands startup configuration DAC ADC CDCM selection CLK on CDCM at 4.88MHz built from DAC_clk (78.12MHz)
+//DRE_Startup()
+
+function configure_demux(Ki)
+{
+	// Definition of global parameters
+	Nbits_DAC=16
+	Nbits_ADC=12
+	Full_scale_DAC	=( Math.pow(2,Nbits_DAC)/2)-1
+	column_ID 				= 0
+	//===========================
+	// Pour version 000F du firmware
+	error_fine_delay		= 9
+	//===========================
+	// Pour version 0010 du firmware
+	// error_fine_delay		= 4
+	//===========================
+	SQ1_fine_delay			= 7		
+	SQ2_fine_delay			= 7
+	//------------------------------------
+	SQ2offset					= parseInt(Full_scale_DAC/-1)
+	sinus_increment		= 1000
+	sinus_amplitude		= 255
+	sinus_on_off			= 0
+	FB_compens_gain 		= 3950
+	AmpV0						= 16000
+	AmpVP						= 9000
+	
+	// DRE TDM STOP
+	DRE_Start_Stop_CMD(0)
+
+	// Possible signals at DAC outputs: feedback, sq2_offset,function_out,sinus_out
+	output_DACSQ1			="feedback"
+	DRE_select_output_DACSQ1_CMD(column_ID,output_DACSQ1)
+	output_DACSQ2			="feedback"
+	DRE_select_output_DACSQ2_CMD(column_ID,output_DACSQ2)
+
+	//-----------------------------------------------
+	// DRE column commands ADC Out ON/OFF
+	//-----------------------------------------------
+	DRE_ADC_ON(column_ID,1)
+	waitMs(400)
+	
+	// Setting of delays and gains
+	// configure feedback output general compensation gain 
+	DRE_configure_column_compensation_gain(column_ID,FB_compens_gain)
+	// configure column firt pixel startup
+	DRE_configure_column_startup_pix(column_ID,0)
+	// configure column firt pixel send to feedback
+	DRE_configure_column_feedback_pix(column_ID,11)
+	// configure column ERROR ADC fine Delay
+	DRE_configure_ERROR_ADC_DELAY(column_ID,error_fine_delay)
+	// configure column SQ1 fine Delay
+	DRE_configure_SQ1_DELAY(column_ID,SQ1_fine_delay)
+	// configure column SQ2 fine Delay
+	DRE_configure_SQ2_DELAY(column_ID,SQ2_fine_delay)
+	// DRE TDM PIXELS config seting the same for all 34 pixels
+	
+	// Configuring SQ2offset for all pixels
+	for (index = 0;index < 34;index++){
+			DRE_configurePixel_SQ2offset(column_ID,index,SQ2offset)
+			print("Pixel("+ index +") SQ2offset set to : " + SQ2offset)
+			waitMs(10)
+		}
+	// select input for TDM DRE : error signal from ADC 
+	DRE_select_input_CMD(0,"error_ADC")
+
+	// DRE column commands DACSQ2 ON of the selected column of the DACSQ2 : Column :0 to 3, DACsq2_on: 1,0 
+	DRE_DACSQ2_ON(column_ID,0)
+	// DRE column commands DACSQ1 ON of the selected column of the DACSQ1 : Column :0 to 3, DACsq2_on: 1,0 
+	DRE_DACSQ1_ON(column_ID,1)
+	// enable feedback OUT of TDM DRE
+	DRE_feedback_enable_CMD(0,1)
+
+	// Configuring kmix for all pixels
+	DRE_configureAllPixels_Kmix(column_ID, KiNorm)
+
+	//START TDM DRE asservissement
+	DRE_Start_Stop_and_Ki_CMD(1, Ki)
+
+	// Configuring Ki for all pixels to the requested value
+
+	//-----------------------------------------------
+	// DRE column commands SINUS Generator  
+	//------------------------------------------------
+	DRE_SINUS_GENE(column_ID,sinus_amplitude,sinus_increment,sinus_on_off)
+}

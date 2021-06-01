@@ -1,0 +1,5 @@
+include("./tools.dscript")
+// DRE general commands clk source selection for the FPGA : DRE_CLK_CDCM_SELECT _CMD(CLK_CDCM_SELECT ) possible values:  1 CDCM(CLK=4.88MHz) , 0 FPGA_BOARD (CLK=5MHz)
+DRE_CLK_CDCM_SELECT_CMD(0)
+// DRE general commands startup configuration DAC ADC CDCM selection CLK on CDCM at 4.88MHz built from DAC_clk (78.12MHz)
+DRE_Startup()

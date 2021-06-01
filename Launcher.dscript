@@ -1,125 +1,32 @@
-include("./Test_sequence.dscript")
-include("./Configs.dscript")
+include("./test_sequence.dscript")
+include("./tools.dscript")
 
 // Stopping every previouly unstopped readout...
 clean_stop()
 
 operator_name=get_operator_name()
 session_name=get_session_name()
+session_comment = "No comment"
 
 //-------------------------------
 // Definition of tests to be done
 //-------------------------------
-DoGBW = true
-
-DoScienceSpectra = true
-DoScienceSpectra20Msps = true
-nbr_spectra = 50
-spectra_duration_ms = 1000
-
-DoEnergyResol = true
-PixelType="CBE"  // (CBE, banc, autre = RAZ)
-//ER_nbr_pulses_meas	= 2019
-ER_nbr_pulses_calib	= 2000
-//ER_nbr_pulses_meas	= 3141
-ER_nbr_pulses_meas	= 3141
-//ER_nbr_pulses_meas	= 314159  // Une heure 20 minutes
-//ER_nbr_pulses_meas	= 1200000
-ER_nbr_files = 1
-Threshold  = 200  // EP TRIGGER threshold
-saveIQ = false  // If true the IQ files are saved during the energy resolution measurement (huge files)
-
-DoDelockTst=true
-Delock_level=0x100, 
-Wait_for_relock=2  // (0..7)
-
-Test_pix_only = false
-openloop = false
-NeighbourPix_Off = false
-
-// Definition of parameters ///////////////////////////////////////////////////////////////////
-// Definition of the firmware frequency grid
-Fgridratios = new Array(Math.pow(2,20),Math.pow(2,19),Math.pow(2,18),Math.pow(2,17),Math.pow(2,16),Math.pow(2,15),Math.pow(2,14),Math.pow(2,13),Math.pow(2,8),Math.pow(2,14)+Math.pow(2,20))
-Ncarriers=40
-
-// liste des modes du DAC AD9726:
-dacModes = new Array("Factory", "Self-calibrated", "Uncalibrated")
 
 getLatestValue("DRE_FirmwareId")
-print("Firmware Id:", DRE_FirmwareId)
-config = best_config(DRE_FirmwareId)
-Default_amp = config.Default_amp
-amp_pixel_test	= Default_amp
-Gain = config.Gain
-BIAS_trunc = config.BIAS_trunc
-FBCK_trunc = config.FBCK_trunc
-FBCK_gain = config.FBCK_gain
-ModulationRatio = config.ModulationRatio
-TES_NL = config.TES_NL
-
+print("Firmware Id: ", DRE_FirmwareId.toString(16))
 Channel_ID = 0
-//test_pix_index	= 31
-test_pix_index	= 0
-SQUID_interne = 0
-index = 6
-Fgridratio = Fgridratios[index]
-dacMode = dacModes[0]
+er_noise = false
+er_pulses = false
+er_duration=400000
+print("Starting test sequence "+session_name)
+test_sequence(
+	session_name,
+	session_comment,
+	operator_name,
+	Channel_ID,
+	Ki,
+	er_noise,
+	er_pulses,
+	er_duration
+	)
 
-//Spread = "No"
-Spread = "Normal"  // Default setting
-//Spread = "Huge"
-
-//for (fgridIndex = 0; fgridIndex < Fgrids.length;++fgridIndex) {
-//	Fgrid = Fgrids[fgridIndex]
-
-//for (Gain = 1; Gain < 123; Gain*=2)
-for (iteration = 0; iteration < 1;iteration++) 
-//for (iteration = 0; iteration < 3;iteration++) 
-//for (test_pix_index = 3; test_pix_index < 39;test_pix_index+=5) 
-	{
-//		Default_amp = parseInt(config.Default_amp/Math.pow(1.41,iteration))
-//		amp_pixel_test=Default_amp
-
-		session_comment = ""
-//		session_name = "pixId-"+test_pix_index.toString()
-		print("Starting test sequence "+session_name)
-		//linearity_test_sequence(
-		test_sequence(
-			session_name,
-			session_comment,
-			operator_name,
-			Channel_ID,
-			Default_amp,
-			test_pix_index,
-			amp_pixel_test,
-			SQUID_interne,
-			Gain,
-			BIAS_trunc,
-			FBCK_trunc,
-			FBCK_gain,
-			Fgridratio,
-			dacMode,
-			Spread,
-			Npix,
-			Ncarriers,
-			FS,
-			DoGBW,
-			DoScienceSpectra,
-			DoScienceSpectra20Msps,
-			nbr_spectra,
-			spectra_duration_ms,
-			DoEnergyResol,
-			PixelType,
-			ER_nbr_pulses_calib,
-			ER_nbr_pulses_meas,
-			ER_nbr_files,
-			Threshold,
-			ModulationRatio,
-			TES_NL,
-			saveIQ,
-			Test_pix_only,
-			NeighbourPix_Off,
-			openloop,
-			DoDelockTst
-			)
-	}

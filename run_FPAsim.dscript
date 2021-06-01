@@ -1,0 +1,69 @@
+
+do_pulses=false
+measure_ki=true
+
+LoadPulse("fake_pulse_CBE.txt")
+waitMs(10)
+
+V0max=51000
+
+V0=V0max
+if (measure_ki) {
+	V0=V0max/2
+	}
+
+Vp_7keV=V0/1.49	// 7keV
+
+// VP off for all pixels
+set_all_V0_VP(V0, 0)
+// VP on for a single pixel
+set_pix_V0_VP(1, V0, Vp_7keV)
+// VP on for a single pixel
+//set_pix_V0_VP(3, V0, Vp_7keV)
+// VP on for a single pixel
+//set_pix_V0_VP(5, V0, Vp_7keV)
+// VP on for a single pixel
+//set_pix_V0_VP(7, V0, Vp_7keV)
+
+getLatestValue("FPA_WireOutValues")
+print(FPA_WireOutValues)
+
+if (do_pulses){
+	for (index = 0;index < 30000;index++){
+		sendToFPA_setWireIn(0x00,4)
+		sendToFPA_setWireIn(0x00,0)
+	}
+}
+//////////////////////////////////////////////////////////////////////////
+function set_pix_V0_VP(pix, v0, vP)
+//This function configures the V0 and VP of a single pixel of the FPAsim.
+// VO is directly applied where as the pulses are just ready for a pulse request.
+{
+	sendToFPA_configurePixel(pix, v0, vP, 0)
+	waitMs(300)
+}
+
+//////////////////////////////////////////////////////////////////////////
+function set_all_V0_VP(v0, vP)
+//This function configures all the V0 and VP of the FPAsim to a same value.
+// VO is directly applied where as the pulses are just ready for apulse request.
+{
+	for (index=0; index<34; index++)
+	{
+		sendToFPA_configurePixel(index, v0, vP, 0)
+	}
+	waitMs(300)
+}
+
+//////////////////////////////////////////////////////////////////////////
+function LoadPulse(filename)
+{
+	pulse = new Array(1024)
+	filecontent = readTextFile(filename)
+	
+	for (index = 0;index < filecontent.length && index < 1024;index++)
+		pulse[index] = parseInt(filecontent[index],16)
+	sendToFPA_setPulse(pulse)
+}
+
+//////////////////////////////////////////////////////////////////////////

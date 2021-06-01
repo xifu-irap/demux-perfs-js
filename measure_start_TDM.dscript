@@ -1,0 +1,99 @@
+include("./tools.dscript")
+include("./configure_demux.dscript")
+
+// Stopping every previouly unstopped readout...
+clean_stop()
+
+//===========================================================
+operator_name=get_operator_name()
+session_name="Startup measurements"
+session_comment = "No comment"
+getLatestValue("DRE_FirmwareId")
+print("Firmware Id: ", DRE_FirmwareId.toString(16))
+column_ID = 0
+//===========================================================
+
+// Opening the session
+sendStartSession(session_name, session_comment)
+
+// Saving test parameters in a file
+setAndMemorize( "session_name", session_name)
+setAndMemorize( "session_comment", session_comment)
+setAndMemorize( "operator_name", operator_name)
+setAndMemorize( "Channel_ID", Channel_ID)
+
+copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
+
+// Sauvegarde des scripts
+getLatestValue("DISP_BackupsCurrentDirectory")
+mkpath(DISP_BackupsCurrentDirectory+"\\OUTPUTS")
+mkpath(DISP_BackupsCurrentDirectory+"\\SCRIPTS_GSE\\demux-perfs-js")
+copyFileToBackupDir(".\\measure_start_TDM.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\measure_start_TDM.dscript") 
+copyFileToBackupDir(".\\tools.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\tools.dscript") 
+copyFileToBackupDir(".\\startup_demux.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\startup_demux.dscript") 
+copyFileToBackupDir(".\\test_sequence.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\test_sequence.dscript") 
+copyFileToBackupDir(".\\start_TM.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\start_TM.dscript") 
+copyFileToBackupDir(".\\launcher.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\launcher.dscript") 
+copyFileToBackupDir(".\\configure_demux.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\configure_demux.dscript") 
+copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/").pop()) // sauvegarde du script courant
+
+saveMemorizedParametersToBackupDir("SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/").pop().split(".")[0]+"_PARAMETERS.txt")
+
+print(">>---------------------------------------------------------")
+print(">>  Configuring demux delays and gains...")
+configure_demux()
+
+Ki=KiNorm
+//================================================================
+//STOPS TDM DRE asservissement to be able to observe a startup
+DRE_Start_Stop_CMD(0)
+waitMs(100)
+
+// Starting data acquisition
+START_DUMP("DACSQ1_SCIENCE",0,column_ID,"_sq1_sci_dump")
+waitMs(100)
+
+//Starting TDM feedback
+DRE_Start_Stop_and_Ki_CMD(1, Ki)
+waitMs(100)
+
+// Stoping data acquisition	
+STOP_DUMP()
+
+
+//================================================================
+//STOPS TDM DRE feedback to be able to observe a startup
+DRE_Start_Stop_CMD(0)
+waitMs(100)
+
+// Starting data acquisition
+START_DUMP("ERROR5MHZ_SCIENCE",0,column_ID,"_adc_sci_dump")
+waitMs(100)
+
+//Starting TDM feedback
+DRE_Start_Stop_and_Ki_CMD(1, Ki)
+waitMs(100)
+
+// Stoping data acquisition	
+STOP_DUMP()
+
+//================================================================
+
+saveLogToBackupDir("scriptlog.txt")
+sendStopSession()
+
+onAbortScript()
+
+print("Processing data ...")
+output = copyDirToBackupDirAndExecuteBat("..\\..\\SCRIPTS_ANALYSE\\analysis-tools",".\\SCRIPTS_ANALYSE\\analysis-tools","do-analysis.bat")
+addToFile(output)
+
+//print("Compressing data ...")
+//zipData()
+
+print("End of session " + session_name)
+print(">>---------------------------------------------------------")
+
+clean_stop()	
+
+

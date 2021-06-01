@@ -1,2 +1,2 @@
 # demux-perfs-js
-Set of scripts used to command the DRE.
+Set of scripts used to drive the tests of the prototype DRE-TDM

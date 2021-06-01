@@ -1,0 +1,82 @@
+include("./tools.dscript")
+include("./configure_demux.dscript")
+
+// Stopping every previouly unstopped readout...
+clean_stop()
+
+//===========================================================
+operator_name=get_operator_name()
+session_name="ki measurement"
+session_comment = "No comment"
+getLatestValue("DRE_FirmwareId")
+print("Firmware Id: ", DRE_FirmwareId.toString(16))
+Channel_ID = 0
+//===========================================================
+
+sendStartSession(session_name, session_comment)
+
+// Saving test parameters in a file
+setAndMemorize( "session_name", session_name)
+setAndMemorize( "session_comment", session_comment)
+setAndMemorize( "operator_name", operator_name)
+setAndMemorize( "Channel_ID", Channel_ID)
+
+copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
+
+// Sauvegarde des scripts
+getLatestValue("DISP_BackupsCurrentDirectory")
+mkpath(DISP_BackupsCurrentDirectory+"\\OUTPUTS")
+mkpath(DISP_BackupsCurrentDirectory+"\\SCRIPTS_GSE\\scripts-gse")
+copyFileToBackupDir(".\\tools.dscript","\\SCRIPTS_GSE\\scripts-gse\\tools.dscript") 
+copyFileToBackupDir(".\\startup_demux.dscript","\\SCRIPTS_GSE\\scripts-gse\\startup_demux.dscript") 
+copyFileToBackupDir(".\\test_sequence.dscript","\\SCRIPTS_GSE\\scripts-gse\\test_sequence.dscript") 
+copyFileToBackupDir(".\\start_TM.dscript","\\SCRIPTS_GSE\\scripts-gse\\start_TM.dscript") 
+copyFileToBackupDir(".\\launcher.dscript","\\SCRIPTS_GSE\\scripts-gse\\launcher.dscript") 
+copyFileToBackupDir(".\\configure_demux.dscript","\\SCRIPTS_GSE\\scripts-gse\\configure_demux.dscript") 
+copyFileToBackupDir(".\\measure_ki.dscript","\\SCRIPTS_GSE\\scripts-gse\\measure_ki.dscript") 
+copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\scripts-gse\\"+__FILE__.split("/").pop()) // sauvegarde du script courant
+
+saveMemorizedParametersToBackupDir("SCRIPTS_GSE\\scripts-gse\\"+__FILE__.split("/").pop().split(".")[0]+"_PARAMETERS.txt")
+//===========================================================
+
+print(">>---------------------------------------------------------")
+print(">>  Configuring demux delays and gains and starting TDM...")
+configure_demux(Ki)
+DRE_select_output_DACSQ1_CMD(Channel_ID, "feedback")
+DRE_select_output_DACSQ2_CMD(Channel_ID, "feedback")
+
+print(">>---------------------------------------------------------")
+print("Loading constant in firmware")
+load_function("2")  // 0
+DRE_function_amplitude_CMD(Channel_ID, 255)
+DRE_function_timescale_CMD(Channel_ID, 1)
+DRE_send_function_CMD(Channel_ID,1,1) // Activates the function for ever
+waitMs(400)
+
+print(">>---------------------------------------------------------")
+print("Starting data acquisition")
+START_DUMP("DACSQ1_DACSQ2",0,Channel_ID,"_ki_check")
+waitMs(500)
+
+print(">>---------------------------------------------------------")
+print("Switching feedback to constant value")
+DRE_select_output_DACSQ1_CMD(Channel_ID, "function_out")
+waitMs(400)
+
+print(">>---------------------------------------------------------")
+print("Stoping data acquisition")
+STOP_DUMP()
+
+saveLogToBackupDir("scriptlog.txt")
+sendStopSession()
+
+onAbortScript()
+
+print("Processing data ...")
+output = copyDirToBackupDirAndExecuteBat("..\\..\\SCRIPTS_ANALYSE\\analysis-tools",".\\SCRIPTS_ANALYSE\\analysis-tools","do-analysis.bat")
+addToFile(output)
+
+print("End of session " + session_name)
+print(">>---------------------------------------------------------")
+
+clean_stop()	
