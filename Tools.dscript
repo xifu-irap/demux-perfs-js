@@ -12,8 +12,8 @@ This library contains basic functions to configure the DRE-DEMUX
 
 /////////////////////// Constants ///////////////////////
 getLatestValue("DRE_FS")
-const KiNorm = 1208
-const Ki = KiNorm*1.2
+const KiNorm = Math.pow(2,15)
+const Ki = KiNorm*1.
 const FS	= DRE_FS
 const Npix	= 34
 const WAITING_TIME = 10;
@@ -261,16 +261,16 @@ function DRE_Start_Stop_CMD(Start_Stop)
 }
 
 // Tune the ki parameter once the TDM feedback has been started
-function DRE_Start_Stop_and_Ki_CMD(Start_Stop, Ki)
+function DRE_Start_Stop_and_Ki_CMD(column_ID, Start_Stop, Ki)
 {
-	DRE_configureAllPixels_Ki(0, KiNorm) // Using KiNorm to avoid over ranges at startup
+	DRE_configureAllPixels_Ki(column_ID, KiNorm) // Using KiNorm to avoid over ranges at startup
 
 	address = 0x8004;
 	value = Start_Stop;
     sendNewRegister(address,value)
 	waitMs(10)
 
-	DRE_configureAllPixels_Ki(0, Ki)
+	DRE_configureAllPixels_Ki(column_ID, Ki)
 }
 
 //-----------------------------------------------

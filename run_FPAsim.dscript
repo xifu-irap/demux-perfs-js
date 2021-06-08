@@ -1,15 +1,15 @@
-
-do_pulses=false
-measure_ki=true
+
+do_pulses=true
+measure_ki=false
 
 LoadPulse("fake_pulse_CBE.txt")
 waitMs(10)
 
-V0max=51000
-
-V0=V0max
-if (measure_ki) {
-	V0=V0max/2
+V0max=51000
+
+V0=V0max
+if (measure_ki) {
+	V0=V0max/8
 	}
 
 Vp_7keV=V0/1.49	// 7keV

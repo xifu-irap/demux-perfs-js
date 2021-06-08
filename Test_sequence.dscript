@@ -47,7 +47,8 @@ function test_sequence(
 
 	print(">>---------------------------------------------------------")
 	print(">>  Configuring demux delays and gains...")
-	configure_demux(Ki)
+	configure_demux(Ki)
+	print("Ki :  ", Ki)
 
 	science_dump(Channel_ID, 500, "")		
 	adc_dump(Channel_ID, 500)
