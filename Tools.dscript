@@ -1,103 +1,25 @@
-//////////////////////////////////////////////////////////////////////////////////
-/*
-Javascript library for DRE-DEMUX
-========================================================================
-
-Developped by: L. Ravera/C. OZIOL
-
-Project: Athena X-IFU / DRE-DEMUX
-
-This library contains basic functions to configure the DRE-DEMUX
-*/
-
-/////////////////////// Constants ///////////////////////
-getLatestValue("DRE_FS")
-const KiNorm = Math.pow(2,15)
-const Ki = KiNorm*1.
-const FS	= DRE_FS
-const Npix	= 34
-const WAITING_TIME = 10;
-const TARGET = 0	
-// FPA_simulator = 0; SQUID_emulator = 1;
-
-//const Select_Input = 1
-
-// const DAC AD9726 modes
-FACTORY_CALIBRATED = 0
-SELF_CALIBRATED = 1
-UNCALIBRATED = 2
+//
+//  Copyright (C) 2021-2030 Laurent Ravera, Christophe Oziol, IRAP Toulouse.
+//  This file is part of the ATHENA X-IFU DRE test driving software.
+//
+//  demux-perfs-js is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+//  laurent.ravera@irap.omp.eu
+//  tools.dscript
+//
 
 //---------------------------------------------------------------------------------------------------------------------------------------
-// function list :
-// --------------------------------------------------------------
-// ------------------DRE general commands ADDR 0x8xxx------------
-// --------------------------------------------------------------
-// DRE general commands select HK for FPGA data sending : DRE_select_HK_CMD(Select_HK) possible values: ADC128, ADC128_AUTO, CONF, COUNT
-// DRE general commands start sending HK for FPGA data sending : DRE_Start_sending_HK_CMD(Start_sending_HK ) possible values:  1 on, 0 off
-// DRE general commands select TM for FPGA data sending : DRE_select_TM_CMD(Select_TM)
-// DRE general commands start sending TM for FPGA data sending : DRE_Start_sending_TM_CMD(Start_sending_TM) possible values:  1 on, 0 off
-// DRE general commands start_stop columns: DRE_Start_Stop_CMD(Start_Stop) possible values:  1 on, 0 off
-// DRE general commands clk source selection for the DAC : DRE_CLK_CDCM_SELECT _CMD(CLK_CDCM_SELECT ) possible values:  1 100Mhz, 0 5Mhz
-// DRE general commands CDCM Clock_RESET: DRE_CLK_CDCM_PLL_RESET_CMD(CLK_CDCM_PLL_RESET) possible values: 1 reset, 0 off NOT YET AVALABLE
-// DRE General commands DRE_CDCM_CONFIG_CMD() send configuration frequency and output type to CDCM
-// DRE General commands DRE_RESET_DAC_AD9726() reset the DAC AD9726
-// DRE general commands DRE_WRITE_SPI_CMD(CHANNEL,DATA_SPI) write to CHANNEL_NAME(CHANNRL: DACSQ2_SPI, DACSQ1_SPI, CDCM_SPI) the DATA_SPI(32b)
-//-----------------------------------------------
-//---------------COLUMN COMMANDS ADDR 0x000n-----
-//-----------------------------------------------
-// DRE column commands feedback_enable of the selected column: DRE_feedback_enable_CMD(column,feedback_enable) Column :0 to 3, feedback_enable:  1 on, 0 off
-// DRE column commands select_input of the selected column: DRE_select_input_CMD(column,select_input)) Column :0 to 3, select_input: error_ADC, FPA_sim
-// DRE column commands comensation gain configuration DRE_configure_column_compensation_gain(column,gain) Column :0 to 3, gain: 16 bits
-// DRE column commands startup pixel beging number DRE_configure_column_startup_pix(column,value) Column :0 to 3,value : 0 to 33
-// DRE column commands feedback startup pixel beging number DRE_configure_column_feedback_pix(column,value) Column :0 to 3,value : 0 to 33
-// DRE column commands send_function of the selected column always or not: DRE_send_function_CMD(column,send_function,always)Column :0 to 3, send_function:  1 on, 0 off
-// 							always:  1 on, 0 off
-// DRE column commands function patern amplitude of the selected columnFIXED in DRE to 1 : DRE_function_amplitude_CMD(column,value)
-// DRE column commands function patern timescale DRE_function_timescale_CMD(column,value)
-// DRE column commands select_output_DACSQ1 of the selected column: DRE_select_output_DACSQ1_CMD(column,select_output_DACSQ1)Column :0 to 3, select_output_DACSQ1: feedback, sq2_offset,function
-// DRE column commands select_output_DACSQ2 of the selected column: DRE_select_output_DACSQ2_CMD(column,select_output_DACSQ2)Column :0 to 3, select_output_DACSQ2: feedback, sq2_offset,function
-// DRE column commands DACSQ1 Out ON/OFF DRE_DACSQ1_ON(column,value) Column :0 to 3, value:  1 on, 0 off
-// DRE column commands DACSQ2 Out ON/OFF DRE_DACSQ2_ON(column,value) Column :0 to 3, value:  1 on, 0 off
-// DRE column commands ADC Out ON/OFFDRE_ADC_ON(column,value) Column :0 to 3, value:  1 on, 0 off
-// DRE column commands ADC DFSB DRE_ADC1_DFSB(column,value) Column :0 to 3, value:  1 on, 0 off
-//-----------------------------------------------
-//----------DRE column/PIXEL commands------------
-//-----------------------------------------------
-// DRE column/PIXEL Ki(index) Configuration DRE_configurePixel_Ki(column,index,Ki) Column :0 to 3, index : 0 to 33,Ki : 0 to 4095  
-// DRE column/PIXEL Kmix(index) Configuration DRE_configurePixel_Ki(column,index,Kmix) Column :0 to 3, index : 0 to 33,Kmix : 0 to 4095  
-// DRE column/PIXEL SQ2offset(index) Configuration DRE_configurePixel_SQ2offset(column,index,SQ2offset) Column :0 to 3, index : 0 to 33,Kmix : 0 to 65535
-// DRE column/FPA_sim PIXEL V0(index) Configuration DRE_configurePixel_FPA_V0(column,index,V0) Column :0 to 3, index : 0 to 33,V0 : 0 to 65535
-// DRE column/FPA_sim PIXEL VP(index) Configuration DRE_configurePixel_FPA_VP(column,index,VP) Column :0 to 3, index : 0 to 33,VP : 0 to 65535
-// DRE column/FPA_sim Write VP Configuration DRE_configurePixel_FPA_WriteVP(column,value) Column :0 to 3,value:  1 , 0
-//-----------------------------------------------
-// --------------DRE FPA_SIM COMMANDS -----------
-//-----------------------------------------------
-// DRE FPA_SIM Clear ALL PIXELS V0 and VP DRE_FPA_cleaRegister()
-
-//-----------------------------------------------
-// MACRO DE CONFIGURATION AD9726 dacmode
-//-----------------------------------------------
- //DRE_CONFIG_DACS_AD9726(dacmode) dacMode = UNCALIBRATED, SELF_CALIBRATED, FACTORY_CALIBRATED
-// MACRO DE CONFIGURATION AD9726 sending default values DRE_CONFIG_DAC_AD9726(dacMode,dacSelection) dacMode = UNCALIBRATED, SELF_CALIBRATED, FACTORY_CALIBRATED
-// dacSelection :DACSQ2_SPI, DACSQ1_SPI
-//-----------------------------------------------
-// MACRO RESET MMCM
-//-----------------------------------------------
-// DRE_RESET_MMCM()
-//-----------------------------------------------
-// MACRO select CDCM FPGA Clock
-//-----------------------------------------------
-// DRE_CLK_SELECT() select clock input from CDCM
-//-----------------------------------------------
-// MACRO STARTUP CDCM DAC ADC and change CLOCK source
-//-----------------------------------------------
-// sequence required to startup the DRE-DEMUX : DRE_Startup()
-// NOT USED DRE column commands DAC SLEEP of the selected column of the selected DAC : DRE_DAC_SLEEP_CMD(column,DAC,sleep_on)Column :0 to 3,DAC: DACSQ1, DACsq2, sleep_on: 1,0 
-// DRE general commands load_function (function_type) possible values: 1,2 3 (pattern"1,2,3".txt) decimal values
-//DRE general commands LOAD PULSE VALUES TO DRE FPA_SIM RAM load_pulse(pulse_type) pulse type only "1" at this moment
-
-//---------------------------------------------------------------------------------------------------------------------------------------
-
 
 function nom_de_ma_fonction(my_parameter)
 {	
@@ -673,18 +595,19 @@ function DRE_SINUS_GENE(column,amplitude,increment,on_off)
 //-----------------------------------------------
 
 //-----------------------------------------------
-// DRE column/PIXEL Ki(index) Configuration
+// Configuratoin of a ki value to a single pixel
 //-----------------------------------------------
 function DRE_configurePixel_Ki(column,index,Ki)
 {
 	base_address =0x1000;	
 	address =base_address + column*Math.pow (2,13) + index*Math.pow(2,6)+0;
-	//print (address+" : "+Ki+" Ki pixel("+index+")")
 	sendNewRegister(address,Ki)
 	waitMs(10)
 }
 
-// Configuration of ki for all the pixels
+//-----------------------------------------------
+// Configuration of a ki value for all the pixels
+//-----------------------------------------------
 function DRE_configureAllPixels_Ki(column_ID,Ki)
 {
 	print("Configuring ki for all pixels to: "+Ki+" ...")
@@ -694,19 +617,19 @@ function DRE_configureAllPixels_Ki(column_ID,Ki)
 }
 
 //-----------------------------------------------
-// DRE column/PIXEL Kmix(index) Configuration
+// Configuratoin of a kmix value to a single pixel
 //-----------------------------------------------
 function DRE_configurePixel_Kmix(column,index,Kmix)
 {
 	base_address =0x1000;	
-	address =base_address + column*Math.pow (2,13) + index*Math.pow(2,6)+1;
-	//print (address+" : "+Kmix+ " Kmix pixel("+index+")")
+	address=base_address + column*Math.pow(2,13) + index*Math.pow(2,6)+1;
 	sendNewRegister(address,Kmix)
 	waitMs(10)
-
 }
 
-// Configuration of kmix for all the pixels
+//-----------------------------------------------
+// Configuration of a kmix value for all the pixels
+//-----------------------------------------------
 function DRE_configureAllPixels_Kmix(column_ID,Kmix)
 {
 	print("Configuring kmix for all pixels to: "+Kmix+" ...")
@@ -715,18 +638,16 @@ function DRE_configureAllPixels_Kmix(column_ID,Kmix)
 		}
 }
 
-
 //-----------------------------------------------
 // DRE column/PIXEL SQ2offset(index) Configuration
 //-----------------------------------------------
 function DRE_configurePixel_SQ2offset(column,index,SQ2offset)
 {
 base_address =0x1000;	
-address =base_address + column*Math.pow (2,13) + index*Math.pow(2,6)+2;
+address =base_address + column*Math.pow(2,13) + index*Math.pow(2,6)+2;
 print (address+" : "+SQ2offset +" SQ2offset pixel("+index+")")
 	sendNewRegister(address,SQ2offset)
 	waitMs(10)
-
 }
 
 //-----------------------------------------------
@@ -735,33 +656,28 @@ print (address+" : "+SQ2offset +" SQ2offset pixel("+index+")")
 function DRE_configurePixel_FPA_V0(column,index,V0)
 {
 	base_address =0x1000;	
-	address =base_address + column*Math.pow (2,13) + index*Math.pow (2,6)+3;
+	address =base_address + column*Math.pow(2,13) + index*Math.pow(2,6)+3;
 	print (address+" : "+V0+ " V0 pixel_FPA("+index+")")
 	sendNewRegister(address,V0)
 	waitMs(10)
-
 }
 
 //-----------------------------------------------
 // DRE column/FPA_sim PIXEL VP(index) Configuration
 //-----------------------------------------------
-
 function DRE_configurePixel_FPA_VP(column,index,VP)
 {
 	base_address =0x1000;	
-	address =base_address + column*Math.pow (2,13) + index*Math.pow (2,6)+5;
+	address =base_address + column*Math.pow(2,13) + index*Math.pow(2,6)+5;
 	print (address+" : "+VP +" VP pixel_FPA("+index+")")
 	sendNewRegister(address,VP)
 	waitMs(10)
-
 }
 
 //-----------------------------------------------
 // DRE column/FPA_sim Write VP Configuration
 //-----------------------------------------------
-
 function DRE_configurePixel_FPA_WriteVP(column,value)
-
 {
 	base_address =0x0015;	
 	address =base_address + column*Math.pow (2,13);
@@ -776,7 +692,7 @@ function DRE_configurePixel_FPA_WriteVP(column,value)
 // DRE FPA_SIM Clear ALL PIXELS V0 and VP
 //-----------------------------------------------
 
-function DRE_FPA_cleaRegister()
+function DRE_FPA_clearRegister()
 {
 for (index = 0;index < 34;index++){
 		DRE_configurePixel_FPA_V0(0,index,0)
@@ -862,7 +778,6 @@ function DRE_CONFIG_DAC_AD9726_MODE(dacMode,dacSelection)
 //-----------------------------------------------
 // MACRO RESET MMCM
 //-----------------------------------------------
-
 function DRE_RESET_MMCM()
 {
 	///// FPGA MMCM Reset
@@ -883,7 +798,6 @@ function DRE_CLK_SELECT()
 	DRE_CLK_CDCM_SELECT_CMD(1)
 	waitMs(10)
 }
-
 
 //-----------------------------------------------
 // MACRO STARTUP CDCM DAC ADC and change CLOCK source
@@ -907,30 +821,9 @@ function DRE_Startup()
 	waitMs(100)
 }
 
-
-//ONLY FOR DAC5675A DRE column commands DAC SLEEP of the selected column of the selected DAC :
-// function DRE_DAC_SLEEP_CMD(column,DAC,sleep_on)
-//3 inputs
-// {
-	
-	// switch (DAC) 
-		// {
-		// case "DACSQ1":
-			// base_address = 0x000D;
-			// break
-		// case "DACsq2":
-			// base_address = 0x000E;
-			// break
-		// default:
-			// base_address = 0x000D;
-	
-	// address =base_address + column*Math.pow (2,13)
-	// value = sleep_on;
-	// sendNewRegister(address,value)
-	// waitMs(10)
-// }
-
-//----------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------
+// GUI to read operator name
+//-----------------------------------------------
 function get_operator_name()
 {
 	OperatorTab = ["", "Laurent", "Odile", "David", "Bernard", "Wilfried", "Christophe", "Yann"]
@@ -943,7 +836,9 @@ function get_operator_name()
 	return(Operator_name)
 }
 
-//----------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------
+// GUI to read session name
+//-----------------------------------------------
 function get_session_name()
 {
 	session_name = getText("Please, type the session name:", "Default_session_name")
@@ -1111,6 +1006,7 @@ function load_function(function_type) {
 	configureAckTimeout(5000); // Reactivation de l'acknowledge
 	print("  - Done!");
 }
+
 //---------------------------------------------------
 //LOAD PULSE VALUES TO DRE FPA_SIM RAM
 //---------------------------------------------------
@@ -1264,3 +1160,5 @@ function clean_stop()
 	DRE_Stop_sending_TM_CMD()
 	sendStopSession()
 }
+
+//----------------------------------------------------------------------------------------------------------------------------

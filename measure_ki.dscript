@@ -1,3 +1,24 @@
+//
+//  Copyright (C) 2021-2030 Laurent Ravera, Christophe Oziol, IRAP Toulouse.
+//  This file is part of the ATHENA X-IFU DRE test driving software.
+//
+//  demux-perfs-js is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+//  laurent.ravera@irap.omp.eu
+//  measure_ki.dscript
+//
+
 include("./tools.dscript")
 include("./configure_demux.dscript")
 
@@ -16,32 +37,35 @@ Channel_ID = 0
 sendStartSession(session_name, session_comment)
 
 // Saving test parameters in a file
-setAndMemorize( "session_name", session_name)
-setAndMemorize( "session_comment", session_comment)
-setAndMemorize( "operator_name", operator_name)
-setAndMemorize( "Channel_ID", Channel_ID)
+setAndMemorize( "Session_name", session_name)
+setAndMemorize( "Session_comment", session_comment)
+setAndMemorize( "Operator_name", operator_name)
+setAndMemorize( "DEMUX Firmware Id", DRE_FirmwareId)
+setAndMemorize( "Channel_Id", Channel_ID)
+setAndMemorize( "Ki", Ki)
 
 copyFileToBackupDir(getEGSEDirectory()+"\\parametersTF.dispatcher","HK\\parametersTF.dispatcher")  // copy HK limits
 
 // Sauvegarde des scripts
 getLatestValue("DISP_BackupsCurrentDirectory")
 mkpath(DISP_BackupsCurrentDirectory+"\\OUTPUTS")
-mkpath(DISP_BackupsCurrentDirectory+"\\SCRIPTS_GSE\\scripts-gse")
-copyFileToBackupDir(".\\tools.dscript","\\SCRIPTS_GSE\\scripts-gse\\tools.dscript") 
-copyFileToBackupDir(".\\startup_demux.dscript","\\SCRIPTS_GSE\\scripts-gse\\startup_demux.dscript") 
-copyFileToBackupDir(".\\test_sequence.dscript","\\SCRIPTS_GSE\\scripts-gse\\test_sequence.dscript") 
-copyFileToBackupDir(".\\start_TM.dscript","\\SCRIPTS_GSE\\scripts-gse\\start_TM.dscript") 
-copyFileToBackupDir(".\\launcher.dscript","\\SCRIPTS_GSE\\scripts-gse\\launcher.dscript") 
-copyFileToBackupDir(".\\configure_demux.dscript","\\SCRIPTS_GSE\\scripts-gse\\configure_demux.dscript") 
-copyFileToBackupDir(".\\measure_ki.dscript","\\SCRIPTS_GSE\\scripts-gse\\measure_ki.dscript") 
-copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\scripts-gse\\"+__FILE__.split("/").pop()) // sauvegarde du script courant
+mkpath(DISP_BackupsCurrentDirectory+"\\SCRIPTS_GSE\\demux-perfs-js")
+copyFileToBackupDir(".\\tools.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\tools.dscript") 
+copyFileToBackupDir(".\\constants.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\constants.dscript") 
+copyFileToBackupDir(".\\startup_demux.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\startup_demux.dscript") 
+copyFileToBackupDir(".\\test_sequence.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\test_sequence.dscript") 
+copyFileToBackupDir(".\\start_TM.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\start_TM.dscript") 
+copyFileToBackupDir(".\\launcher.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\launcher.dscript") 
+copyFileToBackupDir(".\\configure_demux.dscript","\\SCRIPTS_GSE\\demux-perfs-js\\configure_demux.dscript") 
+copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/").pop()) // sauvegarde du script courant
 
 saveMemorizedParametersToBackupDir("SCRIPTS_GSE\\scripts-gse\\"+__FILE__.split("/").pop().split(".")[0]+"_PARAMETERS.txt")
 //===========================================================
 
 print(">>---------------------------------------------------------")
 print(">>  Configuring demux delays and gains and starting TDM...")
-configure_demux(Ki)
+Ki=1
+configure_demux(Ki, Channel_ID)
 DRE_select_output_DACSQ1_CMD(Channel_ID, "feedback")
 DRE_select_output_DACSQ2_CMD(Channel_ID, "feedback")
 
@@ -80,3 +104,5 @@ print("End of session " + session_name)
 print(">>---------------------------------------------------------")
 
 clean_stop()	
+
+//===========================================================

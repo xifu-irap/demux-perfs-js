@@ -1,3 +1,24 @@
+//
+//  Copyright (C) 2021-2030 Laurent Ravera, Christophe Oziol, IRAP Toulouse.
+//  This file is part of the ATHENA X-IFU DRE test driving software.
+//
+//  demux-perfs-js is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+//  laurent.ravera@irap.omp.eu
+//  measure_start_TDM.dscript
+//
+
 include("./tools.dscript")
 include("./configure_demux.dscript")
 
@@ -43,7 +64,8 @@ print(">>---------------------------------------------------------")
 print(">>  Configuring demux delays and gains...")
 configure_demux()
 
-Ki=KiNorm
+Ki=KiNorm
+
 //================================================================
 //STOPS TDM DRE asservissement to be able to observe a startup
 DRE_Start_Stop_CMD(0)
@@ -52,9 +74,11 @@ waitMs(100)
 // Starting data acquisition
 START_DUMP("DACSQ1_SCIENCE",0,column_ID,"_sq1_sci_dump")
 waitMs(100)
-
+
+
 //Starting TDM feedback
-DRE_Start_Stop_and_Ki_CMD(1, Ki)
+DRE_Start_Stop_and_Ki_CMD(1, Ki)
+
 waitMs(100)
 
 // Stoping data acquisition	

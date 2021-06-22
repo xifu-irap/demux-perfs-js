@@ -16,28 +16,14 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 //  laurent.ravera@irap.omp.eu
-//  startup_demux.dscript
+//  constants.dscript
 //
 
-include("./tools.dscript")
+const Npix=34
+const Nbits_DAC=16
+const Nbits_ADC=12
+const DAC_peak=(Math.pow(2,Nbits_DAC)/2)-1
+const WAITING_TIME = 10;
 
-//===============================
-// clk source selection for the FPGA: 
-//   possible values:  
-//     1 CDCM (CLK=4.88MHz)
-//     0 FPGA_BOARD (CLK=5MHz)
-DRE_CLK_CDCM_SELECT_CMD(0)
-
-//===============================
-// startup configuration DAC ADC CDCM selection CLK on CDCM at 4.88MHz built from DAC_clk (78.12MHz)
-DRE_Startup()
-
-//===============================
-// HK acquisition (single one)
-print("Reading HK")
-DRE_select_HK_CMD("ADC128")
-DRE_Start_sending_HK_CMD(1)
-waitMs(500)
-DRE_Start_sending_HK_CMD(0)
-
-//===============================
+getLatestValue("DRE_FirmwareId")
+getLatestValue("DRE_FS")

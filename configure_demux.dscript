@@ -1,68 +1,82 @@
+//
+//  Copyright (C) 2021-2030 Laurent Ravera, Christophe Oziol, IRAP Toulouse.
+//  This file is part of the ATHENA X-IFU DRE test driving software.
+//
+//  demux-perfs-js is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+//  laurent.ravera@irap.omp.eu
+//  configure_demux.dscript
+//
+
 include("./tools.dscript")
-// DRE general commands clk source selection for the FPGA : DRE_CLK_CDCM_SELECT _CMD(CLK_CDCM_SELECT ) possible values:  1 CDCM(CLK=4.88MHz) , 0 FPGA_BOARD (CLK=5MHz)
-//DRE_CLK_CDCM_SELECT_CMD(0)
-// DRE general commands startup configuration DAC ADC CDCM selection CLK on CDCM at 4.88MHz built from DAC_clk (78.12MHz)
-//DRE_Startup()
+include("./constants.dscript")
 
-function configure_demux(Ki)
-{
-	// Definition of global parameters
-	Nbits_DAC=16
-	Nbits_ADC=12
-	Full_scale_DAC	=( Math.pow(2,Nbits_DAC)/2)-1
-	column_ID 				= 0
 
-	output_DACSQ1			="feedback"
-	output_DACSQ2			="sq2_offset"
-	
-	//===========================
-	// Pour version 000F du firmware
-	//error_fine_delay		= 9
-	//startup_pix=0
-	//feedback_pix=11
+function configure_demux(Ki, column_ID){
 
-	//===========================
-	// Pour version 0011 du firmware
-	error_fine_delay= 4
-	startup_pix=0
-	feedback_pix=13
+	switch (DRE_FirmwareId) {
+		case 0x0012:
+			KiNorm = Math.pow(2,15)
+			FB_compens_gain = Math.pow(2,16)-1
+			error_fine_delay= 4
+			startup_pix=0
+			feedback_pix=13
+			break
+		case 0x0011:
+			KiNorm = Math.pow(2,15)
+			FB_compens_gain = Math.pow(2,16)-1
+			error_fine_delay= 4
+			startup_pix=0
+			feedback_pix=13
+			break
+		case 0x000F: 
+			KiNorm = 1208
+			FB_compens_gain = 3950
+			error_fine_delay = 9
+			startup_pix=0
+			feedback_pix=11
+			break
+		default:
+			print("Unknown firmware id. Can't define configuration.")
+		}
 
-	SQ1_fine_delay			= 7		
-	SQ2_fine_delay			= 7
-	//------------------------------------
-	SQ2offset					= parseInt(Full_scale_DAC/-1)
-	sinus_increment		= 1000
-	sinus_amplitude		= 255
-	sinus_on_off			= 0
-	FB_compens_gain 		= Math.pow(2,16)-1
-	
 	// DRE TDM STOP
 	DRE_Start_Stop_CMD(0)
 
-	// Possible signals at DAC outputs: feedback, sq2_offset,function_out,sinus_out
-	DRE_select_output_DACSQ1_CMD(column_ID,output_DACSQ1)
-	DRE_select_output_DACSQ2_CMD(column_ID,output_DACSQ2)
-
-	//-----------------------------------------------
-	// DRE column commands ADC Out ON/OFF
-	//-----------------------------------------------
+	// Switching ADC ON
 	DRE_ADC_ON(column_ID,1)
-	waitMs(400)
+
+	// Configuring DAC outputs :
+	// Possible signals are: feedback, sq2_offset, function_out, sinus_out
+	DRE_select_output_DACSQ1_CMD(column_ID,"feedback")
+	DRE_select_output_DACSQ2_CMD(column_ID,"sq2_offset")
+	
+	SQ1_fine_delay = 7		
+	SQ2_fine_delay = 7
+	//------------------------------------
+	SQ2offset = parseInt(DAC_peak)
+	sinus_increment = 1000
+	sinus_amplitude = 255
+	sinus_on_off = 0
 	
 	// Setting of delays and gains
-	// configure feedback output general compensation gain 
 	DRE_configure_column_compensation_gain(column_ID,FB_compens_gain)
-	// configure column firt pixel startup
 	DRE_configure_column_startup_pix(column_ID,startup_pix)
-	// configure column firt pixel send to feedback
 	DRE_configure_column_feedback_pix(column_ID,feedback_pix)
-	// configure column ERROR ADC fine Delay
 	DRE_configure_ERROR_ADC_DELAY(column_ID,error_fine_delay)
-	// configure column SQ1 fine Delay
 	DRE_configure_SQ1_DELAY(column_ID,SQ1_fine_delay)
-	// configure column SQ2 fine Delay
 	DRE_configure_SQ2_DELAY(column_ID,SQ2_fine_delay)
-	// DRE TDM PIXELS config seting the same for all 34 pixels
 	
 	// Configuring SQ2offset for all pixels
 	for (index = 0;index < 34;index++){
@@ -70,24 +84,26 @@ function configure_demux(Ki)
 			print("Pixel("+ index +") SQ2offset set to : " + SQ2offset)
 			waitMs(10)
 		}
+		
 	// select input for TDM DRE : error signal from ADC 
 	DRE_select_input_CMD(column_ID,"error_ADC")
 
-	// DRE column commands DACSQ2 ON of the selected column of the DACSQ2 : Column :0 to 3, DACsq2_on: 1,0 
-	DRE_DACSQ2_ON(column_ID,0)
-	// DRE column commands DACSQ1 ON of the selected column of the DACSQ1 : Column :0 to 3, DACsq2_on: 1,0 
+	// Switching ON DAC SQ1 (command parameters : Column 0 to 3, DACsq2_on: 1,0) 
 	DRE_DACSQ1_ON(column_ID,1)
-	// enable feedback OUT of TDM DRE
+	// Switching OFF DAC SQ2 (command parameters : Column 0 to 3, DACsq2_on: 1,0) 
+	DRE_DACSQ2_ON(column_ID,0)
+	
+	// Enable feedback OUT of TDM DRE	
 	DRE_feedback_enable_CMD(column_ID,1)
 
-	// Configuring kmix for all pixels
-	//DRE_configureAllPixels_Kmix(column_ID, KiNorm)
-
-	//START TDM DRE asservissement
-	DRE_Start_Stop_and_Ki_CMD(column_ID, 1, Ki)
+	//Configuring Ki and starting the feedback
+	// This is done in two step to avoid an unlock when starting with ki>1
+	DRE_Start_Stop_and_Ki_CMD(column_ID, 1, Ki*KiNorm)
 
 	//-----------------------------------------------
 	// DRE column commands SINUS Generator  
 	//------------------------------------------------
 	DRE_SINUS_GENE(column_ID,sinus_amplitude,sinus_increment,sinus_on_off)
 }
+
+	//-----------------------------------------------

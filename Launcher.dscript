@@ -1,3 +1,24 @@
+//
+//  Copyright (C) 2021-2030 Laurent Ravera, Christophe Oziol, IRAP Toulouse.
+//  This file is part of the ATHENA X-IFU DRE test driving software.
+//
+//  demux-perfs-js is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+//  laurent.ravera@irap.omp.eu
+//  launcher.dscript
+//
+
 include("./test_sequence.dscript")
 include("./tools.dscript")
 
@@ -9,15 +30,21 @@ session_name=get_session_name()
 session_comment = "No comment"
 
 //-------------------------------
+// Definition of the configuration
+//-------------------------------
+Ki = 1.
+Channel_ID = 0
+
+//-------------------------------
 // Definition of tests to be done
 //-------------------------------
-
-getLatestValue("DRE_FirmwareId")
-print("Firmware Id: ", DRE_FirmwareId.toString(16))
-Channel_ID = 0
 er_noise = false
 er_pulses = false
 er_duration=400000
+
+//-------------------------------
+// Starting the test sequence
+//-------------------------------
 print("Starting test sequence "+session_name)
 test_sequence(
 	session_name,
@@ -30,3 +57,4 @@ test_sequence(
 	er_duration
 	)
 
+//-------------------------------
