@@ -31,7 +31,8 @@ session_name="ki measurement"
 session_comment = "No comment"
 getLatestValue("DRE_FirmwareId")
 print("Firmware Id: ", DRE_FirmwareId.toString(16))
-Channel_ID = 0
+Channel_ID = 0
+Ki=1
 //===========================================================
 
 sendStartSession(session_name, session_comment)
@@ -64,7 +65,6 @@ saveMemorizedParametersToBackupDir("SCRIPTS_GSE\\scripts-gse\\"+__FILE__.split("
 
 print(">>---------------------------------------------------------")
 print(">>  Configuring demux delays and gains and starting TDM...")
-Ki=1
 configure_demux(Ki, Channel_ID)
 DRE_select_output_DACSQ1_CMD(Channel_ID, "feedback")
 DRE_select_output_DACSQ2_CMD(Channel_ID, "feedback")
