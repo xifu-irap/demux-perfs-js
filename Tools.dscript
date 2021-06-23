@@ -19,6 +19,11 @@
 //  tools.dscript
 //
 
+// const DAC AD9726 modes
+FACTORY_CALIBRATED = 0
+SELF_CALIBRATED = 1
+UNCALIBRATED = 2
+
 //---------------------------------------------------------------------------------------------------------------------------------------
 
 function nom_de_ma_fonction(my_parameter)

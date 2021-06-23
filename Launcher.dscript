@@ -32,7 +32,7 @@ session_comment = "No comment"
 //-------------------------------
 // Definition of the configuration
 //-------------------------------
-Ki = 1.
+Ki = 1.2
 Channel_ID = 0
 
 //-------------------------------
