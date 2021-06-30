@@ -1,24 +1,3 @@
-//
-//  Copyright (C) 2021-2030 Laurent Ravera, Christophe Oziol, IRAP Toulouse.
-//  This file is part of the ATHENA X-IFU DRE test driving software.
-//
-//  demux-perfs-js is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
-//  laurent.ravera@irap.omp.eu
-//  run_FPAsim.dscript
-//
-
 
 do_pulses=true
 measure_ki=false
@@ -26,7 +5,8 @@ measure_ki=false
 LoadPulse("fake_pulse_CBE.txt")
 waitMs(10)
 
-V0max=51000
+//V0max=Math.pow(2,16)-1
+V0max=53000
 
 V0=V0max
 if (measure_ki) {
@@ -38,17 +18,14 @@ Vp_7keV=V0/1.49	// 7keV
 // VP off for all pixels
 set_all_V0_VP(V0, 0)
 // VP on for a single pixel
-set_pix_V0_VP(1, V0, Vp_7keV)
-// VP on for a single pixel
-//set_pix_V0_VP(3, V0, Vp_7keV)
-// VP on for a single pixel
-//set_pix_V0_VP(5, V0, Vp_7keV)
-// VP on for a single pixel
-//set_pix_V0_VP(7, V0, Vp_7keV)
+//set_pix_V0_VP(1, V0, Vp_7keV)
+set_pix_V0_VP(3, V0, Vp_7keV)
+set_pix_V0_VP(5, V0, Vp_7keV)
+set_pix_V0_VP(8, V0, Vp_7keV)
 
 getLatestValue("FPA_WireOutValues")
 print(FPA_WireOutValues)
-
+waitMs(5000)
 if (do_pulses){
 	for (index = 0;index < 30000;index++){
 		sendToFPA_setWireIn(0x00,4)

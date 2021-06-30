@@ -31,7 +31,7 @@ session_name="ki measurement"
 session_comment = "No comment"
 getLatestValue("DRE_FirmwareId")
 print("Firmware Id: ", DRE_FirmwareId.toString(16))
-Channel_ID = 0
+Channel_ID = 0
 Ki=1
 //===========================================================
 
