@@ -179,25 +179,14 @@ function DRE_Stop_sending_TM_CMD()
 //-----------------------------------------------
 // DRE general commands start_stop 
 //-----------------------------------------------
-function DRE_Start_Stop_CMD(Start_Stop)
+function DRE_Start_Stop_CMD(column_ID, Start_Stop, KiNorm)
 {
-	address = 0x8004;
-	value = Start_Stop;
-    sendNewRegister(address,value)
-	waitMs(10)
-}
-
-// Tune the ki parameter once the TDM feedback has been started
-function DRE_Start_Stop_and_Ki_CMD(column_ID, Start_Stop, Ki)
-{
-	DRE_configureAllPixels_Ki(column_ID, KiNorm) // Using KiNorm to avoid over ranges at startup
-
-	address = 0x8004;
-	value = Start_Stop;
-    sendNewRegister(address,value)
-	waitMs(10)
-
-	DRE_configureAllPixels_Ki(column_ID, Ki)
+	DRE_configureAllPixels_Ki(column_ID, KiNorm) // Using KiNorm to avoid over ranges at startup
+
+	address = 0x8004;
+	value = Start_Stop;
+    sendNewRegister(address,value)
+	waitMs(10)
 }
 
 //-----------------------------------------------
@@ -620,28 +609,54 @@ function DRE_configureAllPixels_Ki(column_ID,Ki)
 		DRE_configurePixel_Ki(column_ID,index,Ki)
 		}
 }
+
+//-----------------------------------------------
+// Configuration of a specific sequence of Ki values (alternate 2 values)
+//-----------------------------------------------
+function configure_alternates_Ki(column_ID, Ki1, Ki2)
+{
+	print("Configuring a sequence of alternative Ki values: "+Ki1+" and "+Ki2)
+	for (index=0; index < 17; index++) {
+		DRE_configurePixel_Ki(column_ID,index*2,Ki1)
+		DRE_configurePixel_Ki(column_ID,index*2+1,Ki2)
+		}
+}
+
+//-----------------------------------------------
+// Configuration of a specific sequence of Ki values (2 successive sets of values)
+//-----------------------------------------------
+function configure_2_groups_of_Ki(column_ID, Ki1, Ki2)
+{
+	print("Configuring 2 successive sets of values for Ki : "+Ki1+" and "+Ki2)
+	for (index=0; index < 17; index++) {
+		DRE_configurePixel_Ki(column_ID,index,Ki1)
+		}
+	for (index=17; index < 34; index++) {
+		DRE_configurePixel_Ki(column_ID,index,Ki2)
+		}
+}
 
 //-----------------------------------------------
-// Configuratoin of a kmix value to a single pixel
+// Configuration of a kmix value to a single pixel
 //-----------------------------------------------
-function DRE_configurePixel_Kmix(column,index,Kmix)
-{
-	base_address =0x1000;	
-	address=base_address + column*Math.pow(2,13) + index*Math.pow(2,6)+1;
-	sendNewRegister(address,Kmix)
-	waitMs(10)
-}
+//function DRE_configurePixel_Kmix(column,index,Kmix)
+//{
+//	base_address =0x1000;	
+//	address=base_address + column*Math.pow(2,13) + index*Math.pow(2,6)+1;
+//	sendNewRegister(address,Kmix)
+//	waitMs(10)
+//}
 
 //-----------------------------------------------
 // Configuration of a kmix value for all the pixels
 //-----------------------------------------------
-function DRE_configureAllPixels_Kmix(column_ID,Kmix)
-{
-	print("Configuring kmix for all pixels to: "+Kmix+" ...")
-	for (index = 0;index < 34;index++){
-		DRE_configurePixel_Kmix(column_ID,index,Kmix)
-		}
-}
+//function DRE_configureAllPixels_Kmix(column_ID,Kmix)
+//{
+//	print("Configuring kmix for all pixels to: "+Kmix+" ...")
+//	for (index = 0;index < 34;index++){
+//		DRE_configurePixel_Kmix(column_ID,index,Kmix)
+//		}
+//}
 
 //-----------------------------------------------
 // DRE column/PIXEL SQ2offset(index) Configuration
@@ -991,8 +1006,7 @@ function load_function(function_type) {
 		filename = "DAC_pattern_0.txt"	
 	}
 	print(">>---------------------------------------------------------")
-	print(">>  Loading test pattern into the firmware")
-	print("  - Loading values from file " + filename + "...")
+	print("  - Loading test pattern values from file " + filename + "...")
 	txt = readTextFile(path+filename);	
 	BRAM_base_address = 0x8080; // 64
 	values = new Array();
@@ -1002,7 +1016,6 @@ function load_function(function_type) {
 	for (index = 0; index < txt.length;++index)
 	{		
 		values[index] = parseInt(txt[index],16);
-		print(values[index]);
 		// <<<<<<==========<<<<===== CHRISTOPHE A CHANGé LE 16 EN 10 pour C EN DECIMAL
 		sendNewRegister((BRAM_base_address + index),(values[index]))	
 		//print(BRAM_base_address + index);
@@ -1158,9 +1171,11 @@ function sendNewRegister(address,value)
 
 ////////////////////////////////////////////////////////////////////////////////
 function clean_stop()
-{
+{
+	column_ID=0
+	KiNorm=0
 	print(">>---------------------------------------------------------")
-	DRE_Start_Stop_CMD(0)
+	DRE_Start_Stop_CMD(column_ID, Stop, KiNorm)
 	sendStopDumpedDataBackup()
 	DRE_Stop_sending_TM_CMD()
 	sendStopSession()

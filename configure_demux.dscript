@@ -26,6 +26,13 @@ include("./constants.dscript")
 function configure_demux(Ki, column_ID){
 
 	switch (DRE_FirmwareId) {
+		case 0x0013:
+			KiNorm = Math.pow(2,15)
+			FB_compens_gain=36660
+			error_fine_delay=5
+			startup_pix=0
+			feedback_pix=13
+			break
 		case 0x0012:
 			KiNorm = Math.pow(2,15)
 			FB_compens_gain = Math.pow(2,16)-1
@@ -62,8 +69,8 @@ function configure_demux(Ki, column_ID){
 	DRE_select_output_DACSQ1_CMD(column_ID,"feedback")
 	DRE_select_output_DACSQ2_CMD(column_ID,"sq2_offset")
 	
-	SQ1_fine_delay = 7		
-	SQ2_fine_delay = 7
+	SQ1_fine_delay = 3		
+	SQ2_fine_delay = 3
 	//------------------------------------
 	SQ2offset = parseInt(DAC_peak)
 	sinus_increment = 1000
@@ -89,16 +96,17 @@ function configure_demux(Ki, column_ID){
 	DRE_select_input_CMD(column_ID,"error_ADC")
 
 	// Switching ON DAC SQ1 (command parameters : Column 0 to 3, DACsq2_on: 1,0) 
-	DRE_DACSQ1_ON(column_ID,1)
+	DRE_DACSQ1_ON(column_ID,On)
 	// Switching OFF DAC SQ2 (command parameters : Column 0 to 3, DACsq2_on: 1,0) 
-	DRE_DACSQ2_ON(column_ID,0)
+	DRE_DACSQ2_ON(column_ID,Off)
 	
 	// Enable feedback OUT of TDM DRE	
-	DRE_feedback_enable_CMD(column_ID,1)
+	DRE_feedback_enable_CMD(column_ID,On)
 
 	//Configuring Ki and starting the feedback
 	// This is done in two step to avoid an unlock when starting with ki>1
-	DRE_Start_Stop_and_Ki_CMD(column_ID, 1, Ki*KiNorm)
+	DRE_Start_Stop_CMD(column_ID, Start, KiNorm) // Using KiNorm to avoid over ranges at startup
+	DRE_configureAllPixels_Ki(column_ID, KiNorm*Ki)
 
 	//-----------------------------------------------
 	// DRE column commands SINUS Generator  

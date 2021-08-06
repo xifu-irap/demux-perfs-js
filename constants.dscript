@@ -23,7 +23,11 @@ const Npix=34
 const Nbits_DAC=16
 const Nbits_ADC=12
 const DAC_peak=(Math.pow(2,Nbits_DAC)/2)-1
-const WAITING_TIME = 10;
+const Start=1
+const Stop=0
+const On=1
+const Off=0
+const WAITING_TIME = 10
 
 getLatestValue("DRE_FirmwareId")
 getLatestValue("DRE_FS")

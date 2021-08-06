@@ -62,35 +62,53 @@ copyFileToBackupDir(__FILE__,"\\SCRIPTS_GSE\\demux-perfs-js\\"+__FILE__.split("/
 
 saveMemorizedParametersToBackupDir("SCRIPTS_GSE\\scripts-gse\\"+__FILE__.split("/").pop().split(".")[0]+"_PARAMETERS.txt")
 //===========================================================
+
+print(">>---------------------------------------------------------")
+print("Loading constant in firmware")
+load_function("2")  // 0
+DRE_function_amplitude_CMD(Channel_ID, 255)
+DRE_function_timescale_CMD(Channel_ID, 1)
+DRE_send_function_CMD(Channel_ID,1,1) // Activates the function for ever
+waitMs(400)
+
+for (ki_sequence=0; ki_sequence<3; ki_sequence++) {
+
+	configure_demux(Ki, Channel_ID)
+
+	switch (ki_sequence) {
+		case 1:
+			print("#########################################")
+			print("> Using a Ki sequence with 2 alternatives values")
+			configure_alternates_Ki(Channel_ID, Ki*KiNorm, 0.8*Ki*KiNorm)
+			break
+		case 2:
+			print("#########################################")
+			print("> Using a Ki sequence with 2 consecutive groups of values")
+			configure_2_groups_of_Ki(Channel_ID, Ki*KiNorm, 0.8*Ki*KiNorm)
+			break
+		default:
+			print("#########################################")
+			print("> Using same Ki values for all the pixels")
+			DRE_configureAllPixels_Ki(Channel_ID, KiNorm*Ki)
+		}
+		DRE_select_output_DACSQ1_CMD(Channel_ID, "feedback")
+		DRE_select_output_DACSQ2_CMD(Channel_ID, "feedback")
 
-print(">>---------------------------------------------------------")
-print(">>  Configuring demux delays and gains and starting TDM...")
-configure_demux(Ki, Channel_ID)
-DRE_select_output_DACSQ1_CMD(Channel_ID, "feedback")
-DRE_select_output_DACSQ2_CMD(Channel_ID, "feedback")
+		print(">>---------------------------------------------------------")
+		print("Starting data acquisition")
+		START_DUMP("DACSQ1_DACSQ2",0,Channel_ID,"_ki_check")
+		waitMs(500)
 
-print(">>---------------------------------------------------------")
-print("Loading constant in firmware")
-load_function("2")  // 0
-DRE_function_amplitude_CMD(Channel_ID, 255)
-DRE_function_timescale_CMD(Channel_ID, 1)
-DRE_send_function_CMD(Channel_ID,1,1) // Activates the function for ever
-waitMs(400)
+		print(">>---------------------------------------------------------")
+		print("Switching feedback to constant value")
+		DRE_select_output_DACSQ1_CMD(Channel_ID, "function_out")
+		waitMs(400)
 
-print(">>---------------------------------------------------------")
-print("Starting data acquisition")
-START_DUMP("DACSQ1_DACSQ2",0,Channel_ID,"_ki_check")
-waitMs(500)
-
-print(">>---------------------------------------------------------")
-print("Switching feedback to constant value")
-DRE_select_output_DACSQ1_CMD(Channel_ID, "function_out")
-waitMs(400)
-
-print(">>---------------------------------------------------------")
-print("Stoping data acquisition")
-STOP_DUMP()
-
+		print(">>---------------------------------------------------------")
+		print("Stoping data acquisition")
+		STOP_DUMP()
+	}
+	
 saveLogToBackupDir("scriptlog.txt")
 sendStopSession()
 
